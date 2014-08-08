@@ -51,6 +51,7 @@ public class GameScreen implements Screen {
         g.renderer.setLinearFilter();
         g.motion = new Motion();
         g.updateData(0.2f);
+        g.updateData(0.2f);//test git
         return g;
     }
 
