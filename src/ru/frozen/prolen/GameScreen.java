@@ -1,6 +1,5 @@
 package ru.frozen.prolen;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -26,8 +25,8 @@ public class GameScreen implements Screen {
 
         TextureRegion morda = new TextureRegion(new Texture(Gdx.files.internal("morda.png")));
         TextureRegion two = new TextureRegion(new Texture(Gdx.files.internal("2.png")));
-        TextureRegion four_cher = new TextureRegion(new Texture(Gdx.files.internal("4cher.png")));
-        TextureRegion four_cherkras = new TextureRegion(new Texture(Gdx.files.internal("4cherkras.png")));
+        //TextureRegion four_cher = new TextureRegion(new Texture(Gdx.files.internal("4cher.png")));
+        //TextureRegion four_cherkras = new TextureRegion(new Texture(Gdx.files.internal("4cherkras.png")));
 
         m = createMorda(morda, 5);
         m.motion.xy_velocity = 20;
@@ -51,7 +50,6 @@ public class GameScreen implements Screen {
         g.renderer.setLinearFilter();
         g.motion = new Motion();
         g.updateData(0.2f);
-        g.updateData(0.2f);//test git
         return g;
     }
 
