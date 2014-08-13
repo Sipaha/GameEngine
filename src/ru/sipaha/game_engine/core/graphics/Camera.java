@@ -1,4 +1,4 @@
-package ru.frozen.prolen.core.graphics;
+package ru.sipaha.game_engine.core.graphics;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 

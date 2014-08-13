@@ -1,4 +1,4 @@
-package ru.frozen.prolen;
+package ru.sipaha.game_engine;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;

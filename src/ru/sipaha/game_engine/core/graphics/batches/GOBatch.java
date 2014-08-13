@@ -1,10 +1,10 @@
-package ru.frozen.prolen.core.graphics.batches;
+package ru.sipaha.game_engine.core.graphics.batches;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
-import ru.frozen.prolen.core.gameobject.GameObject;
+import ru.sipaha.game_engine.core.gameobject.GameObject;
 
 public class GOBatch extends Batch {
 

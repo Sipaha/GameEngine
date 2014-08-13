@@ -1,8 +1,8 @@
-package ru.frozen.prolen.core;
+package ru.sipaha.game_engine.core;
 
 import com.badlogic.gdx.utils.Array;
-import ru.frozen.prolen.core.gameobject.GameObject;
-import ru.frozen.prolen.core.graphics.SceneRenderer;
+import ru.sipaha.game_engine.core.gameobject.GameObject;
+import ru.sipaha.game_engine.core.graphics.SceneRenderer;
 
 public class Engine {
     public static final float FIXED_TIME = 0.02f;

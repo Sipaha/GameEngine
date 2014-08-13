@@ -1,8 +1,8 @@
-package ru.frozen.prolen.core.graphics;
+package ru.sipaha.game_engine.core.graphics;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import ru.frozen.prolen.core.utils.Shaders;
+import ru.sipaha.game_engine.core.utils.Shaders;
 
 public abstract class RenderUnit {
     protected final Texture texture;

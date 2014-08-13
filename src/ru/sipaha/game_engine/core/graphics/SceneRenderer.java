@@ -1,11 +1,11 @@
-package ru.frozen.prolen.core.graphics;
+package ru.sipaha.game_engine.core.graphics;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import ru.frozen.prolen.core.gameobject.MeshRenderer;
-import ru.frozen.prolen.core.gameobject.GameObject;
-import ru.frozen.prolen.core.graphics.batches.Batch;
-import ru.frozen.prolen.core.graphics.batches.GOBatch;
+import ru.sipaha.game_engine.core.gameobject.GameObject;
+import ru.sipaha.game_engine.core.gameobject.MeshRenderer;
+import ru.sipaha.game_engine.core.graphics.batches.Batch;
+import ru.sipaha.game_engine.core.graphics.batches.GOBatch;
 
 public class SceneRenderer {
 

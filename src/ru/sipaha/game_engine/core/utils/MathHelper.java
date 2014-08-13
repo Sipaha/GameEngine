@@ -1,4 +1,4 @@
-package ru.frozen.prolen.core.utils;
+package ru.sipaha.game_engine.core.utils;
 
 import com.badlogic.gdx.math.MathUtils;
 

@@ -1,6 +1,7 @@
-package ru.frozen.prolen.core.scripts;
+package ru.sipaha.game_engine.core.scripts;
 
-import ru.frozen.prolen.core.gameobject.GameObject;
+
+import ru.sipaha.game_engine.core.gameobject.GameObject;
 
 public abstract class Script<T extends Script> {
 

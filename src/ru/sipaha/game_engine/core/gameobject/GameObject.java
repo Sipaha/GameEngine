@@ -1,8 +1,8 @@
-package ru.frozen.prolen.core.gameobject;
+package ru.sipaha.game_engine.core.gameobject;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import ru.frozen.prolen.core.scripts.Script;
+import ru.sipaha.game_engine.core.scripts.Script;
 
 
 public class GameObject {

@@ -1,4 +1,4 @@
-package ru.frozen.prolen;
+package ru.sipaha.game_engine;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
-import ru.frozen.prolen.core.gameobject.MeshRenderer;
-import ru.frozen.prolen.core.gameobject.Motion;
-import ru.frozen.prolen.core.gameobject.Transform;
-import ru.frozen.prolen.core.gameobject.GameObject;
-import ru.frozen.prolen.core.graphics.SceneRenderer;
+import ru.sipaha.game_engine.core.gameobject.GameObject;
+import ru.sipaha.game_engine.core.gameobject.MeshRenderer;
+import ru.sipaha.game_engine.core.gameobject.Motion;
+import ru.sipaha.game_engine.core.gameobject.Transform;
+import ru.sipaha.game_engine.core.graphics.SceneRenderer;
 
 public class GameScreen implements Screen {
     SceneRenderer renderer = new SceneRenderer();

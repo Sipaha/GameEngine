@@ -1,11 +1,11 @@
-package ru.frozen.prolen.core.graphics.batches;
+package ru.sipaha.game_engine.core.graphics.batches;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
-import ru.frozen.prolen.core.graphics.RenderUnit;
+import ru.sipaha.game_engine.core.graphics.RenderUnit;
 
 public abstract class Batch extends RenderUnit implements Disposable {
 

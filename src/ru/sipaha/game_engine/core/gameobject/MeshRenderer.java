@@ -1,11 +1,10 @@
-package ru.frozen.prolen.core.gameobject;
+package ru.sipaha.game_engine.core.gameobject;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.NumberUtils;
-import javafx.scene.shape.Mesh;
-import ru.frozen.prolen.core.graphics.RenderUnit;
+import ru.sipaha.game_engine.core.graphics.RenderUnit;
 
 public class MeshRenderer extends RenderUnit {
 
