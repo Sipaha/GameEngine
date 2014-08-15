@@ -1,11 +1,11 @@
-package ru.sipaha.game_engine.core.graphics.batches;
+package ru.sipaha.engine.graphics.batches;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
-import ru.sipaha.game_engine.core.graphics.RenderUnit;
+import ru.sipaha.engine.graphics.RenderUnit;
 
 public abstract class Batch extends RenderUnit implements Disposable {
 
@@ -21,6 +21,7 @@ public abstract class Batch extends RenderUnit implements Disposable {
     private int blendDstFunc = GL20.GL_ONE_MINUS_SRC_ALPHA;
 
     private Batch link = null;
+    private boolean isLinked = false;
 
     private boolean firstDraw = true;
     private boolean isStatic = false;
@@ -43,6 +44,7 @@ public abstract class Batch extends RenderUnit implements Disposable {
             prepareIndices(mesh);
             firstDraw = false;
         }
+        if (isLinked) return;
         begin();
         if(!isStatic) {
             prepareVertices();
@@ -125,13 +127,7 @@ public abstract class Batch extends RenderUnit implements Disposable {
         link = b;
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
+    public void setLinked(boolean b) {
+        isLinked = b;
     }
 }

@@ -1,10 +1,10 @@
-package ru.sipaha.game_engine.core.gameobject;
+package ru.sipaha.engine.gameobjectdata;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.NumberUtils;
-import ru.sipaha.game_engine.core.graphics.RenderUnit;
+import ru.sipaha.engine.graphics.RenderUnit;
 
 public class MeshRenderer extends RenderUnit {
 

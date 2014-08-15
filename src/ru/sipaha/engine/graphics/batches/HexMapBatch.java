@@ -1,4 +1,4 @@
-package ru.sipaha.game_engine.core.graphics.batches;
+package ru.sipaha.engine.graphics.batches;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;

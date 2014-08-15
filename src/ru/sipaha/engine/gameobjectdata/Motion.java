@@ -1,8 +1,8 @@
-package ru.sipaha.game_engine.core.gameobject;
+package ru.sipaha.engine.gameobjectdata;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import ru.sipaha.game_engine.core.utils.MathHelper;
+import ru.sipaha.engine.utils.MathHelper;
 
 public class Motion {
 

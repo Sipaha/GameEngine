@@ -1,4 +1,4 @@
-package ru.sipaha.game_engine.core.utils;
+package ru.sipaha.engine.utils;
 
 import com.badlogic.gdx.math.MathUtils;
 

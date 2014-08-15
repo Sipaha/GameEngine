@@ -1,4 +1,4 @@
-package ru.sipaha.game_engine.core.graphics;
+package ru.sipaha.engine.graphics;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 

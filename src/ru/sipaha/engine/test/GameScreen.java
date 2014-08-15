@@ -1,4 +1,4 @@
-package ru.sipaha.game_engine;
+package ru.sipaha.engine.test;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
-import ru.sipaha.game_engine.core.gameobject.GameObject;
-import ru.sipaha.game_engine.core.gameobject.MeshRenderer;
-import ru.sipaha.game_engine.core.gameobject.Motion;
-import ru.sipaha.game_engine.core.gameobject.Transform;
-import ru.sipaha.game_engine.core.graphics.SceneRenderer;
+import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.gameobjectdata.MeshRenderer;
+import ru.sipaha.engine.gameobjectdata.Motion;
+import ru.sipaha.engine.gameobjectdata.Transform;
+import ru.sipaha.engine.graphics.SceneRenderer;
 
 public class GameScreen implements Screen {
     SceneRenderer renderer = new SceneRenderer();

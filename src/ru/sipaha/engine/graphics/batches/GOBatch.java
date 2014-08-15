@@ -1,10 +1,10 @@
-package ru.sipaha.game_engine.core.graphics.batches;
+package ru.sipaha.engine.graphics.batches;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
-import ru.sipaha.game_engine.core.gameobject.GameObject;
+import ru.sipaha.engine.core.GameObject;
 
 public class GOBatch extends Batch {
 

@@ -1,8 +1,13 @@
-package ru.sipaha.game_engine.core.gameobject;
+package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
-import ru.sipaha.game_engine.core.scripts.Script;
+import ru.sipaha.engine.gameobjectdata.MeshRenderer;
+import ru.sipaha.engine.gameobjectdata.Motion;
+import ru.sipaha.engine.gameobjectdata.Transform;
+import ru.sipaha.engine.scripts.Script;
+
+import java.util.BitSet;
 
 
 public class GameObject {
@@ -13,6 +18,8 @@ public class GameObject {
     public Motion motion;
 
     public boolean enable;
+
+    protected BitSet tag_bits;
 
     private ObjectMap<Class<? extends Script>, Script> scriptsByClass;
     private Array<Script> scripts;

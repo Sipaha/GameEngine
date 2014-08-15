@@ -1,7 +1,7 @@
-package ru.sipaha.game_engine.core.scripts;
+package ru.sipaha.engine.scripts;
 
 
-import ru.sipaha.game_engine.core.gameobject.GameObject;
+import ru.sipaha.engine.core.GameObject;
 
 public abstract class Script<T extends Script> {
 

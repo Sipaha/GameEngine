@@ -1,4 +1,4 @@
-package ru.sipaha.game_engine;
+package ru.sipaha.engine.test;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
