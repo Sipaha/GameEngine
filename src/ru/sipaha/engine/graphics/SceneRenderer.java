@@ -2,6 +2,7 @@ package ru.sipaha.engine.graphics;
 
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.graphics.batches.Batch;
+import ru.sipaha.engine.graphics.batches.GOBatch;
 import ru.sipaha.engine.graphics.batches.utils.Batches;
 
 public class SceneRenderer {
@@ -27,5 +28,18 @@ public class SceneRenderer {
 
     public void removeGO(GameObject go) {
         batches.removeGO(go);
+    }
+
+    public void prepareBatchForGameObject(GameObject go) {
+        GOBatch batch = batches.prepareBatchForGameObject(go);
+        batch.setCombinedMatrix(go.renderer.fixed_camera ? staticCamera.combined : camera.combined);
+    }
+
+    public void rebuildSortedBatches() {
+        batches.rebuildSortedBatches();
+    }
+
+    public void addBatch(Batch b) {
+        batches.addBatch(b);
     }
 }

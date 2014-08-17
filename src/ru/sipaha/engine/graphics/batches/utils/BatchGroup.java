@@ -1,16 +1,21 @@
 package ru.sipaha.engine.graphics.batches.utils;
 
+import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.graphics.batches.Batch;
 import ru.sipaha.engine.utils.Array;
 
 import java.util.Comparator;
 
-public class BatchGroup {
-    public int z_order;
+public class BatchGroup extends RenderUnit {
     public Array<Batch> batches;
 
+    protected int upPriority = 0;
+    protected BatchGroup nextLink;
+    protected BatchGroup prevLink;
+    protected boolean replaced = false;
+
     public BatchGroup(Batch batch) {
-        z_order = batch.getZOrder();
+        super(batch);
         batches = new Array<>(true, 4, Batch.class);
         batches.add(batch);
     }
@@ -19,18 +24,16 @@ public class BatchGroup {
         return batches.size;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BatchGroup
-                && batches.size > 0
-                && batches.items[0].equals(((BatchGroup)obj).batches.items[0]);
+    public void reset() {
+        upPriority = 0;
+        nextLink = null;
+        prevLink = null;
+        replaced = false;
     }
 
-    public boolean equalsIgnoreZOrder(BatchGroup group) {
-        Batch firstGroupBatch = batches.items[0];
-        Batch secondGroupBatch = group.batches.items[0];
-        return firstGroupBatch.getTexture() == secondGroupBatch.getTexture()
-                && firstGroupBatch.getShader() == secondGroupBatch.getShader();
+    @Override
+    public String toString() {
+        return super.toString()+" size="+batches.size;
     }
 
     public static final Comparator<BatchGroup> batchGroupsComparator = new Comparator<BatchGroup>() {

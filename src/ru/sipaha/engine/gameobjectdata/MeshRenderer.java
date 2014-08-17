@@ -44,7 +44,7 @@ public class MeshRenderer extends RenderUnit {
     }
 
     public MeshRenderer(MeshRenderer prototype) {
-        super(prototype.texture, prototype.shader, prototype.z_order);
+        super(prototype);
         set(prototype);
     }
 

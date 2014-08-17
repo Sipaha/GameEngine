@@ -41,79 +41,77 @@ public class Batches {
             batches = sortedBatches.items;
         }
         int z_order = batch.getZOrder();
-        while (idx > 0 && z_order < batches[idx].getZOrder()) idx--;
-        while (idx > 0 && z_order == batches[idx-1].getZOrder() && batches[idx].equals(batches[idx+1])) idx--;
+        while (idx > 0 && z_order < batches[idx-1].getZOrder()) idx--;
+        while (idx > 0 && z_order == batches[idx-1].getZOrder()
+                       && idx+1 < batches.length
+                       && batches[idx+1] != null
+                       && batches[idx].equalsIgnoreZOrder(batches[idx+1])) idx--;
         sortedBatches.insert(idx, batch);
     }
 
-    public void prepareBatchForGameObject(GameObject go) {
-        if(GOBatchesByUnit.containsKey(go.renderer)) return;
-        MeshRenderer renderer = go.renderer;
-        GOBatch batch = new GOBatch(32, renderer.getShader(), renderer.getTexture(), renderer.getZOrder());
-        GOBatchesByUnit.put(renderer, batch);
-        addBatch(batch);
-    }
-
-    public void prepareBatchesForGameObjects(Array<GameObject> gameObjects) {
-        for(GameObject go : gameObjects) prepareBatchForGameObject(go);
-        rebuildSortedBatches();
+    public GOBatch prepareBatchForGameObject(GameObject go) {
+        GOBatch batch = GOBatchesByUnit.get(go.renderer);
+        if(batch == null) {
+            MeshRenderer renderer = go.renderer;
+            batch = new GOBatch(32, renderer.getShader(), renderer.getTexture(), renderer.getZOrder());
+            GOBatchesByUnit.put(renderer, batch);
+            addBatch(batch);
+        }
+        return batch;
     }
 
     public void rebuildSortedBatches() {
         com.badlogic.gdx.utils.Array<BatchGroup> groups = batchesGroups.values().toArray();
         groups.sort(BatchGroup.batchGroupsComparator);
+        for(BatchGroup b : groups) b.reset();
 
         IntIntMap layers = new IntIntMap();
-        BatchGroup[] groupsArr = groups.items;
         for(int i = 0, layer = -1, size = groups.size; i < size; i++) {
-            int currLayer = groupsArr[i].z_order;
+            int currLayer = groups.get(i).getZOrder();
             if(currLayer > layer) {
                 layer = currLayer;
                 layers.put(currLayer, i);
             }
         }
 
-        int prevStickBatchesSize = 0;
-        for(int i = 1; i < layers.size(); i+=2) {
-            int stickBatchesSize = 0;
-            IntIntMap.Entry layer = layers.get(i);
-            final int currLast = layers.get(i+1).value-1;
-            final int currFirst = layer.value;
-            for (int currIdx = currFirst; currIdx <= currLast; currIdx++) {
-                BatchGroup currGroup = groupsArr[currIdx];
-                final int prevFirst = layers.get(i-1).value;
-                final int prevLast = layer.value-1;
-                for (int prevIdx = prevFirst; prevIdx <= prevLast; prevIdx++) {
-                    BatchGroup prevGroup = groupsArr[prevIdx];
-                    int unitedSize = currGroup.size()+prevGroup.size();
-                    if(currGroup.equalsIgnoreZOrder(prevGroup)
-                            && unitedSize > stickBatchesSize
-                            && unitedSize > prevStickBatchesSize) {
-                        groups.swap(prevIdx, prevLast);
-                        groups.swap(currIdx, currFirst);
-                        stickBatchesSize = currGroup.size() + prevGroup.size();
-                    }
-                }
-            }
+        for(int i = 0; i < layers.size()-1; i++) {
+            IntIntMap.Entry currLayer = layers.getByIndex(i);
+            IntIntMap.Entry nextLayer = layers.getByIndex(i + 1);
+            final int currFirst = currLayer.value;
+            final int currLast = nextLayer.value-1;
+            final int nextFirst = nextLayer.value;
+            final int nextLast = i < layers.size()-2 ? layers.getByIndex(i + 2).value-1 : groups.size-1;
 
-            if(i < layers.size()-1) {
-                stickBatchesSize = 0;
-                for (int currIdx = currFirst; currIdx <= currLast; currIdx++) {
-                    BatchGroup currGroup = groupsArr[currIdx];
-                    final int nextFirst = layers.get(i+1).value;
-                    final int nextLast = i < layers.size()-2 ? layers.get(i+2).value-1 : layers.size()-1;
-                    for (int nextIdx = nextFirst; nextIdx <= nextLast; nextIdx++) {
-                        BatchGroup nextGroup = groupsArr[nextIdx];
-                        int unitedSize = currGroup.size()+nextGroup.size();
-                        if(currGroup.equalsIgnoreZOrder(nextGroup) && unitedSize > stickBatchesSize) {
-                            groups.swap(nextIdx, nextFirst);
-                            groups.swap(currIdx, currLast);
-                            stickBatchesSize = unitedSize;
-                            prevStickBatchesSize = unitedSize;
+            for (int currIdx = currFirst; currIdx <= currLast; currIdx++) {
+                BatchGroup currGroup = groups.get(currIdx);
+                for (int nextIdx = nextFirst; nextIdx <= nextLast; nextIdx++) {
+                    BatchGroup nextGroup = groups.get(nextIdx);
+                    if(currGroup.equalsIgnoreZOrder(nextGroup)) {
+                        int priority = currGroup.size()+nextGroup.size();
+                        if(currGroup.upPriority < priority) {
+                            currGroup.upPriority = priority;
+                            currGroup.nextLink = nextGroup;
+                            nextGroup.prevLink = currGroup;
                         }
                     }
                 }
             }
+        }
+
+        int max_idx = 0;
+        for(int i = 1; i < groups.size; i++) {
+            if(groups.get(i).upPriority > groups.get(max_idx).upPriority) max_idx = i;
+        }
+        int start_layer_idx = layers.getIndex(groups.get(max_idx).getZOrder());
+        for(int layer_idx = start_layer_idx; layer_idx >= 0; layer_idx--) {
+            int currFirst = layers.getByIndex(layer_idx).value;
+            int currLast = layers.getByIndex(layer_idx + 1).value-1;
+            moveGroupWithMaxPriority(groups, currFirst, currLast);
+        }
+        for (int layer_idx = start_layer_idx+1; layer_idx < layers.size()-1; layer_idx++) {
+            int currFirst = layers.getByIndex(layer_idx).value;
+            int currLast = layers.getByIndex(layer_idx + 1).value-1;
+            moveGroupWithMaxPriority(groups, currFirst, currLast);
         }
 
         sortedBatches.size = 0;
@@ -135,6 +133,33 @@ public class Batches {
                 next.setLinked(false);
             }
         }
+    }
+
+    private int moveGroupWithMaxPriority(com.badlogic.gdx.utils.Array<BatchGroup> groups, int from, int to) {
+        if(from == to) return -1;
+        BatchGroup fromGroup = groups.get(from);
+        int max_idx = fromGroup.replaced || fromGroup.nextLink != null && fromGroup.nextLink.replaced ? from+1 : from;
+        BatchGroup maxGroup = groups.get(max_idx);
+
+        for(int c = from+1; c <= to; c++) {
+            BatchGroup currGroup = groups.get(c);
+            if(currGroup.nextLink != null
+                    && !currGroup.nextLink.replaced
+                    && (currGroup.upPriority > maxGroup.upPriority
+                    || currGroup.upPriority == maxGroup.upPriority
+                    && currGroup.nextLink.upPriority < maxGroup.nextLink.upPriority)) {
+                maxGroup = currGroup;
+                max_idx = c;
+            }
+        }
+        if(maxGroup.upPriority > 0) {
+            maxGroup.nextLink.replaced = true;
+            maxGroup.replaced = true;
+            groups.swap(max_idx, to);
+            groups.swap(groups.indexOf(maxGroup.nextLink, true), to + 1);
+            return max_idx;
+        }
+        return -1;
     }
 
     public void removeGO(GameObject go) {

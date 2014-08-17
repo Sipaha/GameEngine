@@ -11,6 +11,10 @@ import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.gameobjectdata.Motion;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.SceneRenderer;
+import ru.sipaha.engine.graphics.batches.Batch;
+import ru.sipaha.engine.graphics.batches.GOBatch;
+
+import javax.xml.soap.Text;
 
 public class GameScreen implements Screen {
     SceneRenderer renderer = new SceneRenderer();
@@ -23,22 +27,17 @@ public class GameScreen implements Screen {
     public GameScreen() {
         Gdx.gl.glClearColor(0.5f,0.5f,0.5f,1f);
 
-        TextureRegion morda = new TextureRegion(new Texture(Gdx.files.internal("morda.png")));
-        TextureRegion two = new TextureRegion(new Texture(Gdx.files.internal("2.png")));
-        //TextureRegion four_cher = new TextureRegion(new Texture(Gdx.files.internal("4cher.png")));
-        //TextureRegion four_cherkras = new TextureRegion(new Texture(Gdx.files.internal("4cherkras.png")));
+        Texture[] textures = new Texture[3];
+        for(int i = 0; i < textures.length; i++) {
+            textures[i] = new Texture(Gdx.files.internal((i+1)+".png"));
+        }
 
-        m = createMorda(morda, 5);
-        m.motion.xy_velocity = 20;
-        m.motion.moveTo(200, 200);
-        m.motion.a_velocity = 20;
-        m.motion.rotateTo(100);
-        renderer.addGO(m);
+        for(int i = 0; i < 50; i++) {
+            Batch b = new GOBatch(100,null,textures[(int)Math.round(Math.random()*2)],(int)Math.round(Math.random()*5));
+            renderer.addBatch(b);
+        }
 
-        shell = createMorda(two,6);
-        shell.transform.setPosition(0, 30);
-        shell.motion.xy_velocity = 20;
-        shell.motion.move_forward = true;
+        renderer.rebuildSortedBatches();
     }
 
     public GameObject createMorda(TextureRegion t,int z_order) {
@@ -56,42 +55,6 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        m.updateData(delta);
-        for (int i = 0; i < shells.size; i++) shells.get(i).updateData(delta);
-        if(!m.motion.haveXYTarget) {
-            switch (t) {
-                case 0: m.motion.moveTo(100,100); break;
-                case 1: m.motion.moveTo(300,100); break;
-                case 2: m.motion.moveTo(5, 400); break;
-            }
-            t++;
-        }
-        if(!m.motion.haveATarget) {
-            switch (l) {
-                case 0:
-                    m.motion.rotateTo(30);
-                    GameObject s = shell.copy();
-                    renderer.addGO(s);
-                    shells.add(s);
-                    m.shoot(s);
-                    break;
-                case 1:
-                    m.motion.rotateTo(30);
-                    s = shell.copy();
-                    renderer.addGO(s);
-                    shells.add(s);
-                    m.shoot(s);
-                    break;
-                case 2:
-                    m.motion.rotateTo(30);
-                    s = shell.copy();
-                    renderer.addGO(s);
-                    shells.add(s);
-                    m.shoot(s);
-                    break;
-            }
-            l++;
-        }
         renderer.render();
     }
 
