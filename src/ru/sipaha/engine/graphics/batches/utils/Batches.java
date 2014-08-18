@@ -28,25 +28,30 @@ public class Batches {
     }
 
     public void addBatch(Batch batch) {
+        if(sortedBatches.size == sortedBatches.items.length) {
+            sortedBatches.ensureCapacity((int)(0.5f*sortedBatches.size));
+        }
         BatchGroup batchGroup = batchesGroups.get(batch);
         if(batchGroup == null) {
             batchGroup = new BatchGroup(batch);
             batchesGroups.put(batch, batchGroup);
-        } else batchGroup.batches.add(batch);
 
-        Batch[] batches = sortedBatches.items;
-        int idx = sortedBatches.size;
-        if(idx == batches.length) {
-            sortedBatches.ensureCapacity((int)(idx*0.5f));
-            batches = sortedBatches.items;
+            int idx = sortedBatches.size;
+            int z_order = batch.getZOrder();
+            while(idx > 0 && z_order < sortedBatches.get(idx-1).getZOrder()) idx--;
+            if(idx < sortedBatches.size) {
+                while (idx > 0 && z_order == sortedBatches.get(idx-1).getZOrder()
+                        && sortedBatches.get(idx) != null
+                        && sortedBatches.get(idx-1).equalsIgnoreZOrder(sortedBatches.get(idx))) idx--;
+                sortedBatches.insert(idx, batch);
+            } else {
+                sortedBatches.add(batch);
+            }
+        } else {
+            int groupPos = sortedBatches.indexOf(batchGroup.batches.last(), true)+1;
+            batchGroup.batches.add(batch);
+            sortedBatches.insert(groupPos, batch);
         }
-        int z_order = batch.getZOrder();
-        while (idx > 0 && z_order < batches[idx-1].getZOrder()) idx--;
-        while (idx > 0 && z_order == batches[idx-1].getZOrder()
-                       && idx+1 < batches.length
-                       && batches[idx+1] != null
-                       && batches[idx].equalsIgnoreZOrder(batches[idx+1])) idx--;
-        sortedBatches.insert(idx, batch);
     }
 
     public GOBatch prepareBatchForGameObject(GameObject go) {
@@ -91,7 +96,6 @@ public class Batches {
                         if(currGroup.upPriority < priority) {
                             currGroup.upPriority = priority;
                             currGroup.nextLink = nextGroup;
-                            nextGroup.prevLink = currGroup;
                         }
                     }
                 }

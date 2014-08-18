@@ -18,4 +18,12 @@ public class Array<T> extends com.badlogic.gdx.utils.Array<T> {
             }
         }
     }
+
+    public T last() {
+        return items[size-1];
+    }
+
+    public T first() {
+        return items[0];
+    }
 }

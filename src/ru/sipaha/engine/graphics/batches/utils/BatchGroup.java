@@ -11,7 +11,6 @@ public class BatchGroup extends RenderUnit {
 
     protected int upPriority = 0;
     protected BatchGroup nextLink;
-    protected BatchGroup prevLink;
     protected boolean replaced = false;
 
     public BatchGroup(Batch batch) {
@@ -27,7 +26,6 @@ public class BatchGroup extends RenderUnit {
     public void reset() {
         upPriority = 0;
         nextLink = null;
-        prevLink = null;
         replaced = false;
     }
 
