@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import ru.sipaha.engine.core.GameObject;
@@ -12,15 +13,14 @@ import ru.sipaha.engine.gameobjectdata.Motion;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.SceneRenderer;
 import ru.sipaha.engine.graphics.batches.Batch;
+import ru.sipaha.engine.graphics.batches.BatchArray;
 import ru.sipaha.engine.graphics.batches.GOBatch;
-
-import javax.xml.soap.Text;
 
 public class GameScreen implements Screen {
     SceneRenderer renderer = new SceneRenderer();
 
     int t = 0, l = 0;
-    GameObject m;
+    Texture m;
     GameObject shell;
     Array<GameObject> shells = new Array<>();
 
@@ -29,15 +29,20 @@ public class GameScreen implements Screen {
 
         Texture[] textures = new Texture[3];
         for(int i = 0; i < textures.length; i++) {
-            textures[i] = new Texture(Gdx.files.internal((i+1)+".png"));
+            textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
         }
 
-        for(int i = 0; i < 50; i++) {
-            Batch b = new GOBatch(100,null,textures[(int)Math.round(Math.random()*2)],(int)Math.round(Math.random()*5));
-            renderer.addBatch(b);
+        GameObject[] gameObjects = new GameObject[10];
+        for(int i = 0; i < gameObjects.length; i++) {
+            gameObjects[i] = createMorda(new TextureRegion(textures[(int)Math.round(Math.random()*2)]),(int)Math.round(Math.random()*5));
+            renderer.prepareBatchForGameObject(gameObjects[i]);
         }
 
-        renderer.rebuildSortedBatches();
+        renderer.rebuildBatchesArrays();
+
+        for(int i = 0; i < 30; i++) {
+            renderer.addGameObject(gameObjects[(int)(Math.random()*9)].copy().updateData(0.2f));
+        }
     }
 
     public GameObject createMorda(TextureRegion t,int z_order) {

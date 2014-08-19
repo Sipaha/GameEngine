@@ -8,24 +8,25 @@ public abstract class RenderUnit {
 
     protected final Texture texture;
     protected final ShaderProgram shader;
-    protected final int z_order;
+    protected final int zOrder;
 
     private int hashCode = -1;
 
     public RenderUnit(RenderUnit renderUnit) {
         texture = renderUnit.texture;
         shader = renderUnit.shader;
-        z_order = renderUnit.z_order;
+        zOrder = renderUnit.zOrder;
+        hashCode = renderUnit.hashCode;
     }
 
-    public RenderUnit(Texture t, ShaderProgram s, int z_order) {
+    public RenderUnit(Texture t, ShaderProgram s, int zOrder) {
         texture = t;
         if(s == null) {
             this.shader = Shaders.defaultShader;
         } else {
             this.shader = s;
         }
-        this.z_order = z_order;
+        this.zOrder = zOrder;
     }
 
     public Texture getTexture() {
@@ -37,7 +38,7 @@ public abstract class RenderUnit {
     }
 
     public int getZOrder() {
-        return z_order;
+        return zOrder;
     }
 
     @Override
@@ -45,7 +46,7 @@ public abstract class RenderUnit {
         if(hashCode == -1) {
             int textureId = texture.getTextureObjectHandle();
             int shaderId = Shaders.getShaderId(this.shader);
-            hashCode = ((textureId&0xFF)<<16)|((shaderId&0xFF)<<8)|(z_order&0xFF);
+            hashCode = ((textureId&0xFF)<<16)|((shaderId&0xFF)<<8)|(zOrder &0xFF);
         }
         return hashCode;
     }

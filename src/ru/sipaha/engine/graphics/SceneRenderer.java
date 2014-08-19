@@ -1,11 +1,15 @@
 package ru.sipaha.engine.graphics;
 
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.graphics.batches.Batch;
+import ru.sipaha.engine.graphics.batches.BatchArray;
 import ru.sipaha.engine.graphics.batches.GOBatch;
-import ru.sipaha.engine.graphics.batches.utils.Batches;
+import ru.sipaha.engine.graphics.batches.Batches;
 
 public class SceneRenderer {
+
+    public static int renderCalls = 0;
 
     private final Camera camera = new Camera();
     private final Camera staticCamera = new Camera();
@@ -13,8 +17,10 @@ public class SceneRenderer {
     private final Batches batches = new Batches();
 
     public void render() {
-        Batch[] bs = batches.sortedBatches.items;
-        for(int i = 0, s = batches.sortedBatches.size; i < s; i++) bs[i].draw();
+        BatchArray.renderCalls = 0;
+        BatchArray[] bs = batches.batchesArrays.items;
+        for(int i = 0, s = batches.batchesArrays.size; i < s; i++) bs[i].draw();
+        renderCalls = BatchArray.renderCalls;
     }
 
     public void resize(int width, int height) {
@@ -22,24 +28,30 @@ public class SceneRenderer {
         staticCamera.setViewport(width, height);
     }
 
-    public void addGO(GameObject go) {
-        batches.addGO(go);
+    public void addGameObject(GameObject go) {
+        batches.addGameObject(go);
     }
 
-    public void removeGO(GameObject go) {
-        batches.removeGO(go);
+    public void removeGameObject(GameObject go) {
+        batches.removeGameObject(go);
     }
 
     public void prepareBatchForGameObject(GameObject go) {
-        GOBatch batch = batches.prepareBatchForGameObject(go);
-        batch.setCombinedMatrix(go.renderer.fixed_camera ? staticCamera.combined : camera.combined);
+        if(!batches.goBatchesByUnit.containsKey(go.renderer)) {
+            MeshRenderer renderer = go.renderer;
+            GOBatch batch = new GOBatch(renderer);
+            batch.setCombinedMatrix(go.renderer.fixedCamera ? staticCamera.combined : camera.combined);
+            batches.goBatchesByUnit.put(renderer, batch);
+            batches.addBatch(batch);
+        }
     }
 
-    public void rebuildSortedBatches() {
-        batches.rebuildSortedBatches();
+    public void rebuildBatchesArrays() {
+        batches.rebuildBatchesArrays();
     }
 
-    public void addBatch(Batch b) {
+    public void addBatch(Batch b, boolean fixedCamera) {
+        b.setCombinedMatrix(fixedCamera ? staticCamera.combined : camera.combined);
         batches.addBatch(b);
     }
 }

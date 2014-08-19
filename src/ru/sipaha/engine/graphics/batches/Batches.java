@@ -1,71 +1,34 @@
-package ru.sipaha.engine.graphics.batches.utils;
+package ru.sipaha.engine.graphics.batches;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.graphics.RenderUnit;
-import ru.sipaha.engine.graphics.batches.Batch;
-import ru.sipaha.engine.graphics.batches.GOBatch;
 import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.IntIntMap;
 
 public class Batches {
 
     public ObjectMap<RenderUnit, BatchGroup> batchesGroups = new ObjectMap<>();
-    public Array<Batch> sortedBatches = new Array<>(true, 16, Batch.class);
-    public ObjectMap<RenderUnit, GOBatch> GOBatchesByUnit = new ObjectMap<>();
+    public Array<BatchArray> batchesArrays = new Array<>(true, 16, BatchArray.class);
+    public ObjectMap<RenderUnit, GOBatch> goBatchesByUnit = new ObjectMap<>();
 
-    public void addGO(GameObject go) {
-        GOBatch b = GOBatchesByUnit.get(go.renderer);
-        if(b.isFull()) {
-            GOBatch newBatch = new GOBatch(b.size*2, b.getShader(), b.getTexture(), b.getZOrder());
-            newBatch.addGameObjects(b);
-            GOBatchesByUnit.put(go.renderer, b);
-            sortedBatches.replace(b, newBatch);
-            b = newBatch;
-        }
-        b.addGameObject(go);
+    public void addGameObject(GameObject go) {
+        goBatchesByUnit.get(go.renderer).addGameObject(go);
+    }
+
+    public void removeGameObject(GameObject go) {
+        goBatchesByUnit.get(go.renderer).removeGameObject(go);
     }
 
     public void addBatch(Batch batch) {
-        if(sortedBatches.size == sortedBatches.items.length) {
-            sortedBatches.ensureCapacity((int)(0.5f*sortedBatches.size));
-        }
         BatchGroup batchGroup = batchesGroups.get(batch);
         if(batchGroup == null) {
             batchGroup = new BatchGroup(batch);
             batchesGroups.put(batch, batchGroup);
-
-            int idx = sortedBatches.size;
-            int z_order = batch.getZOrder();
-            while(idx > 0 && z_order < sortedBatches.get(idx-1).getZOrder()) idx--;
-            if(idx < sortedBatches.size) {
-                while (idx > 0 && z_order == sortedBatches.get(idx-1).getZOrder()
-                        && sortedBatches.get(idx) != null
-                        && sortedBatches.get(idx-1).equalsIgnoreZOrder(sortedBatches.get(idx))) idx--;
-                sortedBatches.insert(idx, batch);
-            } else {
-                sortedBatches.add(batch);
-            }
-        } else {
-            int groupPos = sortedBatches.indexOf(batchGroup.batches.last(), true)+1;
-            batchGroup.batches.add(batch);
-            sortedBatches.insert(groupPos, batch);
-        }
+        } else batchGroup.batches.add(batch);
     }
 
-    public GOBatch prepareBatchForGameObject(GameObject go) {
-        GOBatch batch = GOBatchesByUnit.get(go.renderer);
-        if(batch == null) {
-            MeshRenderer renderer = go.renderer;
-            batch = new GOBatch(32, renderer.getShader(), renderer.getTexture(), renderer.getZOrder());
-            GOBatchesByUnit.put(renderer, batch);
-            addBatch(batch);
-        }
-        return batch;
-    }
-
-    public void rebuildSortedBatches() {
+    public void rebuildBatchesArrays() {
         com.badlogic.gdx.utils.Array<BatchGroup> groups = batchesGroups.values().toArray();
         groups.sort(BatchGroup.batchGroupsComparator);
         for(BatchGroup b : groups) b.reset();
@@ -109,7 +72,7 @@ public class Batches {
         int start_layer_idx = layers.getIndex(groups.get(max_idx).getZOrder());
         for(int layer_idx = start_layer_idx; layer_idx >= 0; layer_idx--) {
             int currFirst = layers.getByIndex(layer_idx).value;
-            int currLast = layers.getByIndex(layer_idx + 1).value-1;
+            int currLast = layer_idx < layers.size()-1 ? layers.getByIndex(layer_idx + 1).value-1 : groups.size-1;
             moveGroupWithMaxPriority(groups, currFirst, currLast);
         }
         for (int layer_idx = start_layer_idx+1; layer_idx < layers.size()-1; layer_idx++) {
@@ -118,24 +81,14 @@ public class Batches {
             moveGroupWithMaxPriority(groups, currFirst, currLast);
         }
 
-        sortedBatches.size = 0;
+        batchesArrays.clear();
         for(int i = 0; i < groups.size; i++) {
             BatchGroup group = groups.get(i);
-            for(int g = 0; g < group.size(); g++) {
-                sortedBatches.add(group.batches.get(g));
+            BatchArray batchArray = new BatchArray(group);
+            while (i < groups.size-1 && group.equalsIgnoreZOrder(groups.get(i+1))) {
+                batchArray.add(groups.get(++i));
             }
-        }
-
-        for(int i = 0, s = sortedBatches.size-1; i < s; i++) {
-            Batch curr = sortedBatches.get(i);
-            Batch next = sortedBatches.get(i+1);
-            if(curr.equals(next)) {
-                curr.setLink(next);
-                next.setLinked(true);
-            } else {
-                curr.setLink(null);
-                next.setLinked(false);
-            }
+            batchesArrays.add(batchArray);
         }
     }
 
@@ -165,9 +118,4 @@ public class Batches {
         }
         return -1;
     }
-
-    public void removeGO(GameObject go) {
-        GOBatchesByUnit.get(go.renderer).removeGameObject(go);
-    }
-
 }

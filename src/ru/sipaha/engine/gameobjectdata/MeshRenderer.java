@@ -18,7 +18,7 @@ public class MeshRenderer extends RenderUnit {
     public float a = 1, r = 1, g = 1, b = 1;
     public float u,v,u2,v2,dv,du;
     public boolean visible = true;
-    public boolean fixed_camera = false;
+    public boolean fixedCamera = false;
     public float offsetV = 0, offsetU = 0;
     public float repeatX = 1, repeatY = 1;
 
@@ -26,7 +26,7 @@ public class MeshRenderer extends RenderUnit {
 
     public float width, height;
     public float origin_x, origin_y;
-    public boolean fixed_rotation = false;
+    public boolean fixedRotation = false;
 
     public MeshRenderer(TextureRegion region, ShaderProgram s, int z_order) {
         super(region.getTexture(), s, z_order);
@@ -91,7 +91,7 @@ public class MeshRenderer extends RenderUnit {
         float localX2 = localX + width;
         float localY2 = localY + height;
 
-        if(!fixed_rotation) {
+        if(!fixedRotation) {
             final float x_m00  = localX  * t.m00, y_m01  = localY  * t.m01;
             final float x_m10  = localX  * t.m10, y_m11  = localY  * t.m11;
             final float x2_m00 = localX2 * t.m00, y2_m01 = localY2 * t.m01;
@@ -146,7 +146,7 @@ public class MeshRenderer extends RenderUnit {
         dv = source.dv;
         du = source.du;
         visible = source.visible;
-        fixed_camera = source.fixed_camera;
+        fixedCamera = source.fixedCamera;
         offsetV = source.offsetV;
         offsetU = source.offsetU;
         repeatX = source.repeatX;
@@ -155,6 +155,11 @@ public class MeshRenderer extends RenderUnit {
         height = source.height;
         origin_x = source.origin_x;
         origin_y = source.origin_y;
-        fixed_rotation = source.fixed_rotation;
+        fixedRotation = source.fixedRotation;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }

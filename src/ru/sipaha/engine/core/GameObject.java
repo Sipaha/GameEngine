@@ -56,11 +56,11 @@ public class GameObject {
         }
     }
 
-    public void updateData(float delta) {
-        updateData(delta, null);
+    public GameObject updateData(float delta) {
+        return updateData(delta, null);
     }
 
-    private void updateData(float delta, GameObject parent) {
+    private GameObject updateData(float delta, GameObject parent) {
         motion.update(transform, delta);
         if(parent == null) {
             transform.update();
@@ -73,6 +73,7 @@ public class GameObject {
             }
         }
         renderer.update(transform);
+        return this;
     }
 
     public void addChild(GameObject go) {

@@ -1,18 +1,14 @@
 package ru.sipaha.engine.graphics.batches;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
 import ru.sipaha.engine.graphics.RenderUnit;
 
-public abstract class Batch extends RenderUnit implements Disposable {
+public abstract class Batch extends RenderUnit {
 
-    private Mesh mesh;
-
-    protected final float[] vertices;
-    protected int verticesCount = 0;
+    public static final int SPRITE_SIZE = 20;
 
     private Matrix4 combinedMatrix;
 
@@ -20,79 +16,36 @@ public abstract class Batch extends RenderUnit implements Disposable {
     private int blendSrcFunc = GL20.GL_SRC_ALPHA;
     private int blendDstFunc = GL20.GL_ONE_MINUS_SRC_ALPHA;
 
-    private Batch link = null;
-    private boolean isLinked = false;
+    public boolean isStatic = false;
 
-    private boolean firstDraw = true;
-    private boolean isStatic = false;
-
-    public Batch (int maxVertices, int maxIndices, ShaderProgram shader, Texture texture, int z_order) {
+    public Batch (ShaderProgram shader, Texture texture, int z_order) {
         super(texture, shader, z_order);
-
-        mesh = new Mesh(Mesh.VertexDataType.VertexArray, false, maxVertices, maxIndices,
-                new VertexAttribute(VertexAttributes.Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE),
-                new VertexAttribute(VertexAttributes.Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
-                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
-
-        vertices = new float[maxVertices*5];
     }
 
-    protected abstract void prepareIndices(Mesh mesh);
-
-    public void draw() {
-        if(firstDraw) {
-            prepareIndices(mesh);
-            firstDraw = false;
-        }
-        if (isLinked) return;
-        begin();
-        if(!isStatic) {
-            prepareVertices();
-            Batch b = link;
-            while (b != null) {
-                System.arraycopy(b.vertices, 0, vertices, verticesCount, b.verticesCount);
-                verticesCount += b.verticesCount;
-                b = b.link;
-            }
-        }
-        end();
+    public Batch(RenderUnit batch) {
+        super(batch);
     }
 
-    protected abstract void prepareVertices();
+    protected abstract int prepareVertices(float[] vertices, int idx);
 
-    public void begin () {
-        GL20 gl = Gdx.gl;
-        gl.glDepthMask(false);
-        shader.begin();
-        setupMatrices();
+    public void setCombinedMatrix (Matrix4 combined) {
+        combinedMatrix = combined;
     }
 
-    public void end () {
-        if (verticesCount > 0) flush();
-        GL20 gl = Gdx.gl;
-        gl.glDepthMask(true);
-        shader.end();
+    public Matrix4 getCombinedMatrix() {
+        return combinedMatrix;
     }
 
-    public void flush () {
-        int count = verticesCount * 6/20;
+    public int getBlendSrcFunc() {
+        return blendSrcFunc;
+    }
 
-        texture.bind();
-        Mesh mesh = this.mesh;
-        mesh.setVertices(vertices, 0, verticesCount);
-        mesh.getIndicesBuffer().position(0);
-        mesh.getIndicesBuffer().limit(count);
+    public int getBlendDstFunc() {
+        return blendDstFunc;
+    }
 
-        if (blendingDisabled) {
-            Gdx.gl.glDisable(GL20.GL_BLEND);
-        } else {
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            if (blendSrcFunc != -1) Gdx.gl.glBlendFunc(blendSrcFunc, blendDstFunc);
-        }
-
-        mesh.render(shader, GL20.GL_TRIANGLES, 0, count);
-
-        verticesCount = 0;
+    public boolean isBlendingDisabled() {
+        return blendingDisabled;
     }
 
     public void setBlending(boolean blendingEnabled) {
@@ -104,30 +57,24 @@ public abstract class Batch extends RenderUnit implements Disposable {
         blendDstFunc = dstFunc;
     }
 
-    public void dispose () {
-        mesh.dispose();
-        shader.dispose();
+    @Override
+    public boolean equalsIgnoreZOrder(RenderUnit renderUnit) {
+        return super.equalsIgnoreZOrder(renderUnit)
+                && renderUnit instanceof Batch && equalsBatches((Batch) renderUnit);
+
     }
 
-    public void setCombinedMatrix (Matrix4 combined) {
-        combinedMatrix = combined;
+    private boolean equalsBatches(Batch b) {
+        return isStatic == b.isStatic
+                && combinedMatrix == b.combinedMatrix
+                && blendingDisabled == b.blendingDisabled
+                && blendSrcFunc == b.blendSrcFunc
+                && blendDstFunc == b.blendDstFunc;
     }
 
-    private void setupMatrices () {
-        shader.setUniformMatrix("u_projTrans", combinedMatrix);
-        shader.setUniformi("u_texture", 0);
-    }
-
-    public void setStatic(boolean isStatic) {
-        if(isStatic) prepareVertices();
-        this.isStatic = isStatic;
-    }
-
-    public void setLink(Batch b) {
-        link = b;
-    }
-
-    public void setLinked(boolean b) {
-        isLinked = b;
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj)
+                && obj instanceof Batch && equalsBatches((Batch) obj);
     }
 }

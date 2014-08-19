@@ -1,7 +1,6 @@
-package ru.sipaha.engine.graphics.batches.utils;
+package ru.sipaha.engine.graphics.batches;
 
 import ru.sipaha.engine.graphics.RenderUnit;
-import ru.sipaha.engine.graphics.batches.Batch;
 import ru.sipaha.engine.utils.Array;
 
 import java.util.Comparator;
@@ -37,8 +36,8 @@ public class BatchGroup extends RenderUnit {
     public static final Comparator<BatchGroup> batchGroupsComparator = new Comparator<BatchGroup>() {
         @Override
         public int compare(BatchGroup group1, BatchGroup group2) {
-            if (group1.z_order > group2.z_order) return 1;
-            if (group1.z_order < group2.z_order) return -1;
+            if (group1.zOrder > group2.zOrder) return 1;
+            if (group1.zOrder < group2.zOrder) return -1;
             return 0;
         }
     };

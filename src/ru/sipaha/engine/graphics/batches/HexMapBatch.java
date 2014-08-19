@@ -1,22 +1,23 @@
 package ru.sipaha.engine.graphics.batches;
 
-import com.badlogic.gdx.graphics.Mesh;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import ru.sipaha.engine.graphics.RenderUnit;
 
 public class HexMapBatch extends Batch {
 
-    public HexMapBatch(int maxVertices, int maxIndices, ShaderProgram shader, Texture texture, int z_order) {
-        super(maxVertices, maxIndices, shader, texture, z_order);
+
+    public HexMapBatch(RenderUnit batch) {
+        super(batch);
+    }
+
+    public HexMapBatch(ShaderProgram shader, Texture texture, int z_order) {
+        super(shader, texture, z_order);
     }
 
     @Override
-    protected void prepareIndices(Mesh mesh) {
-
-    }
-
-    @Override
-    protected void prepareVertices() {
-
+    protected int prepareVertices(float[] vertices, int idx) {
+        return 0;
     }
 }

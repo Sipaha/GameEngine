@@ -36,13 +36,13 @@ public class Engine {
     private void addGameObject(GameObject go) {
         gameObjects.add(go);
         tagManager.add(go);
-        renderer.addGO(go);
+        renderer.addGameObject(go);
     }
 
     public void removeGO(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
-        renderer.removeGO(go);
+        renderer.removeGameObject(go);
     }
 
     public void update(float delta) {
