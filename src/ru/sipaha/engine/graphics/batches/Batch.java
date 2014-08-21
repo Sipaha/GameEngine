@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Disposable;
+import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.graphics.RenderUnit;
 
 public abstract class Batch extends RenderUnit {
@@ -22,8 +23,12 @@ public abstract class Batch extends RenderUnit {
         super(texture, shader, z_order);
     }
 
-    public Batch(RenderUnit batch) {
-        super(batch);
+    public Batch(RenderUnit renderUnit) {
+        super(renderUnit);
+        if(renderUnit instanceof MeshRenderer) {
+            MeshRenderer renderer = (MeshRenderer) renderUnit;
+            blendingDisabled = renderer.blendingDisabled;
+        }
     }
 
     protected abstract int prepareVertices(float[] vertices, int idx);

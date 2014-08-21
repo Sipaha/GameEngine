@@ -2,6 +2,7 @@ package ru.sipaha.engine.test;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.backends.lwjgl.LwjglGraphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,6 +24,7 @@ public class GameScreen implements Screen {
     Texture m;
     GameObject shell;
     Array<GameObject> shells = new Array<>();
+    SpriteBatch batch = new SpriteBatch();
 
     public GameScreen() {
         Gdx.gl.glClearColor(0.5f,0.5f,0.5f,1f);
@@ -40,16 +42,27 @@ public class GameScreen implements Screen {
 
         renderer.rebuildBatchesArrays();
 
-        for(int i = 0; i < 30; i++) {
-            renderer.addGameObject(gameObjects[(int)(Math.random()*9)].copy().updateData(0.2f));
+        for(int i = 0; i < 50; i++) {
+            for(int j = 0; j < 20; j++) {
+                GameObject go = gameObjects[(int) (Math.random() * 9)].copy();
+                go.transform.setPosition(50 + 70 * i, 50 + 70 * j);
+                go.updateData(0.2f);
+                renderer.addGameObject(go);
+            }
         }
+
+        m = textures[0];
     }
 
-    public GameObject createMorda(TextureRegion t,int z_order) {
+    public GameObject createMorda(TextureRegion t, int z_order) {
+        return createMorda(t,z_order,(float) Math.random() * Gdx.graphics.getWidth(),
+                                    (float) Math.random() * Gdx.graphics.getHeight());
+    }
+
+    public GameObject createMorda(TextureRegion t,int z_order, float x, float y) {
         GameObject g = new GameObject("test");
         g.transform = new Transform();
-        g.transform.setPosition((float) Math.random() * Gdx.graphics.getWidth(),
-                (float) Math.random() * Gdx.graphics.getHeight());
+        g.transform.setPosition(x,y);
         g.renderer = new MeshRenderer(t,null,z_order);
         g.renderer.setLinearFilter();
         g.motion = new Motion();
@@ -61,6 +74,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         renderer.render();
+        System.out.println(delta);
     }
 
     @Override

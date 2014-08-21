@@ -1,7 +1,7 @@
 package ru.sipaha.engine.core;
 
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectIntMap;
+import ru.sipaha.engine.utils.Array;
 
 import java.util.BitSet;
 
@@ -31,7 +31,7 @@ public class TagManager {
             System.arraycopy(gameObjectsByTag, 0, temp, 0, gameObjectsByTag.length);
             gameObjectsByTag = temp;
         }
-        gameObjectsByTag[id] = new Array<>();
+        gameObjectsByTag[id] = new Array<>(false, 16, GameObject.class);
         return id;
     }
 

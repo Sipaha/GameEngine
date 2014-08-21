@@ -3,7 +3,7 @@ package ru.sipaha.engine.gameobjectdata;
 import com.badlogic.gdx.math.MathUtils;
 
 public class Transform {
-    protected float m00, m01, m02, m10, m11, m12;
+    public float t00, t01, t10, t11, tx, ty;
 
     protected float x = 0, y = 0;
     protected float angle = 0;
@@ -25,9 +25,9 @@ public class Transform {
         wasChanged = dirty;
         if(dirty) {
             absAngle = angle;
-            m00 = cos*scale;  m01 = -sin;
-            m10 = sin;        m11 = cos*scale;
-            m02 = x; m12 = y;
+            t00 = cos*scale;  t01 = -sin;
+            t10 = sin;        t11 = cos*scale;
+            tx = x; ty = y;
             dirty = false;
         }
     }
@@ -46,24 +46,24 @@ public class Transform {
 
     public void unhook() {
         angle = absAngle;
-        sin = m10;//MathUtils.sinDeg(angle);
+        sin = t10;//MathUtils.sinDeg(angle);
         cos = MathUtils.cosDeg(angle);
-        scale = cos != 0 ? m00 / cos : 1;
-        x = m02; y = m12;
+        scale = cos != 0 ? t00 / cos : 1;
+        x = tx; y = ty;
     }
 
     protected Transform mul(Transform trn) {
-        float v00 = m00 * trn.m00 + m10 * trn.m01;
-        float v01 = m01 * trn.m00 + m11 * trn.m01;
-        float v02 = m02 * trn.m00 + m12 * trn.m01 + trn.m02;
+        float v00 = t00 * trn.t00 + t10 * trn.t01;
+        float v01 = t01 * trn.t00 + t11 * trn.t01;
+        float v02 = tx * trn.t00 + ty * trn.t01 + trn.tx;
 
-        float v10 = m00 * trn.m10 + m10 * trn.m11;
-        float v11 = m01 * trn.m10 + m11 * trn.m11;
-        float v12 = m02 * trn.m10 + m12 * trn.m11 + trn.m12;
+        float v10 = t00 * trn.t10 + t10 * trn.t11;
+        float v11 = t01 * trn.t10 + t11 * trn.t11;
+        float v12 = tx * trn.t10 + ty * trn.t11 + trn.ty;
 
-        m00 = v00; m10 = v10;
-        m01 = v01; m11 = v11;
-        m02 = v02; m12 = v12;
+        t00 = v00; t10 = v10;
+        t01 = v01; t11 = v11;
+        tx = v02; ty = v12;
 
         absAngle += trn.absAngle;
 
@@ -84,8 +84,8 @@ public class Transform {
     public void translate(float dx, float dy) {
         x += dx;
         y += dy;
-        m02 += dx;
-        m12 += dy;
+        tx += dx;
+        ty += dy;
     }
 
     public void set(Transform source) {

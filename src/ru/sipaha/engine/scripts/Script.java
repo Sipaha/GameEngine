@@ -1,18 +1,17 @@
 package ru.sipaha.engine.scripts;
 
 
+import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
 
-public abstract class Script<T extends Script> {
+public abstract class Script {
 
     public GameObject go;
-    protected T template;
 
-    public T copy() {
+    public Script copy() {
         try {
-            T copy = (T)getClass().newInstance();
-            copy.template = this;
-            copy.copied();
+            Script copy = getClass().newInstance();
+            copy.set(this);
             return copy;
         } catch (InstantiationException|IllegalAccessException e) {
             e.printStackTrace();
@@ -20,9 +19,9 @@ public abstract class Script<T extends Script> {
         }
     }
 
-    public abstract void start();
-    public abstract void update(float delta);
-    public abstract void fixedUpdate(float delta);
+    public abstract void start(Engine engine);
+    public void update(float delta) {}
+    public void fixedUpdate(float delta) {}
 
-    protected abstract void copied();
+    public abstract void set(Script source);
 }

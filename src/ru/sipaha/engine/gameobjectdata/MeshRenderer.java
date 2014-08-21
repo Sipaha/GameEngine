@@ -19,13 +19,14 @@ public class MeshRenderer extends RenderUnit {
     public float u,v,u2,v2,dv,du;
     public boolean visible = true;
     public boolean fixedCamera = false;
+    public boolean blendingDisabled = false;
     public float offsetV = 0, offsetU = 0;
     public float repeatX = 1, repeatY = 1;
 
     private float cachedA,cachedR,cachedG,cachedB;
 
     public float width, height;
-    public float origin_x, origin_y;
+    public float originX, originY;
     public boolean fixedRotation = false;
 
     public MeshRenderer(TextureRegion region, ShaderProgram s, int z_order) {
@@ -39,8 +40,8 @@ public class MeshRenderer extends RenderUnit {
 
         width = region.getRegionWidth();
         height = region.getRegionHeight();
-        origin_x = width / 2;
-        origin_y = height / 2;
+        originX = width / 2;
+        originY = height / 2;
     }
 
     public MeshRenderer(MeshRenderer prototype) {
@@ -86,22 +87,22 @@ public class MeshRenderer extends RenderUnit {
 
     private void updateBody(Transform t) {
         if(!t.wasChanged) return;
-        float localX  = -origin_x;
-        float localY  = -origin_y;
+        float localX  = -originX;
+        float localY  = -originY;
         float localX2 = localX + width;
         float localY2 = localY + height;
 
         if(!fixedRotation) {
-            final float x_m00  = localX  * t.m00, y_m01  = localY  * t.m01;
-            final float x_m10  = localX  * t.m10, y_m11  = localY  * t.m11;
-            final float x2_m00 = localX2 * t.m00, y2_m01 = localY2 * t.m01;
-            final float x2_m10 = localX2 * t.m10, y2_m11 = localY2 * t.m11;
-            float x1 = x_m00  + y_m01  + t.m02;
-            float y1 = x_m10  + y_m11  + t.m12;
-            float x2 = x_m00  + y2_m01 + t.m02;
-            float y2 = x_m10  + y2_m11 + t.m12;
-            float x3 = x2_m00 + y2_m01 + t.m02;
-            float y3 = x2_m10 + y2_m11 + t.m12;
+            final float x_m00  = localX  * t.t00, y_m01  = localY  * t.t01;
+            final float x_m10  = localX  * t.t10, y_m11  = localY  * t.t11;
+            final float x2_m00 = localX2 * t.t00, y2_m01 = localY2 * t.t01;
+            final float x2_m10 = localX2 * t.t10, y2_m11 = localY2 * t.t11;
+            float x1 = x_m00  + y_m01  + t.tx;
+            float y1 = x_m10  + y_m11  + t.ty;
+            float x2 = x_m00  + y2_m01 + t.tx;
+            float y2 = x_m10  + y2_m11 + t.ty;
+            float x3 = x2_m00 + y2_m01 + t.tx;
+            float y3 = x2_m10 + y2_m11 + t.ty;
             data[X1] = x1;
             data[Y1] = y1;
             data[X2] = x2;
@@ -111,10 +112,10 @@ public class MeshRenderer extends RenderUnit {
             data[X4] = x1 + (x3 - x2);
             data[Y4] = y3 - (y2 - y1);
         } else {
-            float x1 = localX  + t.m02;
-            float y1 = localY  + t.m12;
-            float x3 = localX2 + t.m02;
-            float y3 = localY2 + t.m12;
+            float x1 = localX  + t.tx;
+            float y1 = localY  + t.ty;
+            float x3 = localX2 + t.tx;
+            float y3 = localY2 + t.ty;
             data[X1] = x1;
             data[Y1] = y1;
             data[X3] = x3;
@@ -153,9 +154,10 @@ public class MeshRenderer extends RenderUnit {
         repeatY = source.repeatY;
         width = source.width;
         height = source.height;
-        origin_x = source.origin_x;
-        origin_y = source.origin_y;
+        originX = source.originX;
+        originY = source.originY;
         fixedRotation = source.fixedRotation;
+        blendingDisabled = source.blendingDisabled;
     }
 
     @Override

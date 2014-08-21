@@ -2,6 +2,7 @@ package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import ru.sipaha.engine.gameobjectdata.Life;
 import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.gameobjectdata.Motion;
 import ru.sipaha.engine.gameobjectdata.Transform;
@@ -9,13 +10,13 @@ import ru.sipaha.engine.scripts.Script;
 
 import java.util.BitSet;
 
-
 public class GameObject {
     public final String name;
 
     public MeshRenderer renderer;
     public Transform transform;
     public Motion motion;
+    public Life life;
 
     public boolean enable;
 

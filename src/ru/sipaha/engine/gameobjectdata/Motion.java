@@ -49,8 +49,8 @@ public class Motion {
     public void mul(Transform t) {
         float tx = vx;
         float ty = vy;
-        vx = tx * t.m00 + ty * t.m01;
-        vy = tx * t.m10 + ty * t.m11;
+        vx = tx * t.t00 + ty * t.t01;
+        vy = tx * t.t10 + ty * t.t11;
     }
 
     /*@Override
