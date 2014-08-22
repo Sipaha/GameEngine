@@ -8,7 +8,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.Replicator;
+import ru.sipaha.engine.gameobjectdata.Life;
 import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.gameobjectdata.Motion;
 import ru.sipaha.engine.gameobjectdata.Transform;
@@ -18,7 +21,7 @@ import ru.sipaha.engine.graphics.batches.BatchArray;
 import ru.sipaha.engine.graphics.batches.GOBatch;
 
 public class GameScreen implements Screen {
-    SceneRenderer renderer = new SceneRenderer();
+    Engine engine = new Engine();
 
     int t = 0, l = 0;
     Texture m;
@@ -34,24 +37,21 @@ public class GameScreen implements Screen {
             textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
         }
 
-        GameObject[] gameObjects = new GameObject[10];
-        for(int i = 0; i < gameObjects.length; i++) {
-            gameObjects[i] = createMorda(new TextureRegion(textures[(int)Math.round(Math.random()*2)]),(int)Math.round(Math.random()*5));
-            renderer.prepareBatchForGameObject(gameObjects[i]);
+        for(int i = 0; i < 10; i++) {
+            GameObject g = createMorda(new TextureRegion(textures[(int)Math.round(Math.random()*2)]),(int)Math.round(Math.random()*5));
+            engine.createReplicator(g, i);
         }
-
-        renderer.rebuildBatchesArrays();
 
         for(int i = 0; i < 50; i++) {
             for(int j = 0; j < 20; j++) {
-                GameObject go = gameObjects[(int) (Math.random() * 9)].copy();
+                GameObject go = engine.createGameObject((int)(Math.random()*9));
                 go.transform.setPosition(50 + 70 * i, 50 + 70 * j);
                 go.updateData(0.2f);
-                renderer.addGameObject(go);
+                go.enable = Math.random() > 0.5;
             }
         }
 
-        m = textures[0];
+        engine.initialize();
     }
 
     public GameObject createMorda(TextureRegion t, int z_order) {
@@ -66,6 +66,7 @@ public class GameScreen implements Screen {
         g.renderer = new MeshRenderer(t,null,z_order);
         g.renderer.setLinearFilter();
         g.motion = new Motion();
+        g.life = new Life();
         g.updateData(0.2f);
         return g;
     }
@@ -73,13 +74,12 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        renderer.render();
-        System.out.println(delta);
+        engine.update(delta);
     }
 
     @Override
     public void resize(int width, int height) {
-        renderer.resize(width, height);
+        engine.resize(width, height);
     }
 
     @Override

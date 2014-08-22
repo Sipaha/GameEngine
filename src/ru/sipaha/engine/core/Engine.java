@@ -1,70 +1,94 @@
 package ru.sipaha.engine.core;
 
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.SceneRenderer;
+import ru.sipaha.engine.utils.GameObjectsArray;
 
 public class Engine {
     public static final float FIXED_TIME = 0.02f;
 
     public TagManager tagManager = new TagManager();
+    public ObjectMap<String, Replicator> replicatorsByName;
+    public IntMap<Replicator> replicatorsById;
 
+    private float timeCounter = 0f;
 
-    private GOFactory goFactory = new GOFactory();
-
-    private float counter = 0f;
-
-    private Array<GameObject> gameObjects;
+    private GameObjectsArray gameObjects;
     private SceneRenderer renderer;
 
     public Engine() {
-        gameObjects = new Array<>(false, 128, GameObject.class);
+        gameObjects = new GameObjectsArray(false, 128);
+        replicatorsByName = new ObjectMap<>();
+        replicatorsById = new IntMap<>();
         renderer = new SceneRenderer();
     }
 
     public GameObject createGameObject(String name) {
-        GameObject go = goFactory.createGameObject(name);
-        addGameObject(go);
-        return go;
+        return replicatorsByName.get(name).get();
     }
 
     public GameObject createGameObject(int id) {
-        GameObject go = goFactory.createGameObject(id);
-        addGameObject(go);
-        return go;
+        return replicatorsById.get(id).get();
     }
 
-    private void addGameObject(GameObject go) {
+    public Replicator createReplicator(GameObject go, String name) {
+        return createReplicator(go, name, -1);
+    }
+
+    public Replicator createReplicator(GameObject go, int id) {
+        return createReplicator(go, null, id);
+    }
+
+    public Replicator createReplicator(GameObject go, String name, int id) {
+        Replicator replicator = new Replicator(this, go);
+        if(id >= 0) replicatorsById.put(id, replicator);
+        if(name != null) replicatorsByName.put(name, replicator);
+        renderer.prepareBatchForGameObject(go);
+        return replicator;
+    }
+
+    public Replicator getReplicator(String name) {
+        return replicatorsByName.get(name);
+    }
+
+    public Replicator getReplicator(int id) {
+        return replicatorsById.get(id);
+    }
+
+    public void addGameObject(GameObject go) {
         gameObjects.add(go);
         tagManager.add(go);
         renderer.addGameObject(go);
+        go.start(this);
     }
 
-    public void removeGO(GameObject go) {
+    public void removeGameObject(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
         renderer.removeGameObject(go);
     }
 
-    public void update(float delta) {
-        GameObject[] g = gameObjects.items;
-        int count = gameObjects.size;
-        for(int i = 0; i < count; i++) {
-            GameObject go = g[i];
-            if(go.enable) go.updateData(delta);
-        }
-        for(int i = 0; i < count; i++) {
-            GameObject go = g[i];
-            if(go.enable) go.update(delta);
-        }
-        counter += delta;
-        while(counter >= FIXED_TIME) {
-            for(int i = 0; i < count; i++) {
-                GameObject go = g[i];
-                if(go.enable) go.fixedUpdate(FIXED_TIME);
-            }
-            counter -= FIXED_TIME;
-        }
+    public void resize(int width, int height) {
+        renderer.resize(width, height);
+    }
 
+    public void initialize() {
+        renderer.rebuildBatchesArrays();
+    }
+
+    public void update(float delta) {
+        for(GameObject g : gameObjects) {
+            if(g.life.update(g, delta)) {
+                g.updateData(delta);
+            }
+        }
+        for(GameObject g : gameObjects) g.update(delta);
+        timeCounter += delta;
+        while(timeCounter >= FIXED_TIME) {
+            for (GameObject g : gameObjects) g.fixedUpdate(FIXED_TIME);
+            timeCounter -= FIXED_TIME;
+        }
         renderer.render();
     }
 }

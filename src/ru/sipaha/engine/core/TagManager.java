@@ -2,6 +2,7 @@ package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.utils.ObjectIntMap;
 import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.GameObjectsArray;
 
 import java.util.BitSet;
 
@@ -10,7 +11,7 @@ public class TagManager {
     private int tag_counter = 0;
     private ObjectIntMap<String> tags = new ObjectIntMap<>();
 
-    private Array<GameObject>[] gameObjectsByTag = new Array[16];
+    private GameObjectsArray[] gameObjectsByTag = new GameObjectsArray[16];
 
     public void setTag(GameObject go, String tag) {
         int id = tags.get(tag, -1);
@@ -27,15 +28,15 @@ public class TagManager {
         int id = tag_counter++;
         tags.put(tag, id);
         if(id == gameObjectsByTag.length) {
-            Array<GameObject>[] temp = new Array[(int)(gameObjectsByTag.length*1.5)];
+            GameObjectsArray[] temp = new GameObjectsArray[(int)(gameObjectsByTag.length*1.5)];
             System.arraycopy(gameObjectsByTag, 0, temp, 0, gameObjectsByTag.length);
             gameObjectsByTag = temp;
         }
-        gameObjectsByTag[id] = new Array<>(false, 16, GameObject.class);
+        gameObjectsByTag[id] = new GameObjectsArray(false, 16);
         return id;
     }
 
-    public Array<GameObject> getGameObjectsWithTag(String tag) {
+    public GameObjectsArray getGameObjectsWithTag(String tag) {
         int id = tags.get(tag, -1);
         if(id == -1) id = addTag(tag);
         return gameObjectsByTag[id];

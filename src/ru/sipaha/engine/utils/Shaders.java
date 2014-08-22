@@ -1,6 +1,7 @@
 package ru.sipaha.engine.utils;
 
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.ObjectIntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 
 public class Shaders {
@@ -8,10 +9,10 @@ public class Shaders {
     public static final ShaderProgram defaultShader;
 
     private static int id_counter = 0;
-    private static final ObjectMap<ShaderProgram,Integer> shaderID;
+    private static final ObjectIntMap<ShaderProgram> shaderId;
 
     static {
-        shaderID = new ObjectMap<>();
+        shaderId = new ObjectIntMap<>();
 
         String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
                 + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
@@ -49,10 +50,10 @@ public class Shaders {
     }
 
     public static int getShaderId(ShaderProgram program) {
-        Integer id = shaderID.get(program);
-        if(id != null) return id;
+        int id = shaderId.get(program, -1);
+        if(id != -1) return id;
         int new_id = id_counter++;
-        shaderID.put(program, new_id);
+        shaderId.put(program, new_id);
         return new_id;
     }
 }

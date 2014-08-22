@@ -25,7 +25,7 @@ public class GameObject {
     private ObjectMap<Class<? extends Script>, Script> scriptsByClass;
     private Array<Script> scripts;
 
-    private GameObject prototype;
+    protected Replicator replicator;
     private Array<GameObject> children;
     private ObjectMap<String, GameObject> childByName;
 
@@ -33,6 +33,18 @@ public class GameObject {
         this.name = name;
         enable = true;
         scripts = new Array<>(false, 8, Script.class);
+        tag_bits = new BitSet();
+    }
+
+    public void start(Engine engine) {
+        for (int i = 0, s = scripts.size; i < s; i++) {
+            scripts.items[i].start(engine);
+        }
+        if(children != null) {
+            for(int i = 0, s = children.size; i < s; i++) {
+                children.items[i].start(engine);
+            }
+        }
     }
 
     public void update(float delta) {
@@ -95,30 +107,15 @@ public class GameObject {
         //shell.motion.mul(transform);
     }
 
-    public void enable() {
-        enable = true;
+    public void free() {
+        replicator.free(this);
     }
-    public void disable() {
-        enable = false;
+
+    public void remove() {
+        replicator.remove(this);
     }
 
     public GameObject getChildrenByName(String name) {
         return childByName.get(name);
-    }
-
-    public void reset() {
-        if (prototype == null) throw new RuntimeException("Reset was called from prototype! name = "+name);
-        transform.set(prototype.transform);
-        motion.set(prototype.motion);
-        renderer.set(prototype.renderer);
-    }
-
-    public GameObject copy() {
-        GameObject go = new GameObject(name);
-        go.prototype = this;
-        go.transform = new Transform(transform);
-        go.motion = new Motion(motion);
-        go.renderer = new MeshRenderer(renderer);
-        return go;
     }
 }

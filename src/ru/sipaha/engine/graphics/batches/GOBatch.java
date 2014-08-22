@@ -4,11 +4,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.gameobjectdata.MeshRenderer;
 import ru.sipaha.engine.graphics.RenderUnit;
+import ru.sipaha.engine.utils.GameObjectsArray;
 
 public class GOBatch extends Batch {
 
-    private Array<GameObject> gameObjects = new Array<>(false, 32, GameObject.class);;
+    private GameObjectsArray gameObjects = new GameObjectsArray(false, 32);
 
     public GOBatch(ShaderProgram shader, Texture texture, int z_order) {
         super(shader, texture, z_order);
@@ -20,10 +22,11 @@ public class GOBatch extends Batch {
 
     @Override
     protected int prepareVertices(float[] vertices, int verticesCount) {
-        GameObject[] g = gameObjects.items;
-        for(int i = 0, s = gameObjects.size; i < s; i++) {
-            System.arraycopy(g[i].renderer.data, 0, vertices, verticesCount, SPRITE_SIZE);
-            verticesCount += SPRITE_SIZE;
+        for(GameObject g : gameObjects) {
+            if(g.renderer.visible) {
+                System.arraycopy(g.renderer.data, 0, vertices, verticesCount, SPRITE_SIZE);
+                verticesCount += SPRITE_SIZE;
+            }
         }
         return verticesCount;
     }

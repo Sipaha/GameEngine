@@ -19,24 +19,23 @@ public class Life {
     }
 
     /**
-     * @return true if game object was destroyed
+     * @return true if game object is alive
      */
     public boolean update(GameObject go, float delta) {
-        boolean isDestroyed = false;
         if(lives <= 0) {
             onDying.dispatch(go);
-            isDestroyed = true;
+            go.free();
         } else if(durability <= 0) {
             onBreak.dispatch(go);
-            isDestroyed = true;
+            go.free();
         } else if(lifeTime > 0) {
             lifeTime -= delta;
             if(lifeTime <= 0) {
                 onLifetimeExpired.dispatch(go);
-                isDestroyed = true;
+                go.free();
             }
         }
-        return isDestroyed;
+        return go.enable;
     }
 
     public void reset(Life template) {

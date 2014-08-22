@@ -26,4 +26,5 @@ public class Array<T> extends com.badlogic.gdx.utils.Array<T> {
     public T first() {
         return items[0];
     }
+
 }
