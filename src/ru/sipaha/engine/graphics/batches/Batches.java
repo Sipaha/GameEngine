@@ -2,7 +2,7 @@ package ru.sipaha.engine.graphics.batches;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.gameobjectdata.MeshRenderer;
+import ru.sipaha.engine.gameobjectdata.GameObjectRenderer;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.IntIntMap;
@@ -11,10 +11,10 @@ public class Batches {
 
     public ObjectMap<RenderUnit, BatchGroup> batchesGroups = new ObjectMap<>();
     public Array<BatchArray> batchesArrays = new Array<>(true, 16, BatchArray.class);
-    public ObjectMap<RenderUnit, GOBatch> goBatchesByUnit = new ObjectMap<>();
+    public ObjectMap<RenderUnit, GameObjectsBatch> goBatchesByUnit = new ObjectMap<>();
 
     public void addGameObject(GameObject go) {
-        MeshRenderer renderer = go.renderer;
+        GameObjectRenderer renderer = go.renderer;
         goBatchesByUnit.get(renderer).addGameObject(go);
     }
 

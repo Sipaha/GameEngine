@@ -3,8 +3,7 @@ package ru.sipaha.engine.graphics.batches;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.Disposable;
-import ru.sipaha.engine.gameobjectdata.MeshRenderer;
+import ru.sipaha.engine.gameobjectdata.GameObjectRenderer;
 import ru.sipaha.engine.graphics.RenderUnit;
 
 public abstract class Batch extends RenderUnit {
@@ -25,8 +24,8 @@ public abstract class Batch extends RenderUnit {
 
     public Batch(RenderUnit renderUnit) {
         super(renderUnit);
-        if(renderUnit instanceof MeshRenderer) {
-            MeshRenderer renderer = (MeshRenderer) renderUnit;
+        if(renderUnit instanceof GameObjectRenderer) {
+            GameObjectRenderer renderer = (GameObjectRenderer) renderUnit;
             blendingDisabled = renderer.blendingDisabled;
         }
     }

@@ -1,9 +1,5 @@
 package ru.sipaha.engine.core;
 
-import ru.sipaha.engine.gameobjectdata.Life;
-import ru.sipaha.engine.gameobjectdata.MeshRenderer;
-import ru.sipaha.engine.gameobjectdata.Motion;
-import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.Array;
 
 public class Replicator {
@@ -12,8 +8,16 @@ public class Replicator {
     private final Array<GameObject> cache;
 
     protected Replicator(Engine engine, GameObject template) {
+        this(engine);
+        setTemplate(template);
+    }
+
+    protected Replicator(Engine engine) {
         cache = new Array<>(false, 32, GameObject.class);
         this.engine = engine;
+    }
+
+    protected void setTemplate(GameObject template) {
         this.template = template;
     }
 
@@ -22,7 +26,7 @@ public class Replicator {
      */
     public GameObject get() {
         if(cache.size > 0) {
-            return reset(cache.pop());
+            return cache.pop().reset(template);
         } else {
             return create();
         }
@@ -32,20 +36,10 @@ public class Replicator {
      * Creates new game object.
      */
     public GameObject create() {
-        GameObject gameObject = new GameObject(template.name);
+        if(template == null) throw new RuntimeException("This replicator is not initialized");
+        GameObject gameObject = new GameObject(template);
         gameObject.replicator = this;
-        gameObject.transform = new Transform(template.transform);
-        gameObject.motion = new Motion(template.motion);
-        gameObject.renderer = new MeshRenderer(template.renderer);
-        gameObject.life = new Life(template.life);
         engine.addGameObject(gameObject);
-        return gameObject;
-    }
-
-    protected GameObject reset(GameObject gameObject) {
-        gameObject.transform.set(template.transform);
-        gameObject.motion.set(template.motion);
-        gameObject.renderer.set(template.renderer);
         return gameObject;
     }
 

@@ -3,13 +3,13 @@ package ru.sipaha.engine.scripts;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.gameobjectdata.Transform;
-import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.GameObjectsArray;
 import ru.sipaha.engine.utils.MathHelper;
 
 public class Search extends Script {
 
     public enum SearchStrategy {LAST, FIRST, NEAREST, STRONGEST}
+    public Search template;
 
     public float radius = 0f;
     public GameObjectsArray searchTargets;
@@ -18,6 +18,13 @@ public class Search extends Script {
     public float distance;
     public SearchStrategy strategy = SearchStrategy.NEAREST;
 
+    public Search(){}
+
+    public Search(Search source) {
+        radius = source.radius;
+        template = source;
+    }
+
     @Override
     public void start(Engine engine) {
         searchTargets = engine.tagManager.getGameObjectsWithTag(searchTag);
@@ -25,7 +32,7 @@ public class Search extends Script {
 
     @Override
     public void fixedUpdate(float delta) {
-        Transform transform = go.transform;
+        Transform transform = gameObject.transform;
         target = null;
         distance = radius * radius;
 
@@ -57,12 +64,12 @@ public class Search extends Script {
     }
 
     @Override
-    public void set(Script source) {
-        Search search = (Search) source;
-        radius = search.radius;
-        searchTag = search.searchTag;
+    public Script reset() {
+        radius = template.radius;
+        searchTag = template.searchTag;
         target = null;
-        distance = search.distance;
-        strategy = search.strategy;
+        distance = template.distance;
+        strategy = template.strategy;
+        return this;
     }
 }

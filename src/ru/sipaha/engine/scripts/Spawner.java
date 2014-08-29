@@ -56,10 +56,15 @@ public class Spawner extends Script {
                 active = loop;
             }
             GameObject gObject = engine.createGameObject(currSpawn.unit);
-            gObject.transform.setPosition(go.transform.tx, go.transform.ty);
+            gObject.transform.setPosition(gameObject.transform.tx, gameObject.transform.ty);
             spawnCounter++;
             //gObject.components.get(Life.class).death.add(spawner.spawnedDead);
         }
+    }
+
+
+    public Script reset() {
+        return this;
     }
 
     public void startSpawn() {
@@ -79,11 +84,4 @@ public class Spawner extends Script {
         onSpawnObjectBroken.dispatch(go);
         if(--spawnCounter == 0) onAllSpawnObjectsRemoved.dispatch(go);
     }
-
-    @Override
-    public void set(Script source) {
-
-    }
-
-
 }

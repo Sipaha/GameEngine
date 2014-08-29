@@ -1,5 +1,6 @@
 package ru.sipaha.engine.core;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.SceneRenderer;
@@ -17,6 +18,8 @@ public class Engine {
     private GameObjectsArray gameObjects;
     private SceneRenderer renderer;
 
+    private boolean isRunning = false;
+
     public Engine() {
         gameObjects = new GameObjectsArray(false, 128);
         replicatorsByName = new ObjectMap<>();
@@ -32,28 +35,53 @@ public class Engine {
         return replicatorsById.get(id).get();
     }
 
-    public Replicator createReplicator(GameObject go, String name) {
-        return createReplicator(go, name, -1);
-    }
-
-    public Replicator createReplicator(GameObject go, int id) {
-        return createReplicator(go, null, id);
-    }
-
-    public Replicator createReplicator(GameObject go, String name, int id) {
-        Replicator replicator = new Replicator(this, go);
-        if(id >= 0) replicatorsById.put(id, replicator);
-        if(name != null) replicatorsByName.put(name, replicator);
+    public Replicator setReplicator(GameObject go, String name) {
+        if(isRunning) throw new RuntimeException("Unable to change the replicator while the engine is running!");
+        Replicator replicator = replicatorsByName.get(name);
+        if(replicator == null) {
+            replicator = new Replicator(this, go);
+            replicatorsByName.put(name, replicator);
+        } else {
+            replicator.setTemplate(go);
+        }
         renderer.prepareBatchForGameObject(go);
         return replicator;
     }
 
+    public Replicator setReplicator(GameObject go, int id) {
+        if(isRunning) throw new RuntimeException("Unable to change the replicator while the engine is running!");
+        Replicator replicator = replicatorsById.get(id);
+        if(replicator == null) {
+            replicator = new Replicator(this, go);
+            replicatorsById.put(id, replicator);
+        } else {
+            replicator.setTemplate(go);
+        }
+        renderer.prepareBatchForGameObject(go);
+        return replicator;
+    }
+
+    public Replicator setReplicator(GameObject go, String name, int id) {
+        setReplicator(go, id);
+        return setReplicator(go, name);
+    }
+
     public Replicator getReplicator(String name) {
-        return replicatorsByName.get(name);
+        Replicator replicator = replicatorsByName.get(name);
+        if(replicator == null) {
+            replicator = new Replicator(this);
+            replicatorsByName.put(name, replicator);
+        }
+        return replicator;
     }
 
     public Replicator getReplicator(int id) {
-        return replicatorsById.get(id);
+        Replicator replicator = replicatorsById.get(id);
+        if(replicator == null) {
+            replicator = new Replicator(this);
+            replicatorsById.put(id, replicator);
+        }
+        return replicator;
     }
 
     public void addGameObject(GameObject go) {
@@ -74,21 +102,35 @@ public class Engine {
     }
 
     public void initialize() {
+        if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
         renderer.rebuildBatchesArrays();
+        isRunning = true;
     }
 
     public void update(float delta) {
-        for(GameObject g : gameObjects) {
-            if(g.life.update(g, delta)) {
-                g.updateData(delta);
-            }
-        }
-        for(GameObject g : gameObjects) g.update(delta);
-        timeCounter += delta;
+        if(!isRunning) throw new RuntimeException("Unable to update until the engine is not initialized!");
+
+        renderer.render();
+
+        float frameTime = Math.min(delta, 0.25f);
+        timeCounter += frameTime;
         while(timeCounter >= FIXED_TIME) {
+            for(GameObject g : gameObjects) {
+                if(g.life.update(g, FIXED_TIME)) {
+                    g.updateData(FIXED_TIME);
+                }
+            }
             for (GameObject g : gameObjects) g.fixedUpdate(FIXED_TIME);
             timeCounter -= FIXED_TIME;
         }
-        renderer.render();
+        for(GameObject g : gameObjects) g.update(frameTime);
+    }
+
+    public int getGameObjectsCount() {
+        return gameObjects.size;
+    }
+
+    public SceneRenderer getSceneRenderer() {
+        return renderer;
     }
 }

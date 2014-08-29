@@ -26,7 +26,7 @@ public class Motion {
     public Motion() {}
 
     public Motion(Motion prototype) {
-        set(prototype);
+        reset(prototype);
     }
 
     public void moveTo(Vector2 v) {
@@ -52,23 +52,6 @@ public class Motion {
         vx = tx * t.t00 + ty * t.t01;
         vy = tx * t.t10 + ty * t.t11;
     }
-
-    /*@Override
-    public void reset() {
-        xTarget = -1;
-        yTarget = -1;
-        aTarget = -1;
-        vx = template.vx;
-        vy = template.vy;
-        va = template.va;
-        xy_velocity = template.xy_velocity;
-        a_velocity = template.a_velocity;
-        haveXYTarget = false;
-        haveATarget = false;
-        xyTargetIsAdded = false;
-        aTargetIsAdded = false;
-        move_forward = template.move_forward;
-    }*/
 
     public void update(Transform t, float delta) {
 
@@ -109,6 +92,8 @@ public class Motion {
             t.angle = MathHelper.angle360Limit(t.angle);
             t.cos = MathUtils.cosDeg(t.angle);
             t.sin = MathUtils.sinDeg(t.angle);
+
+            t.dirty = true;
         }
 
         if(move_forward) {
@@ -116,23 +101,22 @@ public class Motion {
             vy = t.cos;
         }
 
-        float deltaXY = delta * xy_velocity;
-        t.x += vx * deltaXY;
-        t.y += vy * deltaXY;
-        if(haveXYTarget) {
-            float vecX = xTarget - t.x;
-            float vecY = yTarget - t.y;
-            if(vecX * vx + vecY * vy <= 0) {
-                vx = 0;
-                vy = 0;
-                haveXYTarget = false;
+        if(vx != 0 || vy != 0) {
+            float deltaXY = delta * xy_velocity;
+            t.translate(vx * deltaXY, vy * deltaXY);
+            if(haveXYTarget) {
+                float vecX = xTarget - t.x;
+                float vecY = yTarget - t.y;
+                if(vecX * vx + vecY * vy <= 0) {
+                    vx = 0;
+                    vy = 0;
+                    haveXYTarget = false;
+                }
             }
         }
-
-        t.dirty = true;
     }
 
-    public void set(Motion source) {
+    public void reset(Motion source) {
         xy_velocity = source.xy_velocity;
         vx = source.vx;
         vy = source.vy;

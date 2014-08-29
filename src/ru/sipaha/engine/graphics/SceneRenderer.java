@@ -1,10 +1,10 @@
 package ru.sipaha.engine.graphics;
 
 import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.gameobjectdata.MeshRenderer;
+import ru.sipaha.engine.gameobjectdata.GameObjectRenderer;
 import ru.sipaha.engine.graphics.batches.Batch;
 import ru.sipaha.engine.graphics.batches.BatchArray;
-import ru.sipaha.engine.graphics.batches.GOBatch;
+import ru.sipaha.engine.graphics.batches.GameObjectsBatch;
 import ru.sipaha.engine.graphics.batches.Batches;
 
 public class SceneRenderer {
@@ -16,6 +16,8 @@ public class SceneRenderer {
 
     private final Batches batches = new Batches();
 
+    private int screenWidth, screenHeight;
+
     public void render() {
         BatchArray.renderCalls = 0;
         BatchArray[] bs = batches.batchesArrays.items;
@@ -26,6 +28,8 @@ public class SceneRenderer {
     public void resize(int width, int height) {
         camera.setViewport(width, height);
         staticCamera.setViewport(width, height);
+        screenWidth = width;
+        screenHeight = height;
     }
 
     public void addGameObject(GameObject go) {
@@ -36,11 +40,11 @@ public class SceneRenderer {
         batches.removeGameObject(go);
     }
 
-    public void prepareBatchForGameObject(GameObject go) {
-        if(!batches.goBatchesByUnit.containsKey(go.renderer)) {
-            MeshRenderer renderer = go.renderer;
-            GOBatch batch = new GOBatch(renderer);
-            batch.setCombinedMatrix(go.renderer.fixedCamera ? staticCamera.combined : camera.combined);
+    public void prepareBatchForGameObject(GameObject gameObject) {
+        if(!batches.goBatchesByUnit.containsKey(gameObject.renderer)) {
+            GameObjectRenderer renderer = gameObject.renderer;
+            GameObjectsBatch batch = new GameObjectsBatch(renderer);
+            batch.setCombinedMatrix(gameObject.renderer.fixedCamera ? staticCamera.combined : camera.combined);
             batches.goBatchesByUnit.put(renderer, batch);
             batches.addBatch(batch);
         }
@@ -53,5 +57,13 @@ public class SceneRenderer {
     public void addBatch(Batch b, boolean fixedCamera) {
         b.setCombinedMatrix(fixedCamera ? staticCamera.combined : camera.combined);
         batches.addBatch(b);
+    }
+
+    public int getScreenWidth() {
+        return screenWidth;
+    }
+
+    public int getScreenHeight() {
+        return screenHeight;
     }
 }

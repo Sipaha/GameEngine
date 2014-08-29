@@ -9,8 +9,8 @@ public class MainGame extends Game {
     public static void main(String... args) {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.title = "Game";
-        config.width = 480;
-        config.height = 320;
+        config.width = 800;
+        config.height = 600;
         config.vSyncEnabled = false;
         new LwjglApplication(new MainGame(), config);
     }

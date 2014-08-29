@@ -1,7 +1,6 @@
 package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.utils.ObjectIntMap;
-import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.GameObjectsArray;
 
 import java.util.BitSet;

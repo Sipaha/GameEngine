@@ -2,32 +2,19 @@ package ru.sipaha.engine.test;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.backends.lwjgl.LwjglGraphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Array;
 import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.core.Replicator;
-import ru.sipaha.engine.gameobjectdata.Life;
-import ru.sipaha.engine.gameobjectdata.MeshRenderer;
-import ru.sipaha.engine.gameobjectdata.Motion;
 import ru.sipaha.engine.gameobjectdata.Transform;
-import ru.sipaha.engine.graphics.SceneRenderer;
-import ru.sipaha.engine.graphics.batches.Batch;
-import ru.sipaha.engine.graphics.batches.BatchArray;
-import ru.sipaha.engine.graphics.batches.GOBatch;
+import ru.sipaha.engine.scripts.Script;
+
+import javax.xml.soap.Text;
 
 public class GameScreen implements Screen {
     Engine engine = new Engine();
-
-    int t = 0, l = 0;
-    Texture m;
-    GameObject shell;
-    Array<GameObject> shells = new Array<>();
-    SpriteBatch batch = new SpriteBatch();
 
     public GameScreen() {
         Gdx.gl.glClearColor(0.5f,0.5f,0.5f,1f);
@@ -37,38 +24,36 @@ public class GameScreen implements Screen {
             textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
         }
 
-        for(int i = 0; i < 10; i++) {
-            GameObject g = createMorda(new TextureRegion(textures[(int)Math.round(Math.random()*2)]),(int)Math.round(Math.random()*5));
-            engine.createReplicator(g, i);
-        }
-
-        for(int i = 0; i < 50; i++) {
-            for(int j = 0; j < 20; j++) {
-                GameObject go = engine.createGameObject((int)(Math.random()*9));
-                go.transform.setPosition(50 + 70 * i, 50 + 70 * j);
-                go.updateData(0.2f);
-                go.enable = Math.random() > 0.5;
+        TextureRegion arrow = new TextureRegion(new Texture(Gdx.files.internal("images/arrow.png")));
+        Entity[] entities = new Entity[4];
+        Transform[] transforms = new Transform[4];
+        for(int i = 0; i < entities.length; i++) {
+            entities[i] = new Entity(arrow);
+            float u,v,u2,v2;
+            switch (i) {
+                case 0: u = 0; v = 0; u2 = 0.5f; v2 = 0.5f; break;
+                case 1: u = 0.5f; v = 0; u2 = 1f; v2 = 0.5f; break;
+                case 2: u = 0.5f; v = 0.5f; u2 = 1f; v2 = 1f; break;
+                case 3: u = 0; v = 0.5f; u2 = 0.5f; v2 = 1f; break;
+                default: u = 0; v = 0; u2 = 0; v2 = 0;
             }
+            entities[i].renderer.setUV(u,v,u2,v2);
+            transforms[i] = new Transform(new Transform().setPosition(200,200));
+            transforms[i].parentId = i-1;
+            entities[i].transformId = i;
         }
 
+        GameObject g = new GameObject(entities,transforms,new Script[0], arrow.getTexture(),null,5);
+        g.transform.setPosition(100, 100);
+        engine.setReplicator(g, "Name");
         engine.initialize();
-    }
 
-    public GameObject createMorda(TextureRegion t, int z_order) {
-        return createMorda(t,z_order,(float) Math.random() * Gdx.graphics.getWidth(),
-                                    (float) Math.random() * Gdx.graphics.getHeight());
-    }
+        GameObject gg = engine.createGameObject("Name");
 
-    public GameObject createMorda(TextureRegion t,int z_order, float x, float y) {
-        GameObject g = new GameObject("test");
-        g.transform = new Transform();
-        g.transform.setPosition(x,y);
-        g.renderer = new MeshRenderer(t,null,z_order);
-        g.renderer.setLinearFilter();
-        g.motion = new Motion();
-        g.life = new Life();
-        g.updateData(0.2f);
-        return g;
+        GameObject gameObject = engine.createGameObject("Name");
+        gameObject.transform.setPosition(200,200);
+        gameObject.transform.motion.xy_velocity = 20;
+        gameObject.transform.motion.moveTo(600,600);
     }
 
     @Override

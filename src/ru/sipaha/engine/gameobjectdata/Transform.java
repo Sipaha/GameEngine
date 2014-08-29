@@ -4,43 +4,49 @@ import com.badlogic.gdx.math.MathUtils;
 
 public class Transform {
     public float t00, t01, t10, t11, tx, ty;
+    public boolean wasChanged;
+    public int parentId = 0;
+    public Motion motion = new Motion();
 
     protected float x = 0, y = 0;
-    protected float angle = 0;
     protected float scale = 1;
 
+    protected float angle = 0;
     protected float absAngle = 0;
     protected float cos = 1, sin = 0;
 
-    protected boolean wasChanged;
     protected boolean dirty = true;
 
     public Transform(){}
 
     public Transform(Transform prototype) {
-        set(prototype);
+        parentId = prototype.parentId;
+        reset(prototype);
     }
 
-    public void update() {
-        wasChanged = dirty;
+    public void update(float delta) {
+        motion.update(this, delta);
         if(dirty) {
             absAngle = angle;
-            t00 = cos*scale;  t01 = -sin;
-            t10 = sin;        t11 = cos*scale;
+            t00 = cos*scale;
+            t01 = -sin;
+            t10 = sin;
+            t11 = cos*scale;
             tx = x; ty = y;
             dirty = false;
+            wasChanged = true;
         }
     }
 
-    public void update(Transform parent) {
+    public void update(Transform parent, float delta) {
         dirty |= parent.wasChanged;
-        update();
+        update(delta);
         if(wasChanged) mul(parent);
     }
 
     public void forceUpdate(Transform parent) {
         dirty = true;
-        update();
+        update(0f);
         if(parent != null) mul(parent);
     }
 
@@ -77,8 +83,9 @@ public class Transform {
         dirty = true;
     }
 
-    public void setPosition(float x, float y) {
+    public Transform setPosition(float x, float y) {
         translate(x - this.x, y - this.y);
+        return this;
     }
 
     public void translate(float dx, float dy) {
@@ -86,14 +93,16 @@ public class Transform {
         y += dy;
         tx += dx;
         ty += dy;
+        wasChanged = true;
     }
 
-    public void set(Transform source) {
+    public void reset(Transform source) {
         x = source.x;
         y = source.y;
         angle = source.angle;
         scale = source.scale;
         cos = source.cos;
         sin = source.sin;
+        dirty = true;
     }
 }
