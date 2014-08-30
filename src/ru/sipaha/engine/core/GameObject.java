@@ -4,10 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.ObjectIntMap;
-import ru.sipaha.engine.gameobjectdata.GameObjectRenderer;
-import ru.sipaha.engine.gameobjectdata.Life;
-import ru.sipaha.engine.gameobjectdata.Transform;
+import ru.sipaha.engine.gameobjectdata.*;
 import ru.sipaha.engine.scripts.Script;
 
 import java.util.BitSet;
@@ -19,10 +22,12 @@ public class GameObject {
     public final Transform transform; //root transform
     public final GameObjectRenderer renderer;
     public final Life life;
+    public RigidBody body;
     public boolean enable = true;
 
     protected Replicator replicator;
     protected BitSet tag_bits = new BitSet();
+    protected Rectangle bounds;
 
     private final ObjectIntMap<String> transformByEntityName;
     private final Entity[] entities;
@@ -76,6 +81,10 @@ public class GameObject {
         transform = transforms[0];
         renderer.setEntities(entities);
         transformByEntityName = prototype.transformByEntityName;
+        if(prototype.body != null) {
+            body = new RigidBody(prototype.body);
+            transform.rigidBody = body;
+        }
     }
 
     private void setup() {
@@ -86,7 +95,32 @@ public class GameObject {
         for(Script s : scripts) s.gameObject = this;
     }
 
+    public void createBody(float boundsScale) {
+        EntityRenderer renderer = entities[0].renderer;
+        Vector2 position = transform.getPosition().sub(renderer.originX, renderer.originY);
+        Rectangle rect = new Rectangle(position.x, position.y, renderer.width, renderer.height);
+        Vector2 rectPos = rect.getPosition(new Vector2());
+        Vector2 transformPos = transform.getPosition();
+        body = new RigidBody(rect, boundsScale, transformPos.sub(rectPos));
+        transform.rigidBody = body;
+    }
+
+    public void createBody(float boundsScale, float density, float friction, float restitution) {
+        EntityRenderer renderer = entities[0].renderer;
+        Vector2 position = transform.getPosition().sub(renderer.originX, renderer.originY);
+        Rectangle rect = new Rectangle(position.x, position.y, renderer.width, renderer.height);
+        Vector2 rectPos = rect.getPosition(new Vector2());
+        body = new RigidBody(rect, boundsScale, transform.getPosition().sub(rectPos), density, friction, restitution);
+        transform.rigidBody = body;
+    }
+
+    public void createBody(BodyDef def, FixtureDef... fixturesDef) {
+        body = new RigidBody(def, fixturesDef);
+        transform.rigidBody = body;
+    }
+
     public void start(Engine engine) {
+        if(body != null) body.create(this, engine.getPhysicsWorld());
         for(Script s : scripts) s.start(engine);
     }
 
@@ -131,8 +165,14 @@ public class GameObject {
             transforms[i].reset(prototype.transforms[i]);
         }
         for (Script script : scripts) script.reset();
-
+        if(body != null) body.reset(prototype.body);
         return this;
+    }
+
+    public Rectangle getBounds() {
+        if(bounds == null) bounds = entities[0].renderer.getBounds(null);
+        for(Entity e : entities) e.renderer.getBounds(bounds);
+        return bounds;
     }
 
     public void free() {
@@ -141,6 +181,16 @@ public class GameObject {
 
     public void remove() {
         replicator.remove(this);
+    }
+
+    public void disable() {
+        enable = false;
+        body.disable();
+    }
+
+    public void enable() {
+        enable = true;
+        body.enable();
     }
 
     public <T extends Script> T getScript(Class<T> type) {

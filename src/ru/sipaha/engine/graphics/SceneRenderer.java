@@ -1,6 +1,8 @@
 package ru.sipaha.engine.graphics;
 
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.PhysicsWorld;
 import ru.sipaha.engine.gameobjectdata.GameObjectRenderer;
 import ru.sipaha.engine.graphics.batches.Batch;
 import ru.sipaha.engine.graphics.batches.BatchArray;
@@ -57,6 +59,10 @@ public class SceneRenderer {
     public void addBatch(Batch b, boolean fixedCamera) {
         b.setCombinedMatrix(fixedCamera ? staticCamera.combined : camera.combined);
         batches.addBatch(b);
+    }
+
+    public Camera getCamera() {
+        return camera;
     }
 
     public int getScreenWidth() {

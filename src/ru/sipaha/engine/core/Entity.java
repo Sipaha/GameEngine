@@ -8,7 +8,6 @@ public class Entity {
     public String name;
     public int transformId = 0;
     public EntityRenderer renderer;
-    public FixtureDef fixture = null;
 
     public Entity(TextureRegion region) {
         renderer = new EntityRenderer(region);

@@ -1,6 +1,7 @@
 package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.SceneRenderer;
@@ -9,14 +10,16 @@ import ru.sipaha.engine.utils.GameObjectsArray;
 public class Engine {
     public static final float FIXED_TIME = 0.02f;
 
-    public TagManager tagManager = new TagManager();
-    public ObjectMap<String, Replicator> replicatorsByName;
-    public IntMap<Replicator> replicatorsById;
+    public final TagManager tagManager = new TagManager();
+    public final ObjectMap<String, Replicator> replicatorsByName;
+    public final IntMap<Replicator> replicatorsById;
 
     private float timeCounter = 0f;
 
-    private GameObjectsArray gameObjects;
-    private SceneRenderer renderer;
+    private final GameObjectsArray gameObjects;
+    private final SceneRenderer renderer;
+    private final PhysicsWorld physicsWorld = new PhysicsWorld();
+    private boolean physicsDebugDrawing = false;
 
     private boolean isRunning = false;
 
@@ -111,10 +114,14 @@ public class Engine {
         if(!isRunning) throw new RuntimeException("Unable to update until the engine is not initialized!");
 
         renderer.render();
+        if(physicsDebugDrawing) {
+            physicsWorld.debugRender(renderer.getCamera());
+        }
 
         float frameTime = Math.min(delta, 0.25f);
         timeCounter += frameTime;
         while(timeCounter >= FIXED_TIME) {
+            physicsWorld.update(FIXED_TIME);
             for(GameObject g : gameObjects) {
                 if(g.life.update(g, FIXED_TIME)) {
                     g.updateData(FIXED_TIME);
@@ -124,6 +131,14 @@ public class Engine {
             timeCounter -= FIXED_TIME;
         }
         for(GameObject g : gameObjects) g.update(frameTime);
+    }
+
+    public PhysicsWorld getPhysicsWorld() {
+        return physicsWorld;
+    }
+
+    public void setPhysicsDebugDrawing(boolean physicsDebugDrawing) {
+        this.physicsDebugDrawing = physicsDebugDrawing;
     }
 
     public int getGameObjectsCount() {

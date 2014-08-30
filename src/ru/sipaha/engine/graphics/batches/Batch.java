@@ -8,8 +8,6 @@ import ru.sipaha.engine.graphics.RenderUnit;
 
 public abstract class Batch extends RenderUnit {
 
-    public static final int SPRITE_SIZE = 20;
-
     private Matrix4 combinedMatrix;
 
     private boolean blendingDisabled = false;
