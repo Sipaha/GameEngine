@@ -13,13 +13,12 @@ public class Batches {
     public Array<BatchArray> batchesArrays = new Array<>(true, 16, BatchArray.class);
     public ObjectMap<RenderUnit, GameObjectsBatch> goBatchesByUnit = new ObjectMap<>();
 
-    public void addGameObject(GameObject go) {
-        GameObjectRenderer renderer = go.renderer;
-        goBatchesByUnit.get(renderer).addGameObject(go);
+    public void addGameObjectRenderer(GameObjectRenderer renderer) {
+        goBatchesByUnit.get(renderer).addGameObjectRenderer(renderer);
     }
 
-    public void removeGameObject(GameObject go) {
-        goBatchesByUnit.get(go.renderer).removeGameObject(go);
+    public void removeGameObjectRenderer(GameObjectRenderer renderer) {
+        goBatchesByUnit.get(renderer).removeGameObjectRenderer(renderer);
     }
 
     public void addBatch(Batch batch) {

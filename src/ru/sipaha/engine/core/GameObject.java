@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.ObjectIntMap;
 import ru.sipaha.engine.gameobjectdata.*;
 import ru.sipaha.engine.scripts.Script;
@@ -22,7 +21,7 @@ public class GameObject {
     public final Transform transform; //root transform
     public final GameObjectRenderer renderer;
     public final Life life;
-    public RigidBody body;
+    public RigidBody rigidBody;
     public boolean enable = true;
 
     protected Replicator replicator;
@@ -81,9 +80,9 @@ public class GameObject {
         transform = transforms[0];
         renderer.setEntities(entities);
         transformByEntityName = prototype.transformByEntityName;
-        if(prototype.body != null) {
-            body = new RigidBody(prototype.body);
-            transform.rigidBody = body;
+        if(prototype.rigidBody != null) {
+            rigidBody = new RigidBody(prototype.rigidBody);
+            transform.rigidBody = rigidBody;
         }
     }
 
@@ -101,8 +100,8 @@ public class GameObject {
         Rectangle rect = new Rectangle(position.x, position.y, renderer.width, renderer.height);
         Vector2 rectPos = rect.getPosition(new Vector2());
         Vector2 transformPos = transform.getPosition();
-        body = new RigidBody(rect, boundsScale, transformPos.sub(rectPos));
-        transform.rigidBody = body;
+        rigidBody = new RigidBody(rect, boundsScale, transformPos.sub(rectPos));
+        transform.rigidBody = rigidBody;
     }
 
     public void createBody(float boundsScale, float density, float friction, float restitution) {
@@ -110,17 +109,17 @@ public class GameObject {
         Vector2 position = transform.getPosition().sub(renderer.originX, renderer.originY);
         Rectangle rect = new Rectangle(position.x, position.y, renderer.width, renderer.height);
         Vector2 rectPos = rect.getPosition(new Vector2());
-        body = new RigidBody(rect, boundsScale, transform.getPosition().sub(rectPos), density, friction, restitution);
-        transform.rigidBody = body;
+        rigidBody = new RigidBody(rect, boundsScale, transform.getPosition().sub(rectPos), density, friction, restitution);
+        transform.rigidBody = rigidBody;
     }
 
     public void createBody(BodyDef def, FixtureDef... fixturesDef) {
-        body = new RigidBody(def, fixturesDef);
-        transform.rigidBody = body;
+        rigidBody = new RigidBody(def, fixturesDef);
+        transform.rigidBody = rigidBody;
     }
 
     public void start(Engine engine) {
-        if(body != null) body.create(this, engine.getPhysicsWorld());
+        if(rigidBody != null) rigidBody.create(this, engine.getPhysicsWorld());
         for(Script s : scripts) s.start(engine);
     }
 
@@ -130,16 +129,6 @@ public class GameObject {
 
     public void fixedUpdate(float delta) {
         for(Script s : scripts) s.fixedUpdate(delta);
-    }
-
-    public int render(float[] vertices, int pos) {
-        if(renderer.visible) {
-            float[] data = renderer.renderData;
-            System.arraycopy(data, 0, vertices, pos, data.length);
-            return pos + data.length;
-        } else {
-            return pos;
-        }
     }
 
     public GameObject updateData(float delta) {
@@ -165,7 +154,10 @@ public class GameObject {
             transforms[i].reset(prototype.transforms[i]);
         }
         for (Script script : scripts) script.reset();
-        if(body != null) body.reset(prototype.body);
+        life.reset(prototype.life);
+        if(rigidBody != null) rigidBody.reset(prototype.rigidBody);
+        if(renderer != null) renderer.reset(prototype.renderer);
+        enable = prototype.enable;
         return this;
     }
 
@@ -185,12 +177,12 @@ public class GameObject {
 
     public void disable() {
         enable = false;
-        body.disable();
+        rigidBody.disable();
     }
 
     public void enable() {
         enable = true;
-        body.enable();
+        rigidBody.enable();
     }
 
     public <T extends Script> T getScript(Class<T> type) {

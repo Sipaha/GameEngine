@@ -109,6 +109,10 @@ public class Transform {
         dirty = true;
     }
 
+    public Transform setPosition(double x, double y) {
+        return setPosition((float)x, (float)y);
+    }
+
     public Transform setPosition(float x, float y) {
         translate(x - this.x, y - this.y);
         return this;

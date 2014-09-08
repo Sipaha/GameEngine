@@ -5,16 +5,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.gameobjectdata.Transform;
+import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.scripts.Script;
 import ru.sipaha.engine.utils.ContactListener;
-
-import javax.xml.soap.Text;
 
 public class GameScreen implements Screen {
     Engine engine = new Engine();
@@ -51,34 +48,23 @@ public class GameScreen implements Screen {
         g.renderer.setLinearFilter();
         g.transform.setPosition(100, 100);
         g.transform.motion.va = 1;
-        g.transform.motion.a_velocity = 40;
-        g.createBody(0.85f);
+        g.transform.motion.a_velocity = 10;
+        //g.createBody(0.85f);
         engine.setReplicator(g, "Name");
 
         engine.setPhysicsDebugDrawing(true);
         engine.initialize();
 
-        GameObject gg = engine.createGameObject("Name");
-
-        gg.getTransform("3").motion.va = 1;
-        gg.getTransform("3").motion.a_velocity = 40;
+        /*for(int i = 0; i < 400; i++) {
+            GameObject gg = engine.createGameObject("Name");
+            gg.transform.setPosition(Math.random()*Gdx.graphics.getWidth(), Math.random()*Gdx.graphics.getHeight());
+        }*/
 
         GameObject gameObject = engine.createGameObject("Name");
         gameObject.transform.setPosition(200,200);
-        gameObject.transform.motion.xy_velocity = 20;
         gameObject.transform.motion.moveTo(600,600);
 
-        gameObject.body.addContactListener(new ContactListener() {
-            @Override
-            public void beginContact(GameObject gameObject) {
-                System.out.println("begin!");
-            }
-
-            @Override
-            public void endContact(GameObject gameObject) {
-                System.out.println("end!");
-            }
-        });
+        Camera.setViewLimits(0, 0, 1000, 1000);
     }
 
     @Override
@@ -89,7 +75,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        engine.resize(width, height);
+        Camera.setViewport(width, height);
     }
 
     @Override

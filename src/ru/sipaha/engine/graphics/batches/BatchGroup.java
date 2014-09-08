@@ -6,7 +6,8 @@ import ru.sipaha.engine.utils.Array;
 import java.util.Comparator;
 
 public class BatchGroup extends RenderUnit {
-    public Array<Batch> batches;
+
+    public final Array<Batch> batches;
 
     protected int upPriority = 0;
     protected BatchGroup nextLink;

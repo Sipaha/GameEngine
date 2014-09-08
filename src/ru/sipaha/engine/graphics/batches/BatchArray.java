@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Matrix4;
+import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
 
@@ -22,14 +22,6 @@ public class BatchArray extends RenderUnit {
     protected final float[] vertices;
     protected int verticesCount = 0;
 
-    private Matrix4 combinedMatrix;
-
-    private boolean blendingDisabled;
-    private int blendSrcFunc;
-    private int blendDstFunc;
-
-    private boolean isStatic = false;
-
     public BatchArray(BatchGroup group) {
         this(DEFAULT_MAX_SIZE, group);
     }
@@ -37,14 +29,8 @@ public class BatchArray extends RenderUnit {
     public BatchArray(int size, BatchGroup group) {
         super(group);
         if (size > 5460) throw new IllegalArgumentException("Can't have more than 5460 sprites per BatchArray: " + size);
-        Batch batch = group.batches.get(0);
-        isStatic = batch.isStatic;
-        combinedMatrix = batch.getCombinedMatrix();
-        blendDstFunc = batch.getBlendDstFunc();
-        blendSrcFunc = batch.getBlendSrcFunc();
-        blendingDisabled = batch.isBlendingDisabled();
-        add(group);
 
+        add(group);
         mesh = new Mesh(Mesh.VertexDataType.VertexArray, false, size*4, size*6,
                 new VertexAttribute(VertexAttributes.Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
@@ -67,7 +53,7 @@ public class BatchArray extends RenderUnit {
     }
 
     private void setupMatrices () {
-        shader.setUniformMatrix("u_projTrans", combinedMatrix);
+        shader.setUniformMatrix("u_projTrans", inWorldSpace ? Camera.combined : Camera.projection);
         shader.setUniformi("u_texture", 0);
     }
 
@@ -86,8 +72,8 @@ public class BatchArray extends RenderUnit {
         if(!isStatic) {
             verticesCount = 0;
             Batch[] batchesArr = batches.items;
-            for(int i = 0, s = batches.size; i < s; i++) {
-                verticesCount = batchesArr[i].prepareVertices(vertices,verticesCount);
+            for (int i = 0, s = batches.size; i < s; i++) {
+                verticesCount = batchesArr[i].prepareVertices(vertices, verticesCount);
             }
         }
         end();

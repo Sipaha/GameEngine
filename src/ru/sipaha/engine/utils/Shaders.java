@@ -8,12 +8,7 @@ public class Shaders {
 
     public static final ShaderProgram defaultShader;
 
-    private static int id_counter = 0;
-    private static final ObjectIntMap<ShaderProgram> shaderId;
-
     static {
-        shaderId = new ObjectIntMap<>();
-
         String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
                 + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
                 + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
@@ -46,14 +41,5 @@ public class Shaders {
         if (!defaultShader.isCompiled()) {
             throw new IllegalArgumentException("Error compiling shader: " + defaultShader.getLog());
         }
-        getShaderId(defaultShader);
-    }
-
-    public static int getShaderId(ShaderProgram program) {
-        int id = shaderId.get(program, -1);
-        if(id != -1) return id;
-        int new_id = id_counter++;
-        shaderId.put(program, new_id);
-        return new_id;
     }
 }

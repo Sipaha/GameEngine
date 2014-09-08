@@ -6,10 +6,10 @@ import ru.sipaha.engine.utils.MathHelper;
 
 public class Motion {
 
-    public float xy_velocity = 0f;
+    public float xy_velocity = 20f;
     public float vx = 0f;
     public float vy = 0f;
-    public float a_velocity = 0f;
+    public float a_velocity = 45f;
     public float va = 0;
 
     public float xTarget = -1;

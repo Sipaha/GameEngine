@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import ru.sipaha.engine.graphics.Camera;
-import ru.sipaha.engine.utils.Array;
 
 public class PhysicsWorld {
     public static final float WORLD_UNITS_TO_ENGINE_UNITS = 32f;
@@ -24,14 +23,14 @@ public class PhysicsWorld {
             public void beginContact(Contact contact) {
                 GameObject gameObjectA = (GameObject) contact.getFixtureA().getBody().getUserData();
                 GameObject gameObjectB = (GameObject) contact.getFixtureB().getBody().getUserData();
-                gameObjectA.body.beginContact(gameObjectB);
-                gameObjectB.body.beginContact(gameObjectA);
+                gameObjectA.rigidBody.beginContact(gameObjectB);
+                gameObjectB.rigidBody.beginContact(gameObjectA);
             }
             public void endContact(Contact contact) {
                 GameObject gameObjectA = (GameObject) contact.getFixtureA().getBody().getUserData();
                 GameObject gameObjectB = (GameObject) contact.getFixtureB().getBody().getUserData();
-                gameObjectA.body.endContact(gameObjectB);
-                gameObjectB.body.endContact(gameObjectA);
+                gameObjectA.rigidBody.endContact(gameObjectB);
+                gameObjectB.rigidBody.endContact(gameObjectA);
             }
             public void preSolve(Contact contact, Manifold oldManifold) {
             }
@@ -43,7 +42,7 @@ public class PhysicsWorld {
         /*BodyDef bodyDef = new BodyDef();
         bodyDef.position.set(10,10);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        Body body = world.createBody(bodyDef);
+        Body rigidBody = world.createBody(bodyDef);
         CircleShape shape = new CircleShape();
         shape.setRadius(2);
         FixtureDef fixtureDef = new FixtureDef();
@@ -51,7 +50,7 @@ public class PhysicsWorld {
         fixtureDef.restitution = 1f;
         fixtureDef.friction = 1f;
         fixtureDef.density = 1f;
-        body.createFixture(fixtureDef);
+        rigidBody.createFixture(fixtureDef);
         enable = true;*/
     }
 
@@ -70,12 +69,12 @@ public class PhysicsWorld {
         return body;
     }
 
-    public void debugRender(Camera camera) {
+    public void debugRender() {
         if(box2DDebugRenderer == null) {
             box2DDebugRenderer = new Box2DDebugRenderer();
             projectionDebugMatrix = new Matrix4();
         }
-        projectionDebugMatrix.set(camera.combined).scl(WORLD_UNITS_TO_ENGINE_UNITS);
+        projectionDebugMatrix.set(Camera.combined).scl(WORLD_UNITS_TO_ENGINE_UNITS);
         box2DDebugRenderer.render(world, projectionDebugMatrix);
     }
 

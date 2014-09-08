@@ -46,6 +46,7 @@ public class Replicator {
     protected void free(GameObject gameObject) {
         cache.add(gameObject);
         gameObject.enable = false;
+        if(gameObject.renderer != null) gameObject.renderer.visible = false;
     }
 
     protected void remove(GameObject gameObject) {

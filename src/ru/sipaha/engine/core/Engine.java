@@ -1,7 +1,6 @@
 package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.SceneRenderer;
@@ -13,6 +12,9 @@ public class Engine {
     public final TagManager tagManager = new TagManager();
     public final ObjectMap<String, Replicator> replicatorsByName;
     public final IntMap<Replicator> replicatorsById;
+    private Replicator cachedReplicator;
+    private int cachedReplicatorId = -1;
+    private String cachedReplicatorName = null;
 
     private float timeCounter = 0f;
 
@@ -31,11 +33,18 @@ public class Engine {
     }
 
     public GameObject createGameObject(String name) {
-        return replicatorsByName.get(name).get();
+        if(!name.equals(cachedReplicatorName)) cachedReplicator = replicatorsByName.get(name);
+        cachedReplicatorName = name;
+        cachedReplicatorId = -1;
+        return cachedReplicator.get();
     }
 
     public GameObject createGameObject(int id) {
-        return replicatorsById.get(id).get();
+        if(id < 0) throw new RuntimeException("id can't be less than zero! id = " + id);
+        if(id != cachedReplicatorId) cachedReplicator = replicatorsById.get(id);
+        cachedReplicatorId = id;
+        cachedReplicatorName = null;
+        return cachedReplicator.get();
     }
 
     public Replicator setReplicator(GameObject go, String name) {
@@ -47,7 +56,7 @@ public class Engine {
         } else {
             replicator.setTemplate(go);
         }
-        renderer.prepareBatchForGameObject(go);
+        if(go.renderer != null) renderer.prepareBatchForGameObjectRenderer(go.renderer);
         return replicator;
     }
 
@@ -60,7 +69,7 @@ public class Engine {
         } else {
             replicator.setTemplate(go);
         }
-        renderer.prepareBatchForGameObject(go);
+        if(go.renderer != null) renderer.prepareBatchForGameObjectRenderer(go.renderer);
         return replicator;
     }
 
@@ -90,18 +99,14 @@ public class Engine {
     public void addGameObject(GameObject go) {
         gameObjects.add(go);
         tagManager.add(go);
-        renderer.addGameObject(go);
+        if(go.renderer != null) renderer.addGameObjectRenderer(go.renderer);
         go.start(this);
     }
 
     public void removeGameObject(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
-        renderer.removeGameObject(go);
-    }
-
-    public void resize(int width, int height) {
-        renderer.resize(width, height);
+        if(go.renderer != null) renderer.removeGameObjectRenderer(go.renderer);
     }
 
     public void initialize() {
@@ -115,7 +120,7 @@ public class Engine {
 
         renderer.render();
         if(physicsDebugDrawing) {
-            physicsWorld.debugRender(renderer.getCamera());
+            physicsWorld.debugRender();
         }
 
         float frameTime = Math.min(delta, 0.25f);
