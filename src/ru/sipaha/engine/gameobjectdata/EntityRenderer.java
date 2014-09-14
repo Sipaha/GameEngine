@@ -22,6 +22,8 @@ public class EntityRenderer {
     public float repeatX = 1, repeatY = 1;
     public boolean fixedRotation = false;
 
+    private boolean dirtyBody = false;
+
     public EntityRenderer(TextureRegion r) {
         this(r.getU(), r.getV(), r.getU2(), r.getV2(), r.getRegionWidth(), r.getRegionHeight());
     }
@@ -93,7 +95,7 @@ public class EntityRenderer {
     }
 
     private void updateBody(Transform t) {
-        if(!t.wasChanged) return;
+        if(!t.wasChanged && !dirtyBody) return;
         float localX  = -originX;
         float localY  = -originY;
         float localX2 = localX + width;
@@ -132,6 +134,7 @@ public class EntityRenderer {
             renderData[X4] = x3;
             renderData[Y4] = y1;
         }
+        dirtyBody = false;
     }
 
     public void reset(EntityRenderer source) {
@@ -185,5 +188,15 @@ public class EntityRenderer {
         }
 
         return bounds;
+    }
+
+    public void setAlpha(float alpha) {
+        a = alpha;
+    }
+
+    public void setOrigin(float x, float y) {
+        originX = x;
+        originY = y;
+        dirtyBody = true;
     }
 }

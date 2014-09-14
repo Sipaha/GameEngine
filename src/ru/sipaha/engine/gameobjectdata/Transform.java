@@ -56,7 +56,7 @@ public class Transform {
         t00 = cos*scale;
         t01 = -sin;
         t10 = sin;
-        t11 = cos*scale;
+        t11 = t00;//cos*scale;
         tx = x; ty = y;
         dirty = false;
         wasChanged = true;
@@ -116,6 +116,12 @@ public class Transform {
     public Transform setPosition(float x, float y) {
         translate(x - this.x, y - this.y);
         return this;
+    }
+
+    public void setScale(float scale) {
+        t00 = cos*scale;
+        t11 = t00;
+        wasChanged = true;
     }
 
     public Vector2 getPosition() {

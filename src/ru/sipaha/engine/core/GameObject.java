@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.ObjectIntMap;
 import ru.sipaha.engine.gameobjectdata.*;
 import ru.sipaha.engine.scripts.Script;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 public class GameObject {
@@ -158,7 +159,9 @@ public class GameObject {
         if(rigidBody != null) rigidBody.reset(prototype.rigidBody);
         if(renderer != null) renderer.reset(prototype.renderer);
         enable = prototype.enable;
+        Number j;
         return this;
+
     }
 
     public Rectangle getBounds() {
