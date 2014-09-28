@@ -11,7 +11,7 @@ import ru.sipaha.engine.utils.curves.Curve;
 
 public class AnimatedAlpha extends AnimatedFloat {
 
-    public AnimatedAlpha(Curve[] curves) {
+    public AnimatedAlpha(Curve curves) {
         super(curves);
     }
 

@@ -28,8 +28,14 @@ public class Animation {
         timeLimit = prototype.timeLimit;
     }
 
-    public Animation(AnimatedUnit... units) {
-
+    public Animation(String name, AnimatedUnit... units) {
+        if(name == null) throw new RuntimeException("Name can't be null!");
+        this.name = name;
+        animatedUnits = units;
+        timeLimit = units[0].getMaxDefinedTime();
+        for(int i = 1; i < units.length; i++) {
+            timeLimit = Math.max(units[i].getMaxDefinedTime(), timeLimit);
+        }
     }
 
     public void update(Entity[] entities, Transform[] transforms, float delta) {
@@ -58,6 +64,16 @@ public class Animation {
                 pause = false;
             }
         }
+    }
+
+    public Animation setLoop(boolean loop) {
+        this.loop = loop;
+        return this;
+    }
+
+    public Animation setPauseTime(float pauseTime) {
+        this.pauseTime = pauseTime;
+        return this;
     }
 
     public void start(Entity[] entities, Transform[] transforms) {

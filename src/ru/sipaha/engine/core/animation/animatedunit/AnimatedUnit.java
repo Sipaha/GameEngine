@@ -16,4 +16,6 @@ public abstract class AnimatedUnit {
     public abstract void update(Entity[] entities, Transform[] transforms, float time);
 
     public abstract void start(Entity[] entities, Transform[] transforms);
+
+    public abstract float getMaxDefinedTime();
 }

@@ -10,8 +10,19 @@ import ru.sipaha.engine.utils.curves.Curve;
 public abstract class AnimatedFloat extends AnimatedUnit {
 
     protected final Curve[] curves;
+    protected final float maxDefinedTime;
 
-    public AnimatedFloat(Curve[] curves) {
+    public AnimatedFloat(Curve... curves) {
         this.curves = curves;
+        float maxDefTime = curves[0].getMaxArgument();
+        for(int i = 1; i < curves.length; i++) {
+            maxDefTime = Math.max(maxDefTime, curves[i].getMaxArgument());
+        }
+        maxDefinedTime = maxDefTime;
+    }
+
+    @Override
+    public float getMaxDefinedTime() {
+        return maxDefinedTime;
     }
 }

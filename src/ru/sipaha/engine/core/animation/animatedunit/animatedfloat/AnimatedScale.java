@@ -10,8 +10,8 @@ import ru.sipaha.engine.utils.curves.Curve;
 
 public class AnimatedScale extends AnimatedFloat {
 
-    public AnimatedScale(Curve[] curves) {
-        super(curves);
+    public AnimatedScale(Curve curve) {
+        super(curve);
     }
 
     @Override

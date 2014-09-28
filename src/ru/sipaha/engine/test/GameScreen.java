@@ -5,13 +5,16 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.animation.Animation;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedAlpha;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.scripts.Script;
-import ru.sipaha.engine.utils.ContactListener;
+import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 
 public class GameScreen implements Screen {
     Engine engine = new Engine();
@@ -66,6 +69,12 @@ public class GameScreen implements Screen {
 
         Camera.setViewLimits(0, 0, 1000, 1000);
 
+        PiecewiseLinCurve curve = new PiecewiseLinCurve(new Vector2(0,0), new Vector2(5,1), new Vector2(10,0));
+        AnimatedAlpha animatedAlpha = new AnimatedAlpha(curve);
+        Animation animation = new Animation("Test",animatedAlpha).setLoop(true).setPauseTime(3f);
+
+        gameObject.addAnimation(animation);
+        gameObject.startAnimation("Test");
     }
 
     @Override
