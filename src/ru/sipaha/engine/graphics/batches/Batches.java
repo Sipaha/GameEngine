@@ -31,7 +31,7 @@ public class Batches {
 
     public void rebuildBatchesArrays() {
         com.badlogic.gdx.utils.Array<BatchGroup> groups = batchesGroups.values().toArray();
-        groups.sort(BatchGroup.batchGroupsComparator);
+        groups.sort();//groups.sort(BatchGroup.batchGroupsComparator);
         for(BatchGroup b : groups) b.reset();
 
         IntIntMap layers = new IntIntMap();

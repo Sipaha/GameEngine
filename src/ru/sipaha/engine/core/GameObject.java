@@ -9,10 +9,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.ObjectIntMap;
+import ru.sipaha.engine.core.animation.Animation;
+import ru.sipaha.engine.core.animation.Animator;
 import ru.sipaha.engine.gameobjectdata.*;
+import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.scripts.Script;
 
-import java.util.Arrays;
 import java.util.BitSet;
 
 public class GameObject {
@@ -33,6 +35,7 @@ public class GameObject {
     private final Entity[] entities;
     private final Transform[] transforms;
     private final Script[] scripts;
+    private Animator animator;
 
     public GameObject(Entity[] entities, Transform[] transforms, Script[] scripts,
                                                 Texture t, ShaderProgram s, int zOrder) {
@@ -44,6 +47,10 @@ public class GameObject {
         life = new Life();
         transformByEntityName = new ObjectIntMap<>();
         setup();
+    }
+
+    public GameObject(TextureRegion region) {
+        this(region, RenderUnit.DEFAULT_Z_ORDER, new Script[0]);
     }
 
     public GameObject(TextureRegion region, int zOrder) {
@@ -85,6 +92,7 @@ public class GameObject {
             rigidBody = new RigidBody(prototype.rigidBody);
             transform.rigidBody = rigidBody;
         }
+        if(prototype.animator != null) animator = new Animator(prototype.animator);
     }
 
     private void setup() {
@@ -133,6 +141,7 @@ public class GameObject {
     }
 
     public GameObject updateData(float delta) {
+        if(animator != null) animator.update(entities, transforms, delta);
         transform.update(delta);
         for (int i = 1; i < transforms.length; i++) {
             Transform t = transforms[i];
@@ -159,7 +168,6 @@ public class GameObject {
         if(rigidBody != null) rigidBody.reset(prototype.rigidBody);
         if(renderer != null) renderer.reset(prototype.renderer);
         enable = prototype.enable;
-        Number j;
         return this;
 
     }
@@ -186,6 +194,15 @@ public class GameObject {
     public void enable() {
         enable = true;
         rigidBody.enable();
+    }
+
+    public void addAnimation(Animation animation) {
+        if(animator == null) animator = new Animator();
+        animator.add(animation);
+    }
+
+    public void startAnimation(String name) {
+        animator.start(name, entities, transforms);
     }
 
     public <T extends Script> T getScript(Class<T> type) {

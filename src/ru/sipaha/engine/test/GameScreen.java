@@ -65,6 +65,7 @@ public class GameScreen implements Screen {
         gameObject.transform.motion.moveTo(600,600);
 
         Camera.setViewLimits(0, 0, 1000, 1000);
+
     }
 
     @Override

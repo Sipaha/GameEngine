@@ -3,6 +3,8 @@ package ru.sipaha.engine.gameobjectdata;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedPosition;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedScale;
 
 public class Transform {
     public float t00, t01, t10, t11, tx, ty;
@@ -21,6 +23,9 @@ public class Transform {
     protected boolean dirty = true;
 
     private Vector2 positionTemp;
+
+    public AnimatedPosition animatedPosition = null;
+    public AnimatedScale animatedScale = null;
 
     public Transform(){
         motion = new Motion();

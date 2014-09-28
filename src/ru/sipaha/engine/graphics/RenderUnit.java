@@ -5,10 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import ru.sipaha.engine.utils.Shaders;
 
-import javax.xml.soap.Text;
-
 public abstract class RenderUnit {
-    public static int defaulZOrder = 3;
+    public static int DEFAULT_Z_ORDER = 3;
 
     protected final Texture texture;
     protected final ShaderProgram shader;
@@ -34,7 +32,7 @@ public abstract class RenderUnit {
     }
 
     public RenderUnit(Texture t) {
-        this(t, null, defaulZOrder);
+        this(t, null, DEFAULT_Z_ORDER);
     }
 
     public RenderUnit(Texture t, int zOrder) {

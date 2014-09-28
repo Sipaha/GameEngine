@@ -1,11 +1,12 @@
 package ru.sipaha.engine.graphics.batches;
 
+import com.sun.istack.internal.NotNull;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
 
 import java.util.Comparator;
 
-public class BatchGroup extends RenderUnit {
+public class BatchGroup extends RenderUnit implements Comparable<BatchGroup>{
 
     public final Array<Batch> batches;
 
@@ -34,12 +35,19 @@ public class BatchGroup extends RenderUnit {
         return super.toString()+" size="+batches.size;
     }
 
-    public static final Comparator<BatchGroup> batchGroupsComparator = new Comparator<BatchGroup>() {
+    @Override
+    public int compareTo(BatchGroup group) {
+        if (zOrder > group.zOrder) return 1;
+        if (zOrder < group.zOrder) return -1;
+        return 0;
+    }
+
+    /*public static final Comparator<BatchGroup> batchGroupsComparator = new Comparator<BatchGroup>() {
         @Override
         public int compare(BatchGroup group1, BatchGroup group2) {
             if (group1.zOrder > group2.zOrder) return 1;
             if (group1.zOrder < group2.zOrder) return -1;
             return 0;
         }
-    };
+    };*/
 }

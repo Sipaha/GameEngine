@@ -1,24 +1,45 @@
 package ru.sipaha.engine.core.animation;
 
-public abstract class Animation {
+import ru.sipaha.engine.core.Entity;
+import ru.sipaha.engine.core.animation.animatedunit.AnimatedUnit;
+import ru.sipaha.engine.gameobjectdata.Transform;
+
+public class Animation {
     public String name;
+    private AnimatedUnit[] animatedUnits;
 
     private boolean loop = false;
     private boolean run = false;
-    private float pause_time = 0;
+    private float pauseTime = 0;
     private boolean pause = false;
     private float pauseTimer = 0;
     private float time = 0;
     private float timeLimit = 0;
 
-    public void update(float delta) {
+    public Animation(Animation prototype) {
+        name = prototype.name;
+        animatedUnits = prototype.animatedUnits;
+        loop = prototype.loop;
+        run = prototype.run;
+        pauseTime = prototype.pauseTime;
+        pause = prototype.pause;
+        pauseTimer = prototype.pauseTimer;
+        time = prototype.time;
+        timeLimit = prototype.timeLimit;
+    }
+
+    public Animation(AnimatedUnit... units) {
+
+    }
+
+    public void update(Entity[] entities, Transform[] transforms, float delta) {
         if (!run) return;
         if (!pause) {
             time += delta;
             if (time >= timeLimit) {
                 run = loop;
                 if (run) {
-                    if (pause_time > 0) {
+                    if (pauseTime > 0) {
                         pause = true;
                         time = 0;
                     } else {
@@ -28,13 +49,28 @@ public abstract class Animation {
                     time = timeLimit;
                 }
             }
-            updateTarget(time);
+            for(AnimatedUnit u : animatedUnits) {
+                u.update(entities, transforms, time);
+            }
         } else {
-            if ((pauseTimer += delta) >= pause_time) {
+            if ((pauseTimer += delta) >= pauseTime) {
                 pauseTimer = 0;
                 pause = false;
             }
         }
     }
-    public abstract void updateTarget(float time);
+
+    public void start(Entity[] entities, Transform[] transforms) {
+        run = true;
+        time = 0;
+        pause = false;
+        pauseTimer = 0;
+        for(AnimatedUnit u : animatedUnits) {
+            u.start(entities, transforms);
+        }
+    }
+
+    public void stop() {
+        run = false;
+    }
 }

@@ -3,6 +3,11 @@ package ru.sipaha.engine.gameobjectdata;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.NumberUtils;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedAlpha;
+import ru.sipaha.engine.core.animation.animatedunit.AnimatedUnit;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedColor;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedOrigin;
+import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedUVOffset;
 
 public class EntityRenderer {
     public static final int ENTITY_RENDER_SIZE = 20;
@@ -14,7 +19,6 @@ public class EntityRenderer {
 
     private float[] renderData;
     private float a = 1, r = 1, g = 1, b = 1;
-    private float cachedA,cachedR,cachedG,cachedB;
     private float u,v,u2,v2,dv,du;
     public float width, height;
     public float originX, originY;
@@ -22,7 +26,14 @@ public class EntityRenderer {
     public float repeatX = 1, repeatY = 1;
     public boolean fixedRotation = false;
 
-    private boolean dirtyBody = false;
+    private boolean dirtyBody = true;
+    private boolean dirtyColor = true;
+    private boolean dirtyUV = true;
+
+    public AnimatedAlpha animatedAlpha = null;
+    public AnimatedColor animatedColor = null;
+    public AnimatedOrigin animatedOrigin = null;
+    public AnimatedUVOffset animatedUVOffset = null;
 
     public EntityRenderer(TextureRegion r) {
         this(r.getU(), r.getV(), r.getU2(), r.getV2(), r.getRegionWidth(), r.getRegionHeight());
@@ -48,6 +59,7 @@ public class EntityRenderer {
         this.v2 = v2;
         dv = v2 - v;
         du = u2 - u;
+        dirtyUV = true;
     }
 
     public void setRenderData(float[] renderData, int offset) {
@@ -56,27 +68,34 @@ public class EntityRenderer {
         X3 = 10+offset; Y3 = 11+offset; C3 = 12+offset; U3 = 13+offset; V3 = 14+offset;
         X4 = 15+offset; Y4 = 16+offset; C4 = 17+offset; U4 = 18+offset; V4 = 19+offset;
         this.renderData = renderData;
-        updateUV();
+        dirtyBody = true;
+        dirtyColor = true;
+        dirtyUV = true;
     }
 
     public void update(Transform t) {
         updateBody(t);
         updateColor();
+        updateUV();
     }
 
     private void updateUV() {
-        float u  = this.u  + offsetU;
-        float v  = this.v  + offsetV;
-        float u2 = this.u2 + offsetU;
-        float v2 = this.v2 + offsetV;
-        renderData[U1] = u;  renderData[V1] = v2;
-        renderData[U2] = u;  renderData[V2] = v;
-        renderData[U3] = u2; renderData[V3] = v;
-        renderData[U4] = u2; renderData[V4] = v2;
+        if(dirtyUV) {
+            float u  = this.u  + offsetU;
+            float v  = this.v  + offsetV;
+            float u2 = this.u2 + offsetU;
+            float v2 = this.v2 + offsetV;
+            renderData[U1] = u;  renderData[V1] = v2;
+            renderData[U2] = u;  renderData[V2] = v;
+            renderData[U3] = u2; renderData[V3] = v;
+            renderData[U4] = u2; renderData[V4] = v2;
+
+            dirtyUV = false;
+        }
     }
 
     private void updateColor() {
-        if(a != cachedA || b != cachedB || g != cachedG || r != cachedR) {
+        if(dirtyColor) {
             int intBits = ((int) (255 * a) << 24)
                     | ((int) (255 * b) << 16)
                     | ((int) (255 * g) << 8)
@@ -87,10 +106,7 @@ public class EntityRenderer {
             renderData[C3] = color;
             renderData[C4] = color;
 
-            cachedA = a;
-            cachedB = b;
-            cachedG = g;
-            cachedR = r;
+            dirtyColor = false;
         }
     }
 
@@ -192,11 +208,25 @@ public class EntityRenderer {
 
     public void setAlpha(float alpha) {
         a = alpha;
+        dirtyColor = true;
+    }
+
+    public void setColor(float r, float g, float b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        dirtyColor = true;
     }
 
     public void setOrigin(float x, float y) {
         originX = x;
         originY = y;
         dirtyBody = true;
+    }
+
+    public void setOffsetUV(float u, float v) {
+        offsetU = u;
+        offsetV = v;
+        dirtyUV = true;
     }
 }

@@ -4,5 +4,5 @@ package ru.sipaha.engine.utils.curves;
 
 public interface Curve {
     float get(float arg);
-
+    float getMaxArgument();
 }
