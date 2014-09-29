@@ -2,6 +2,7 @@ package ru.sipaha.engine.core.animation;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.core.Entity;
+import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.Array;
 

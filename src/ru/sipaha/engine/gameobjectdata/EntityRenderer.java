@@ -3,11 +3,8 @@ package ru.sipaha.engine.gameobjectdata;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.NumberUtils;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedAlpha;
-import ru.sipaha.engine.core.animation.animatedunit.AnimatedUnit;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedColor;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedOrigin;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedUVOffset;
+import ru.sipaha.engine.core.animation.discrete.DiscreteAnimation;
+import ru.sipaha.engine.core.animation.сontinuous.*;
 
 public class EntityRenderer {
     public static final int ENTITY_RENDER_SIZE = 20;
@@ -33,7 +30,9 @@ public class EntityRenderer {
     public AnimatedAlpha animatedAlpha = null;
     public AnimatedColor animatedColor = null;
     public AnimatedOrigin animatedOrigin = null;
-    public AnimatedUVOffset animatedUVOffset = null;
+    public AnimatedUOffset animatedUOffset = null;
+    public AnimatedVOffset animatedVOffset = null;
+    public DiscreteAnimation animatedSprite = null;
 
     public EntityRenderer(TextureRegion r) {
         this(r.getU(), r.getV(), r.getU2(), r.getV2(), r.getRegionWidth(), r.getRegionHeight());
@@ -224,8 +223,12 @@ public class EntityRenderer {
         dirtyBody = true;
     }
 
-    public void setOffsetUV(float u, float v) {
+    public void setOffsetU(float u) {
         offsetU = u;
+        dirtyUV = true;
+    }
+
+    public void setOffsetV(float v) {
         offsetV = v;
         dirtyUV = true;
     }

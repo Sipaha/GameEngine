@@ -1,10 +1,9 @@
 package ru.sipaha.engine.gameobjectdata;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedPosition;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedScale;
+import ru.sipaha.engine.core.animation.сontinuous.AnimatedPosition;
+import ru.sipaha.engine.core.animation.сontinuous.AnimatedScale;
 
 public class Transform {
     public float t00, t01, t10, t11, tx, ty;

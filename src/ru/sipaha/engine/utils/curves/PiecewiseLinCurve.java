@@ -15,14 +15,14 @@ public class PiecewiseLinCurve implements Curve{
     private float maxDefinedArg;
 
     /**
-     * @param points x = time, y = value
+     * @param points x = argument, y = result
      */
     public PiecewiseLinCurve(Vector2... points) {
         if(points.length < 2) {
             throw new RuntimeException("There are too few points to create a curve. points.length = "+points.length);
         }
         int size = points.length-1;
-        b = new float[size];
+        b = new float[size+1];
         k = new float[size];
         time = new float[size];
         for(int i = 0; i < size; i++) {
@@ -30,7 +30,9 @@ public class PiecewiseLinCurve implements Curve{
             b[i] = points[i].y - k[i]*points[i].x;
             time[i] = points[i].x;
         }
-        maxDefinedArg = points[points.length-1].x;
+        int lastIdx = points.length - 1;
+        maxDefinedArg = points[lastIdx].x;
+        b[lastIdx] = k[lastIdx-1]*maxDefinedArg + b[lastIdx-1];
     }
 
     @Override
@@ -38,18 +40,16 @@ public class PiecewiseLinCurve implements Curve{
         int low = 0;
         int high = time.length - 1;
 
-        if(arg >= time[high]) return k[high]*arg+b[high];
-        if(arg <= time[low]) return k[low]*arg+b[low];
+        if(arg >= time[high]) return b[high+1];
+        if(arg <= time[low]) return b[low];
         while (low != high-1) {
             int mid = (low + high) >>> 1;
             float midVal = time[mid];
-
             if (midVal <= arg){
                 low = mid;
             } else if (midVal > arg) {
                 high = mid;
             }
-
         }
         return k[low]*arg+b[low];
     }

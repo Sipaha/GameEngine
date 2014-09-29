@@ -10,11 +10,14 @@ import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.animation.Animation;
-import ru.sipaha.engine.core.animation.animatedunit.animatedfloat.AnimatedAlpha;
+import ru.sipaha.engine.core.animation.discrete.SpriteAnimation;
+import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
+import ru.sipaha.engine.core.animation.сontinuous.AnimatedAlpha;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.scripts.Script;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
+import ru.sipaha.engine.utils.structures.SpriteFrame;
 
 public class GameScreen implements Screen {
     Engine engine = new Engine();
@@ -53,7 +56,20 @@ public class GameScreen implements Screen {
         g.transform.motion.va = 1;
         g.transform.motion.a_velocity = 10;
         //g.createBody(0.85f);
+
+        PiecewiseLinCurve curve = new PiecewiseLinCurve(new Vector2(0,0), new Vector2(5,1), new Vector2(10,0));
+        AnimatedAlpha animatedAlpha = new AnimatedAlpha(curve);
+        Animation animation = new ContinuousAnimation("Test",animatedAlpha).setLoop(true).setPauseTime(3f);
+        g.addAnimation(animation);
         engine.setReplicator(g, "Name");
+
+        Texture t = new Texture(Gdx.files.internal("images/sprite.png"));
+        SpriteFrame[] frames = new SpriteFrame[5];
+        for(int i = 0; i < frames.length;i++) frames[i] = new SpriteFrame(i*i+1, 0, 0.2f*i, 1, 0.2f*(i+1));
+        animation = new SpriteAnimation("Sprite", frames).setLoop(true).setPauseTime(3f).setNeedBackMove(true);
+        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2));
+        g.addAnimation(animation);
+        engine.setReplicator(g, "SpriteTest");
 
         engine.setPhysicsDebugDrawing(true);
         engine.initialize();
@@ -66,15 +82,14 @@ public class GameScreen implements Screen {
         GameObject gameObject = engine.createGameObject("Name");
         gameObject.transform.setPosition(200,200);
         gameObject.transform.motion.moveTo(600,600);
+        gameObject.startAnimation("Test");
+
+        gameObject = engine.createGameObject("SpriteTest");
+        gameObject.transform.setPosition(500,200);
+        gameObject.startAnimation("Sprite");
 
         Camera.setViewLimits(0, 0, 1000, 1000);
 
-        PiecewiseLinCurve curve = new PiecewiseLinCurve(new Vector2(0,0), new Vector2(5,1), new Vector2(10,0));
-        AnimatedAlpha animatedAlpha = new AnimatedAlpha(curve);
-        Animation animation = new Animation("Test",animatedAlpha).setLoop(true).setPauseTime(3f);
-
-        gameObject.addAnimation(animation);
-        gameObject.startAnimation("Test");
     }
 
     @Override

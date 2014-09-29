@@ -1,4 +1,4 @@
-package ru.sipaha.engine.core.animation.animatedunit.animatedfloat;
+package ru.sipaha.engine.core.animation.сontinuous;
 
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.gameobjectdata.EntityRenderer;
@@ -17,14 +17,14 @@ public class AnimatedColor extends AnimatedFloat {
 
     @Override
     public void update(Entity[] entities, Transform[] transforms, float time) {
-        entities[id].renderer.setColor(curves[0].get(time), curves[1].get(time), curves[2].get(time));
+        entities[targetIdx].renderer.setColor(curves[0].get(time), curves[1].get(time), curves[2].get(time));
     }
 
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
-        EntityRenderer renderer = entities[id].renderer;
+        EntityRenderer renderer = entities[targetIdx].renderer;
         if(renderer.animatedColor != this && renderer.animatedColor != null) {
-            renderer.animatedColor.animation.stop();
+            renderer.animatedColor.continuousAnimation.stop();
         }
         renderer.animatedColor = this;
     }

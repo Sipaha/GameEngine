@@ -24,13 +24,13 @@ public class ShellsShooting extends Script {
         } else {
             timer = fireRate;
         }
-        if(timer >= fireRate && !mm.items[e.id].haveATarget && schm.items[e.id].target != null) {
+        if(timer >= fireRate && !mm.items[e.targetIdx].haveATarget && schm.items[e.targetIdx].target != null) {
             timer -= fireRate;
             GameObject shell = Game.engine.createAsEntity(weapon.shell);
-            Transform shellTransform = tm.items[shell.id];
+            Transform shellTransform = tm.items[shell.targetIdx];
             shellTransform.parent = transform;
             shellTransform.reqUnhook = true;
-            em.items[shell.id].damage = weapon.damage;
+            em.items[shell.targetIdx].damage = weapon.damage;
             e.gameObject.animator.start("ShootAnimation");
         }*/
     }

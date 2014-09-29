@@ -1,4 +1,4 @@
-package ru.sipaha.engine.core.animation.animatedunit.animatedfloat;
+package ru.sipaha.engine.core.animation.сontinuous;
 
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.gameobjectdata.Transform;
@@ -16,14 +16,14 @@ public class AnimatedPosition extends AnimatedFloat {
 
     @Override
     public void update(Entity[] entities, Transform[] transforms, float time) {
-        transforms[id].setPosition(curves[0].get(time), curves[1].get(time));
+        transforms[targetIdx].setPosition(curves[0].get(time), curves[1].get(time));
     }
 
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
-        Transform transform = transforms[id];
+        Transform transform = transforms[targetIdx];
         if(transform.animatedPosition != this && transform.animatedPosition != null) {
-            transform.animatedPosition.animation.stop();
+            transform.animatedPosition.continuousAnimation.stop();
         }
         transform.animatedPosition = this;
     }

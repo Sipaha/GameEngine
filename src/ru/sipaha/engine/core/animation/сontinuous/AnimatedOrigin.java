@@ -1,4 +1,4 @@
-package ru.sipaha.engine.core.animation.animatedunit.animatedfloat;
+package ru.sipaha.engine.core.animation.сontinuous;
 
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.gameobjectdata.EntityRenderer;
@@ -17,14 +17,14 @@ public class AnimatedOrigin extends AnimatedFloat {
 
     @Override
     public void update(Entity[] entities, Transform[] transforms, float time) {
-        entities[id].renderer.setOrigin(curves[0].get(time), curves[1].get(time));
+        entities[targetIdx].renderer.setOrigin(curves[0].get(time), curves[1].get(time));
     }
 
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
-        EntityRenderer renderer = entities[id].renderer;
+        EntityRenderer renderer = entities[targetIdx].renderer;
         if(renderer.animatedOrigin != this && renderer.animatedOrigin != null) {
-            renderer.animatedOrigin.animation.stop();
+            renderer.animatedOrigin.continuousAnimation.stop();
         }
         renderer.animatedOrigin = this;
     }

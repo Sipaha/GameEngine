@@ -1,13 +1,12 @@
-package ru.sipaha.engine.core.animation.animatedunit.animatedfloat;
+package ru.sipaha.engine.core.animation.сontinuous;
 
-import ru.sipaha.engine.core.animation.animatedunit.AnimatedUnit;
 import ru.sipaha.engine.utils.curves.Curve;
 
 /**
  * Created on 15.09.2014.
  */
 
-public abstract class AnimatedFloat extends AnimatedUnit {
+public abstract class AnimatedFloat extends ContinuousAnimatedUnit {
 
     protected final Curve[] curves;
     protected final float maxDefinedTime;

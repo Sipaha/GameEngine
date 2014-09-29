@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.ObjectIntMap;
 import ru.sipaha.engine.core.animation.Animation;
+import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.core.animation.Animator;
 import ru.sipaha.engine.gameobjectdata.*;
 import ru.sipaha.engine.graphics.RenderUnit;

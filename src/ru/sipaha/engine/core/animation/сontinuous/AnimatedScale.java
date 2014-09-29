@@ -1,4 +1,4 @@
-package ru.sipaha.engine.core.animation.animatedunit.animatedfloat;
+package ru.sipaha.engine.core.animation.сontinuous;
 
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.gameobjectdata.Transform;
@@ -16,14 +16,14 @@ public class AnimatedScale extends AnimatedFloat {
 
     @Override
     public void update(Entity[] entities, Transform[] transforms, float time) {
-        transforms[id].setScale(curves[0].get(time));
+        transforms[targetIdx].setScale(curves[0].get(time));
     }
 
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
-        Transform transform = transforms[id];
+        Transform transform = transforms[targetIdx];
         if(transform.animatedScale != this && transform.animatedScale != null) {
-            transform.animatedScale.animation.stop();
+            transform.animatedScale.continuousAnimation.stop();
         }
         transform.animatedScale = this;
     }
