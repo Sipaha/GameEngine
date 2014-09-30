@@ -17,4 +17,6 @@ public abstract class Batch extends RenderUnit {
     }
 
     protected abstract int prepareVertices(float[] vertices, int idx);
+
+    public abstract int getWeight();
 }

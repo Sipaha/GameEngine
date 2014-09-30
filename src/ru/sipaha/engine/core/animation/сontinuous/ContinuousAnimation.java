@@ -27,6 +27,11 @@ public class ContinuousAnimation extends Animation {
     @Override
     public void update(Entity[] entities, Transform[] transforms, float delta) {
         if (!run) return;
+        if (pause && (pauseTimer += delta) >= pauseTime) {
+            delta = pauseTimer - pauseTime;
+            pauseTimer = 0;
+            pause = false;
+        }
         if (!pause) {
             time += delta;
             if (time >= timeLimit) {
@@ -44,11 +49,6 @@ public class ContinuousAnimation extends Animation {
             }
             for(ContinuousAnimatedUnit u : animatedUnits) {
                 u.update(entities, transforms, time);
-            }
-        } else {
-            if ((pauseTimer += delta) >= pauseTime) {
-                pauseTimer = 0;
-                pause = false;
             }
         }
     }

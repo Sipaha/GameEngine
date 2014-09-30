@@ -3,7 +3,9 @@ package ru.sipaha.engine.core;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
-import ru.sipaha.engine.graphics.SceneRenderer;
+import ru.sipaha.engine.graphics.renderlayers.Box2DDebugRenderLayer;
+import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
+import ru.sipaha.engine.graphics.renderlayers.RenderLayers;
 import ru.sipaha.engine.utils.GameObjectsArray;
 
 public class Engine {
@@ -19,7 +21,9 @@ public class Engine {
     private float timeCounter = 0f;
 
     private final GameObjectsArray gameObjects;
-    private final SceneRenderer renderer;
+
+    private RenderLayers renderLayers;
+
     private final PhysicsWorld physicsWorld = new PhysicsWorld();
     private boolean physicsDebugDrawing = false;
 
@@ -29,7 +33,7 @@ public class Engine {
         gameObjects = new GameObjectsArray(false, 128);
         replicatorsByName = new ObjectMap<>();
         replicatorsById = new IntMap<>();
-        renderer = new SceneRenderer();
+        renderLayers = new RenderLayers();
     }
 
     public GameObject createGameObject(String name) {
@@ -56,7 +60,7 @@ public class Engine {
         } else {
             replicator.setTemplate(go);
         }
-        if(go.renderer != null) renderer.prepareBatchForGameObjectRenderer(go.renderer);
+        if(go.renderer != null) renderLayers.prepareBatchForGameObject(go);
         return replicator;
     }
 
@@ -69,7 +73,7 @@ public class Engine {
         } else {
             replicator.setTemplate(go);
         }
-        if(go.renderer != null) renderer.prepareBatchForGameObjectRenderer(go.renderer);
+        if(go.renderer != null) renderLayers.prepareBatchForGameObject(go);
         return replicator;
     }
 
@@ -99,29 +103,26 @@ public class Engine {
     public void addGameObject(GameObject go) {
         gameObjects.add(go);
         tagManager.add(go);
-        if(go.renderer != null) renderer.addGameObjectRenderer(go.renderer);
+        if(go.renderer != null) renderLayers.addGameObject(go);
         go.start(this);
     }
 
     public void removeGameObject(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
-        if(go.renderer != null) renderer.removeGameObjectRenderer(go.renderer);
+        if(go.renderer != null) renderLayers.removeGameObject(go);;
     }
 
     public void initialize() {
         if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
-        renderer.rebuildBatchesArrays();
+        renderLayers.update();
         isRunning = true;
     }
 
     public void update(float delta) {
         if(!isRunning) throw new RuntimeException("Unable to update until the engine is not initialized!");
 
-        renderer.render();
-        if(physicsDebugDrawing) {
-            physicsWorld.debugRender();
-        }
+        renderLayers.render();
 
         float frameTime = Math.min(delta, 0.25f);
         timeCounter += frameTime;
@@ -143,6 +144,12 @@ public class Engine {
     }
 
     public void setPhysicsDebugDrawing(boolean physicsDebugDrawing) {
+        boolean oldVal = this.physicsDebugDrawing;
+        if(physicsDebugDrawing && !oldVal) {
+            renderLayers.addRenderLayer(new Box2DDebugRenderLayer(physicsWorld.getWorld()));
+        } else if(!physicsDebugDrawing && oldVal) {
+            renderLayers.removeRenderLayer(Box2DDebugRenderLayer.RENDER_LAYER_TAG);
+        }
         this.physicsDebugDrawing = physicsDebugDrawing;
     }
 
@@ -150,7 +157,9 @@ public class Engine {
         return gameObjects.size;
     }
 
-    public SceneRenderer getSceneRenderer() {
-        return renderer;
+    public RenderLayer getRenderLayer(String name) {
+        return renderLayers.getRenderLayer(name);
     }
+
+    public RenderLayer getRenderLayer() {return renderLayers.getRenderLayer("Default");}
 }

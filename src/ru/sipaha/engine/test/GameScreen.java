@@ -59,7 +59,7 @@ public class GameScreen implements Screen {
 
         PiecewiseLinCurve curve = new PiecewiseLinCurve(new Vector2(0,0), new Vector2(5,1), new Vector2(10,0));
         AnimatedAlpha animatedAlpha = new AnimatedAlpha(curve);
-        Animation animation = new ContinuousAnimation("Test",animatedAlpha).setLoop(true).setPauseTime(3f);
+        Animation animation = new ContinuousAnimation("Test",animatedAlpha).setPauseTime(3f);
         g.addAnimation(animation);
         engine.setReplicator(g, "Name");
 
@@ -69,6 +69,7 @@ public class GameScreen implements Screen {
         animation = new SpriteAnimation("Sprite", frames).setLoop(true).setPauseTime(3f).setNeedBackMove(true);
         g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2));
         g.addAnimation(animation);
+        g.createBody(1);
         engine.setReplicator(g, "SpriteTest");
 
         engine.setPhysicsDebugDrawing(true);
@@ -88,7 +89,7 @@ public class GameScreen implements Screen {
         gameObject.transform.setPosition(500,200);
         gameObject.startAnimation("Sprite");
 
-        Camera.setViewLimits(0, 0, 1000, 1000);
+        engine.getRenderLayer().camera.setViewLimits(0, 0, 1000, 1000);
 
     }
 
@@ -100,7 +101,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        Camera.setViewport(width, height);
+        engine.getRenderLayer().camera.setViewport(width, height);
     }
 
     @Override

@@ -34,6 +34,11 @@ public class GameObjectsBatch extends Batch {
         return verticesCount;
     }
 
+    @Override
+    public int getWeight() {
+        return gameObjects.size;
+    }
+
     public void addGameObjectRenderer(GameObjectRenderer go) {
         gameObjects.add(go);
     }

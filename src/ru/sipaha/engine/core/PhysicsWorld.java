@@ -38,20 +38,6 @@ public class PhysicsWorld {
             }
         };
         world.setContactListener(contactListener);
-
-        /*BodyDef bodyDef = new BodyDef();
-        bodyDef.position.set(10,10);
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        Body rigidBody = world.createBody(bodyDef);
-        CircleShape shape = new CircleShape();
-        shape.setRadius(2);
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        fixtureDef.restitution = 1f;
-        fixtureDef.friction = 1f;
-        fixtureDef.density = 1f;
-        rigidBody.createFixture(fixtureDef);
-        enable = true;*/
     }
 
     public void setGravity(float x, float y) {
@@ -69,13 +55,8 @@ public class PhysicsWorld {
         return body;
     }
 
-    public void debugRender() {
-        if(box2DDebugRenderer == null) {
-            box2DDebugRenderer = new Box2DDebugRenderer();
-            projectionDebugMatrix = new Matrix4();
-        }
-        projectionDebugMatrix.set(Camera.combined).scl(WORLD_UNITS_TO_ENGINE_UNITS);
-        box2DDebugRenderer.render(world, projectionDebugMatrix);
+    public World getWorld() {
+        return world;
     }
 
 }

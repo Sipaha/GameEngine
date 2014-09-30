@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Matrix4;
 import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
@@ -52,11 +53,6 @@ public class BatchArray extends RenderUnit {
         mesh.setIndices(indices);
     }
 
-    private void setupMatrices () {
-        shader.setUniformMatrix("u_projTrans", inWorldSpace ? Camera.combined : Camera.projection);
-        shader.setUniformi("u_texture", 0);
-    }
-
     public void add(BatchGroup group) {
         for(int i = 0; i < group.size(); i++) {
             Batch b = group.batches.get(i);
@@ -67,8 +63,8 @@ public class BatchArray extends RenderUnit {
         }
     }
 
-    public void draw() {
-        begin();
+    public void draw(Matrix4 combined) {
+        begin(combined);
         if(!isStatic) {
             verticesCount = 0;
             Batch[] batchesArr = batches.items;
@@ -79,11 +75,12 @@ public class BatchArray extends RenderUnit {
         end();
     }
 
-    public void begin () {
+    public void begin (Matrix4 combined) {
         GL20 gl = Gdx.gl;
         gl.glDepthMask(false);
         shader.begin();
-        setupMatrices();
+        shader.setUniformMatrix("u_projTrans", combined);
+        shader.setUniformi("u_texture", 0);
     }
 
     public void end () {

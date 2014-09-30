@@ -24,7 +24,7 @@ public class PiecewiseLinCurve implements Curve{
         int size = points.length-1;
         b = new float[size+1];
         k = new float[size];
-        time = new float[size];
+        time = new float[size+1];
         for(int i = 0; i < size; i++) {
             k[i] = (points[i+1].y - points[i].y) / (points[i+1].x - points[i].x);
             b[i] = points[i].y - k[i]*points[i].x;
@@ -33,6 +33,7 @@ public class PiecewiseLinCurve implements Curve{
         int lastIdx = points.length - 1;
         maxDefinedArg = points[lastIdx].x;
         b[lastIdx] = k[lastIdx-1]*maxDefinedArg + b[lastIdx-1];
+        time[lastIdx] = points[lastIdx].x;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class PiecewiseLinCurve implements Curve{
         int low = 0;
         int high = time.length - 1;
 
-        if(arg >= time[high]) return b[high+1];
+        if(arg >= time[high]) return b[high];
         if(arg <= time[low]) return b[low];
         while (low != high-1) {
             int mid = (low + high) >>> 1;

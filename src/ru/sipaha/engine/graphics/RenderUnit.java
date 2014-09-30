@@ -8,13 +8,13 @@ import ru.sipaha.engine.utils.Shaders;
 public abstract class RenderUnit {
     public static int DEFAULT_Z_ORDER = 3;
 
+    public String renderLayer = "Default";
     protected final Texture texture;
     protected final ShaderProgram shader;
     protected final int zOrder;
     protected boolean blendingDisabled = false;
     protected int blendSrcFunc = GL20.GL_SRC_ALPHA;
     protected int blendDstFunc = GL20.GL_ONE_MINUS_SRC_ALPHA;
-    protected boolean inWorldSpace = true;
     protected boolean isStatic = false;
 
     private int hash;
@@ -26,7 +26,6 @@ public abstract class RenderUnit {
         blendingDisabled = renderUnit.blendingDisabled;
         blendSrcFunc = renderUnit.blendSrcFunc;
         blendDstFunc = renderUnit.blendDstFunc;
-        inWorldSpace = renderUnit.inWorldSpace;
         isStatic = renderUnit.isStatic;
         hash = renderUnit.hash;
     }
@@ -70,12 +69,15 @@ public abstract class RenderUnit {
         blendDstFunc = dstFunc;
     }
 
+    public void setRenderLayer(String renderLayer) {
+        this.renderLayer = renderLayer;
+    }
+
     public boolean equalsIgnoreZOrder(RenderUnit r) {
         return this == r
                 || r != null
                 && shader == r.shader
                 && texture == r.texture
-                && inWorldSpace == r.inWorldSpace
                 && isStatic == r.isStatic
                 && blendingDisabled == r.blendingDisabled
                 && blendDstFunc == r.blendDstFunc
@@ -92,7 +94,6 @@ public abstract class RenderUnit {
         return zOrder == r.zOrder
                 && shader == r.shader
                 && texture == r.texture
-                && inWorldSpace == r.inWorldSpace
                 && isStatic == r.isStatic
                 && blendingDisabled == r.blendingDisabled
                 && blendDstFunc == r.blendDstFunc

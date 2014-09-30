@@ -20,4 +20,9 @@ public class HexMapBatch extends Batch {
     protected int prepareVertices(float[] vertices, int idx) {
         return 0;
     }
+
+    @Override
+    public int getWeight() {
+        return 0;
+    }
 }
