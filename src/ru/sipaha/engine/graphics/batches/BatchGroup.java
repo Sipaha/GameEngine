@@ -10,9 +10,9 @@ public class BatchGroup extends RenderUnit implements Comparable<BatchGroup>{
 
     public final Array<Batch> batches;
 
-    protected int upPriority = 0;
-    protected BatchGroup nextLink;
-    protected boolean replaced = false;
+    public int upPriority = 0;
+    public BatchGroup nextLink;
+    public boolean replaced = false;
 
     public BatchGroup(Batch batch) {
         super(batch);

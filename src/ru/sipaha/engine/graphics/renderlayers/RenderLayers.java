@@ -41,9 +41,9 @@ public class RenderLayers {
 
     public void prepareBatchForGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
-        GameObjectsRenderLayer layer = (GameObjectsRenderLayer)layersByName.get(renderer.renderLayer);
+        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayer);
         if(layer == null) {
-            layer = new GameObjectsRenderLayer(renderer.renderLayer);
+            layer = new BatchesRenderLayer(renderer.renderLayer);
             addRenderLayer(layer);
         }
         layer.prepareBatchForGameObject(renderer);
@@ -51,7 +51,7 @@ public class RenderLayers {
 
     public void addGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
-        GameObjectsRenderLayer layer = (GameObjectsRenderLayer)layersByName.get(renderer.renderLayer);
+        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayer);
         try {
             layer.addGameObject(gameObject);
         } catch (NullPointerException e) {
@@ -62,7 +62,7 @@ public class RenderLayers {
 
     public void removeGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
-        GameObjectsRenderLayer layer = (GameObjectsRenderLayer)layersByName.get(renderer.renderLayer);
+        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayer);
         try {
             layer.removeGameObject(gameObject);
         } catch (NullPointerException e) {
@@ -71,7 +71,7 @@ public class RenderLayers {
         }
     }
 
-    public void update() {
-        for(RenderLayer layer : layers) layer.update();
+    public void initialize() {
+        for(RenderLayer layer : layers) layer.initialize();
     }
 }

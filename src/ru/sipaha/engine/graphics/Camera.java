@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import ru.sipaha.engine.utils.signals.Listener;
+import ru.sipaha.engine.utils.signals.Signal;
 
 public class Camera extends OrthographicCamera {
 
@@ -13,6 +15,8 @@ public class Camera extends OrthographicCamera {
     private final Vector2 minPosition = new Vector2(Float.MIN_VALUE, Float.MIN_VALUE);
     private final Vector2 maxView = new Vector2(Float.MAX_VALUE, Float.MAX_VALUE);
     private final Vector2 minView = new Vector2(Float.MIN_VALUE, Float.MIN_VALUE);
+
+    private final Signal<Camera> onUpdate = new Signal<>();
 
     public Camera() {
         setToOrtho(false);
@@ -87,15 +91,26 @@ public class Camera extends OrthographicCamera {
         checkPosition(false);
     }
 
+    public void addOnUpdateListener(Listener<Camera> listener) {
+        onUpdate.add(listener);
+    }
+
     public void lookAtCenter() {
         float x = (maxPosition.x - minPosition.x)/2f;
         float y = (maxPosition.y - minPosition.y)/2f;
         setPosition(x, y);
     }
 
+    @Override
+    public void update() {
+        super.update();
+        onUpdate.dispatch(this);
+    }
+
     public void reset() {
         zoom = 1;
         setToOrtho(false);
+        onUpdate.clear();
         update();
     }
 }

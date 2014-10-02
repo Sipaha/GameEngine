@@ -19,6 +19,8 @@ import ru.sipaha.engine.scripts.Script;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
+import java.math.BigDecimal;
+
 public class GameScreen implements Screen {
     Engine engine = new Engine();
 
@@ -81,8 +83,8 @@ public class GameScreen implements Screen {
         }*/
 
         GameObject gameObject = engine.createGameObject("Name");
-        gameObject.transform.setPosition(200,200);
-        gameObject.transform.motion.moveTo(600,600);
+        gameObject.transform.setPosition(200, 200);
+        gameObject.transform.motion.moveTo(600, 600);
         gameObject.startAnimation("Test");
 
         gameObject = engine.createGameObject("SpriteTest");
@@ -90,7 +92,6 @@ public class GameScreen implements Screen {
         gameObject.startAnimation("Sprite");
 
         engine.getRenderLayer().camera.setViewLimits(0, 0, 1000, 1000);
-
     }
 
     @Override

@@ -1,23 +1,63 @@
-package ru.sipaha.engine.graphics.batches;
+package ru.sipaha.engine.graphics.renderlayers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.gameobjectdata.GameObjectRenderer;
 import ru.sipaha.engine.graphics.RenderUnit;
+import ru.sipaha.engine.graphics.batches.*;
 import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.IntIntMap;
 
-public class Batches {
+/**
+ * Created on 30.09.2014.
+ */
 
-    public ObjectMap<RenderUnit, BatchGroup> batchesGroups = new ObjectMap<>();
-    public Array<BatchArray> batchesArrays = new Array<>(true, 16, BatchArray.class);
-    public ObjectMap<RenderUnit, GameObjectsBatch> goBatchesByUnit = new ObjectMap<>();
+public class BatchesRenderLayer extends RenderLayer {
 
-    public void addGameObjectRenderer(GameObjectRenderer renderer) {
-        goBatchesByUnit.get(renderer).addGameObjectRenderer(renderer);
+    private ObjectMap<RenderUnit, BatchGroup> batchesGroups = new ObjectMap<>();
+    private Array<BatchArray> batchesArrays = new Array<>(true, 16, BatchArray.class);
+    private ObjectMap<RenderUnit, GameObjectsBatch> goBatchesByUnit = new ObjectMap<>();
+    private boolean initialized = false;
+
+    public BatchesRenderLayer(String name) {
+        super(name);
     }
 
-    public void removeGameObjectRenderer(GameObjectRenderer renderer) {
+    @Override
+    public void render() {
+        BatchArray[] bs = batchesArrays.items;
+        for(int i = 0, s = batchesArrays.size; i < s; i++) {
+            bs[i].draw(camera.combined);
+        }
+    }
+
+    public void prepareBatchForGameObject(GameObjectRenderer renderer) {
+        if(!goBatchesByUnit.containsKey(renderer)) {
+            GameObjectsBatch batch = new GameObjectsBatch(renderer);
+            goBatchesByUnit.put(renderer, batch);
+            addBatch(batch);
+        }
+    }
+
+    public void addGameObject(GameObject gameObject) {
+        GameObjectRenderer renderer = gameObject.renderer;
+        try {
+            goBatchesByUnit.get(renderer).addGameObjectRenderer(renderer);
+        } catch (NullPointerException n) {
+            Gdx.app.error("GameEngine","Game object not initialized before!! "+gameObject);
+            GameObjectsBatch batch = new GameObjectsBatch(renderer);
+            goBatchesByUnit.put(renderer, batch);
+            addBatch(batch);
+            if(initialized) {
+                batch.addGameObjectRenderer(renderer);
+                rebuildBatchesArrays();
+            }
+        }
+    }
+
+    public void removeGameObject(GameObject gameObject) {
+        GameObjectRenderer renderer = gameObject.renderer;
         goBatchesByUnit.get(renderer).removeGameObjectRenderer(renderer);
     }
 
@@ -118,5 +158,12 @@ public class Batches {
             return max_idx;
         }
         return -1;
+    }
+
+
+    @Override
+    public void initialize() {
+        rebuildBatchesArrays();
+        initialized = true;
     }
 }

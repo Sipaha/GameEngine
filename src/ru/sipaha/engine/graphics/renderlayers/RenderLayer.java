@@ -10,11 +10,20 @@ public abstract class RenderLayer implements Comparable<RenderLayer> {
     private static int orderCounter = 0;
 
     public final String name;
-    public final Camera camera = new Camera();
+    public final Camera camera;
     private int order = orderCounter++;
 
     public RenderLayer(String name) {
+        this(name, new Camera());
+    }
+
+    public RenderLayer(String name, Camera camera) {
         this.name = name;
+        if(camera != null) {
+            this.camera = camera;
+        } else {
+            this.camera = new Camera();
+        }
     }
 
     public abstract void render();
@@ -23,9 +32,11 @@ public abstract class RenderLayer implements Comparable<RenderLayer> {
         this.order = order;
     }
 
-    public void update() {
-        camera.update();
+    public void reset() {
+        camera.reset();
     }
+
+    public void initialize(){}
 
     @SuppressWarnings("NullableProblems")
     @Override

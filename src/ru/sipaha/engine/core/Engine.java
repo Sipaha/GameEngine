@@ -115,7 +115,7 @@ public class Engine {
 
     public void initialize() {
         if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
-        renderLayers.update();
+        renderLayers.initialize();
         isRunning = true;
     }
 
@@ -146,7 +146,8 @@ public class Engine {
     public void setPhysicsDebugDrawing(boolean physicsDebugDrawing) {
         boolean oldVal = this.physicsDebugDrawing;
         if(physicsDebugDrawing && !oldVal) {
-            renderLayers.addRenderLayer(new Box2DDebugRenderLayer(physicsWorld.getWorld()));
+            renderLayers.addRenderLayer(new Box2DDebugRenderLayer(physicsWorld.getWorld(),
+                                        renderLayers.getRenderLayer("Default").camera));
         } else if(!physicsDebugDrawing && oldVal) {
             renderLayers.removeRenderLayer(Box2DDebugRenderLayer.RENDER_LAYER_TAG);
         }
