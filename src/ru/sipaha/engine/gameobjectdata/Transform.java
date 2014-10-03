@@ -113,6 +113,10 @@ public class Transform {
         dirty = true;
     }
 
+    public float getAngle() {
+        return absAngle;
+    }
+
     public Transform setPosition(double x, double y) {
         return setPosition((float)x, (float)y);
     }

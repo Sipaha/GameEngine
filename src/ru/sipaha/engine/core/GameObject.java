@@ -128,6 +128,10 @@ public class GameObject {
         transform.rigidBody = rigidBody;
     }
 
+    public void initialize(Engine engine) {
+        for(Script s : scripts) s.initialize(engine);
+    }
+
     public void start(Engine engine) {
         if(rigidBody != null) rigidBody.create(this, engine.getPhysicsWorld());
         for(Script s : scripts) s.start(engine);
@@ -206,6 +210,14 @@ public class GameObject {
         animator.start(name, entities, transforms);
     }
 
+    public void startAnimation(Animation animation) {
+        if(animation != null) animation.start(entities, transforms);
+    }
+
+    public Animation getAnimation(String name) {
+        return animator.get(name);
+    }
+
     public <T extends Script> T getScript(Class<T> type) {
         for(Script s : scripts) if(type.isInstance(s)) return (T)s;
         Gdx.app.error("GameEngine","Script \""+type.getName()+"\" not found!");
@@ -213,8 +225,9 @@ public class GameObject {
     }
 
     public Transform getTransform(String name) {
+        if(name == null) return transform;
         int transformId = transformByEntityName.get(name, -1);
-        if(transformId == -1) return null;
+        if(transformId == -1) return transform;
         return transforms[transformId];
     }
 }

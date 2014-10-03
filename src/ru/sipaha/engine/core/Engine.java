@@ -110,12 +110,13 @@ public class Engine {
     public void removeGameObject(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
-        if(go.renderer != null) renderLayers.removeGameObject(go);;
+        if(go.renderer != null) renderLayers.removeGameObject(go);
     }
 
     public void initialize() {
         if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
         renderLayers.initialize();
+        for(GameObject g : gameObjects) g.initialize(this);
         isRunning = true;
     }
 
@@ -162,5 +163,5 @@ public class Engine {
         return renderLayers.getRenderLayer(name);
     }
 
-    public RenderLayer getRenderLayer() {return renderLayers.getRenderLayer("Default");}
+    public RenderLayer getRenderLayer() {return renderLayers.getRenderLayer();}
 }

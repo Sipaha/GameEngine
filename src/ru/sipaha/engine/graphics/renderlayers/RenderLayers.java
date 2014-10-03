@@ -11,6 +11,7 @@ import ru.sipaha.engine.utils.Array;
  */
 
 public class RenderLayers {
+    public final static String DEFAULT_LAYER = "Default";
 
     private ObjectMap<String, RenderLayer> layersByName;
     private Array<RenderLayer> layers;
@@ -37,6 +38,10 @@ public class RenderLayers {
 
     public RenderLayer getRenderLayer(String name) {
         return layersByName.get(name);
+    }
+
+    public RenderLayer getRenderLayer() {
+        return layersByName.get(DEFAULT_LAYER);
     }
 
     public void prepareBatchForGameObject(GameObject gameObject) {

@@ -1,43 +1,73 @@
 package ru.sipaha.engine.scripts;
 
 import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.Replicator;
+import ru.sipaha.engine.core.animation.Animation;
 import ru.sipaha.engine.gameobjectdata.Transform;
 
 public class ShellsShooting extends Script {
 
     public float fireRate = 1f;
-    public float timer;
-    public Replicator shell;
     public float damage;
+
+    private ShellsShooting template;
+
+    private float timer;
+
+    private String shellName;
+    private String weaponName;
+    private String shootAnimationName;
+
+    private Search search;
+    private Transform weaponTransform;
+    private Replicator shellReplicator;
+    private Animation shootAnimation;
+
+    public ShellsShooting(String shellName, String weaponName, String shootAnimationName) {
+        this.shellName = shellName;
+        this.weaponName = weaponName;
+        this.shootAnimationName = shootAnimationName;
+    }
+
+    public ShellsShooting(ShellsShooting prototype) {
+        shellName = prototype.shellName;
+        shellReplicator = prototype.shellReplicator;
+        template = prototype;
+        reset();
+    }
 
     @Override
     public void start(Engine engine) {
-
+        shellReplicator = engine.getReplicator(shellName);
+        search = gameObject.getScript(Search.class);
+        weaponTransform = gameObject.getTransform(weaponName);
+        if(shootAnimationName != null) shootAnimation = gameObject.getAnimation(shootAnimationName);
     }
 
     @Override
     public void fixedUpdate(float delta) {
-        /*Transform transform = gameObject.transform;
+        Transform transform = gameObject.transform;
         if(timer < fireRate) {
             timer += delta;
         } else {
             timer = fireRate;
         }
-        if(timer >= fireRate && !mm.items[e.targetIdx].haveATarget && schm.items[e.targetIdx].target != null) {
+        if(timer >= fireRate && !transform.motion.haveATarget && search.target != null) {
             timer -= fireRate;
-            GameObject shell = Game.engine.createAsEntity(weapon.shell);
-            Transform shellTransform = tm.items[shell.targetIdx];
-            shellTransform.parent = transform;
-            shellTransform.reqUnhook = true;
-            em.items[shell.targetIdx].damage = weapon.damage;
-            e.gameObject.animator.start("ShootAnimation");
-        }*/
+            GameObject shell = shellReplicator.get();
+            shell.transform.update(weaponTransform, 0f);
+            gameObject.startAnimation(shootAnimation);
+        }
     }
 
     @Override
     public Script reset() {
-        return null;
+        fireRate = template.fireRate;
+        timer = 0;
+        shellReplicator = template.shellReplicator;
+        damage = template.damage;
+        return this;
     }
 
 }

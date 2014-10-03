@@ -10,7 +10,8 @@ public abstract class Script {
 
     public GameObject gameObject;
 
-    public abstract void start(Engine engine);
+    public void start(Engine engine){}
+    public void initialize(Engine engine){}
     public void update(float delta) {}
     public void fixedUpdate(float delta) {}
 

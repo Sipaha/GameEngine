@@ -15,6 +15,7 @@ import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.AnimatedAlpha;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.Camera;
+import ru.sipaha.engine.scripts.AngleTracking;
 import ru.sipaha.engine.scripts.Script;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
@@ -69,7 +70,7 @@ public class GameScreen implements Screen {
         SpriteFrame[] frames = new SpriteFrame[5];
         for(int i = 0; i < frames.length;i++) frames[i] = new SpriteFrame(i*i+1, 0, 0.2f*i, 1, 0.2f*(i+1));
         animation = new SpriteAnimation("Sprite", frames).setLoop(true).setPauseTime(3f).setNeedBackMove(true);
-        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2));
+        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2),8,new AngleTracking());
         g.addAnimation(animation);
         g.createBody(1);
         engine.setReplicator(g, "SpriteTest");

@@ -34,6 +34,10 @@ public class Animator {
         animations.get(animationIdByName.get(name)).start(entities, transforms);
     }
 
+    public Animation get(String name) {
+        return animations.get(animationIdByName.get(name));
+    }
+
     public void update(Entity[] entities, Transform[] transforms, float delta) {
         for(Animation a : animations) a.update(entities, transforms, delta);
     }

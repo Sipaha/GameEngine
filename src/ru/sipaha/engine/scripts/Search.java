@@ -9,24 +9,29 @@ import ru.sipaha.engine.utils.MathHelper;
 public class Search extends Script {
 
     public enum SearchStrategy {LAST, FIRST, NEAREST, STRONGEST}
-    public Search template;
 
     public float radius = 0f;
-    public GameObjectsArray searchTargets;
-    public String searchTag;
     public GameObject target;
     public float distance;
     public SearchStrategy strategy = SearchStrategy.NEAREST;
 
-    public Search(){}
+    private Search template;
+    private String searchTag;
+    private GameObjectsArray searchTargets;
 
-    public Search(Search source) {
-        radius = source.radius;
-        template = source;
+    public Search(String searchTag){
+        this.searchTag = searchTag;
+    }
+
+    public Search(Search prototype) {
+        template = prototype;
+        searchTargets = template.searchTargets;
+        reset();
     }
 
     @Override
-    public void start(Engine engine) {
+    public void initialize(Engine engine) {
+        super.initialize(engine);
         searchTargets = engine.tagManager.getGameObjectsWithTag(searchTag);
     }
 
