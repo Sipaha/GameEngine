@@ -2,18 +2,19 @@ package ru.sipaha.engine.scripts;
 
 import com.badlogic.gdx.math.MathUtils;
 import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.gameobjectdata.Transform;
 
 /**
  * Created on 03.10.2014.
  */
 
-public class AngleTracking extends Script {
+public class AngleTracking extends Script implements TargetCatcher {
 
     private String trackingTransformName;
     private Transform trackingTransform;
     private AngleTracking template;
-    private Search search;
+    private TargetHolder targetHolder;
 
     private float idleTimer;
     private float idleLimit = 4;
@@ -27,20 +28,24 @@ public class AngleTracking extends Script {
     @Override
     public void start(Engine engine) {
         trackingTransform = gameObject.getTransform(trackingTransformName);
-        search = gameObject.getScript(Search.class);
+        targetHolder = gameObject.getScript(TargetHolder.class);
     }
 
     @Override
     public void fixedUpdate(float delta) {
-        if(search != null && search.target != null) {
-            float angle = calcAngle(trackingTransform, search.target.transform, search.distance);
-            gameObject.transform.motion.rotateTo(angle);
-            idleTimer = 0;
-        } else {
-            if(updateInactive(delta)) {
-                float randAngle = MathUtils.random(-160, 160);
-                while (Math.abs(randAngle) < 40) randAngle = MathUtils.random(-120, 160);
-                trackingTransform.motion.rotateTo(trackingTransform.getAngle() + randAngle);
+        if(targetHolder != null) {
+            GameObject target = targetHolder.getTarget();
+            if (target != null) {
+                float distance = targetHolder.getDistanceToTarget();
+                float angle = calcAngle(trackingTransform, target.transform, distance);
+                gameObject.transform.motion.rotateTo(angle);
+                idleTimer = 0;
+            } else {
+                if(updateInactive(delta)) {
+                    float randAngle = MathUtils.random(-160, 160);
+                    while (Math.abs(randAngle) < 40) randAngle = MathUtils.random(-120, 160);
+                    trackingTransform.motion.rotateTo(trackingTransform.getAngle() + randAngle);
+                }
             }
         }
     }
@@ -69,5 +74,10 @@ public class AngleTracking extends Script {
     @Override
     public Script reset() {
         return this;
+    }
+
+    @Override
+    public boolean targetIsCatched() {
+        return targetHolder.getTarget() != null && !trackingTransform.motion.haveATarget;
     }
 }

@@ -19,15 +19,20 @@ public class ShellsShooting extends Script {
     private String weaponName;
     private String shootAnimationName;
 
-    private Search search;
+    private TargetCatcher targetCatcher;
     private Transform weaponTransform;
     private Replicator shellReplicator;
     private Animation shootAnimation;
 
-    public ShellsShooting(String shellName, String weaponName, String shootAnimationName) {
+    public ShellsShooting(String shellName, String weaponName) {
+        this(shellName, weaponName, null, 1);
+    }
+
+    public ShellsShooting(String shellName, String weaponName, String shootAnimationName, float fireRate) {
         this.shellName = shellName;
         this.weaponName = weaponName;
         this.shootAnimationName = shootAnimationName;
+        this.fireRate = fireRate;
     }
 
     public ShellsShooting(ShellsShooting prototype) {
@@ -40,23 +45,23 @@ public class ShellsShooting extends Script {
     @Override
     public void start(Engine engine) {
         shellReplicator = engine.getReplicator(shellName);
-        search = gameObject.getScript(Search.class);
+        targetCatcher = gameObject.getScript(TargetCatcher.class);
         weaponTransform = gameObject.getTransform(weaponName);
         if(shootAnimationName != null) shootAnimation = gameObject.getAnimation(shootAnimationName);
     }
 
     @Override
     public void fixedUpdate(float delta) {
-        Transform transform = gameObject.transform;
         if(timer < fireRate) {
             timer += delta;
         } else {
             timer = fireRate;
         }
-        if(timer >= fireRate && !transform.motion.haveATarget && search.target != null) {
+        if(timer >= fireRate && targetCatcher.targetIsCatched()) {
             timer -= fireRate;
             GameObject shell = shellReplicator.get();
-            shell.transform.update(weaponTransform, 0f);
+            shell.transform.forceUpdate(weaponTransform);
+            shell.transform.unhook();
             gameObject.startAnimation(shootAnimation);
         }
     }

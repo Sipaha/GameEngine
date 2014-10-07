@@ -37,13 +37,11 @@ public class Motion {
         xTarget = x;
         yTarget = y;
         xyTargetIsAdded = true;
-        haveXYTarget = true;
     }
 
     public void rotateTo(float angle) {
         aTarget = MathHelper.angle360Limit(angle);
         aTargetIsAdded = true;
-        haveATarget = true;
     }
 
     public void mul(Transform t) {
@@ -64,15 +62,19 @@ public class Motion {
                 vy = vecY / length;
             }
             xyTargetIsAdded = false;
+            haveXYTarget = true;
         }
 
         if(aTargetIsAdded) {
             float direct = aTarget - t.absAngle;
-            float absDirect = Math.abs(direct);
-            float back = 360 - absDirect;
-            float directSign = Math.signum(direct);
-            va = Math.abs(direct) < Math.abs(back) ? directSign : -directSign;
-            aTargetIsAdded = false;
+            if(direct != 0) {
+                float absDirect = Math.abs(direct);
+                float back = 360 - absDirect;
+                float directSign = Math.signum(direct);
+                va = Math.abs(direct) < Math.abs(back) ? directSign : -directSign;
+                aTargetIsAdded = false;
+                haveATarget = true;
+            } else haveATarget = false;
         }
 
         float da = va * a_velocity * delta;

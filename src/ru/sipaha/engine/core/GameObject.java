@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.ObjectIntMap;
+import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.core.animation.Animation;
 import ru.sipaha.engine.core.animation.Animator;
 import ru.sipaha.engine.gameobjectdata.*;
@@ -28,22 +29,33 @@ public class GameObject {
     public RigidBody rigidBody;
     public boolean enable = true;
 
+    protected final BitSet tag_bits;
+    protected Engine engine;
     protected Replicator replicator;
-    protected BitSet tag_bits = new BitSet();
     protected Rectangle bounds;
 
-    private ObjectIntMap<String> transformByEntityName = new ObjectIntMap<>();;
-    private Array<Script> scripts = new Array<>(true, 4, Script.class);
-    private Array<Entity> entities = new Array<>(true, 4, Entity.class);
-    private Array<Transform> transforms = new Array<>(true, 4, Transform.class);
+    private final ObjectIntMap<String> transformByEntityName;
+    private final ObjectIntMap<Class> scriptsIdByClass;
+    private final Array<Script> scripts;
+    private final Array<Entity> entities;
+    private final Array<Transform> transforms;
     private Animator animator;
 
     private boolean initialized = false;
 
-    public GameObject() {}
+    public GameObject() {
+        scripts = new Array<>(true, 4, Script.class);
+        entities = new Array<>(true, 4, Entity.class);
+        transforms = new Array<>(true, 4, Transform.class);
+        scriptsIdByClass = new ObjectIntMap<>();
+        transformByEntityName = new ObjectIntMap<>();
+        tag_bits = new BitSet();
+        replicator = null;
+    }
 
     public GameObject(Entity[] entities, Transform[] transforms, Script[] scripts,
                                                 Texture t, ShaderProgram s, int zOrder) {
+        this();
         transform = transforms[0];
         this.entities.addAll(entities);
         this.transforms.addAll(transforms);
@@ -62,6 +74,7 @@ public class GameObject {
     }
 
     public GameObject(TextureRegion region, int zOrder, Script... scripts) {
+        this();
         this.entities.add(new Entity(region));
         this.transforms.add(new Transform());
         this.scripts.addAll(scripts);
@@ -71,9 +84,11 @@ public class GameObject {
     }
 
     public GameObject(Texture texture) {
-        this.entities.add(new Entity(texture));
-        this.transforms.add(new Transform());
+        this();
+        entities.add(new Entity(texture));
+        transforms.add(new Transform());
         transform = transforms.get(0);
+        renderer.setTexture(texture);
     }
 
     public GameObject(GameObject prototype) {
@@ -96,6 +111,8 @@ public class GameObject {
         transform = transforms.items[0];
         renderer.setEntities(entities.items);
         transformByEntityName = prototype.transformByEntityName;
+        scriptsIdByClass = prototype.scriptsIdByClass;
+        tag_bits = prototype.tag_bits;
         if(prototype.rigidBody != null) {
             rigidBody = new RigidBody(prototype.rigidBody);
             transform.rigidBody = rigidBody;
@@ -185,7 +202,6 @@ public class GameObject {
         if(renderer != null) renderer.reset(prototype.renderer);
         enable = prototype.enable;
         return this;
-
     }
 
     public Rectangle getBounds() {
@@ -199,7 +215,12 @@ public class GameObject {
     }
 
     public void remove() {
-        replicator.remove(this);
+        if(replicator != null) {
+            replicator.remove(this);
+        } else {
+            engine.removeGameObject(this);
+        }
+        engine = null;
     }
 
     public void disable() {
@@ -229,7 +250,9 @@ public class GameObject {
         return animator.get(name);
     }
 
-    public <T extends Script> T getScript(Class<T> type) {
+    public <T> T getScript(Class<T> type) {
+        int scriptId = scriptsIdByClass.get(type, -1);
+        if(scriptId != -1) return (T)scripts.get(scriptId);
         for(Script s : scripts) if(type.isInstance(s)) return (T)s;
         Gdx.app.error("GameEngine","Script \""+type.getName()+"\" not found!");
         return null;
@@ -253,6 +276,11 @@ public class GameObject {
 
     public void addScript(Script s) {
         scripts.add(s);
+    }
+
+    public void addScript(Class type, Script script) {
+        scriptsIdByClass.put(type, scripts.size);
+        scripts.add(script);
     }
 
     public void setTexture(Texture t) {

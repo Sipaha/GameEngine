@@ -16,11 +16,11 @@ import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.AnimatedAlpha;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.Camera;
-import ru.sipaha.engine.scripts.AngleTracking;
-import ru.sipaha.engine.scripts.Script;
+import ru.sipaha.engine.scripts.*;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
+import java.lang.reflect.AnnotatedType;
 import java.math.BigDecimal;
 
 public class GameScreen implements Screen {
@@ -60,6 +60,7 @@ public class GameScreen implements Screen {
         g.transform.setPosition(100, 100);
         g.transform.motion.va = 1;
         g.transform.motion.a_velocity = 10;
+        engine.tagManager.setTag(g, "Enemy");
         //g.createBody(0.85f);
 
         PiecewiseLinCurve curve = new PiecewiseLinCurve(new Vector2(0,0), new Vector2(5,1), new Vector2(10,0));
@@ -72,10 +73,20 @@ public class GameScreen implements Screen {
         SpriteFrame[] frames = new SpriteFrame[5];
         for(int i = 0; i < frames.length;i++) frames[i] = new SpriteFrame(i*i+1, 0, 0.2f*i, 1, 0.2f*(i+1));
         animation = new SpriteAnimation("Sprite", frames).setLoop(true).setPauseTime(3f).setNeedBackMove(true);
-        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2),8,new AngleTracking());
+        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2),8);
         g.addAnimation(animation);
         g.createBody(1);
+        g.addScript(TargetHolder.class, new Search("Enemy", 1000));
+        g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 0.1f));
+        g.addScript(TargetCatcher.class, new AngleTracking());
         engine.setReplicator(g, "SpriteTest");
+
+        g = new GameObject(new Texture(Gdx.files.internal("images/4.png")));
+        g.transform.motion.xy_velocity = 140;
+        g.transform.motion.move_forward = true;
+        g.transform.setPosition(0, 70);
+        g.life.lifeTime = 4;
+        engine.setReplicator(g, "Shell");
 
         engine.initialize();
 

@@ -6,7 +6,7 @@ import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.GameObjectsArray;
 import ru.sipaha.engine.utils.MathHelper;
 
-public class Search extends Script {
+public class Search extends Script implements TargetHolder {
 
     public enum SearchStrategy {LAST, FIRST, NEAREST, STRONGEST}
 
@@ -16,11 +16,16 @@ public class Search extends Script {
     public SearchStrategy strategy = SearchStrategy.NEAREST;
 
     private Search template;
-    private String searchTag;
     private GameObjectsArray searchTargets;
+    private String searchTag;
 
     public Search(String searchTag){
+        this(searchTag, 200);
+    }
+
+    public Search(String searchTag, float radius) {
         this.searchTag = searchTag;
+        this.radius = radius;
     }
 
     public Search(Search prototype) {
@@ -41,8 +46,7 @@ public class Search extends Script {
         target = null;
         distance = radius * radius;
 
-        GameObject[] targets = searchTargets.items;
-        for(GameObject target : targets) {
+        for(GameObject target : searchTargets) {
             Transform targetTransform = target.transform;
 
             float distanceToTarget = MathHelper.sqrDistance(transform.tx, transform.ty,
@@ -51,6 +55,7 @@ public class Search extends Script {
             if(distanceToTarget < distance) {
                 switch (strategy) {
                     case NEAREST:
+                        this.target = target;
                         distance = distanceToTarget;
                         break;
                     case LAST:
@@ -66,6 +71,16 @@ public class Search extends Script {
             }
         }
         if(target != null) distance = (float) Math.sqrt(distance);
+    }
+
+    @Override
+    public GameObject getTarget() {
+        return target;
+    }
+
+    @Override
+    public float getDistanceToTarget() {
+        return distance;
     }
 
     @Override

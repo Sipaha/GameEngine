@@ -1,16 +1,16 @@
 package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.utils.ObjectIntMap;
+import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.GameObjectsArray;
 
 import java.util.BitSet;
 
 public class TagManager {
 
-    private int tag_counter = 0;
     private ObjectIntMap<String> tags = new ObjectIntMap<>();
 
-    private GameObjectsArray[] gameObjectsByTag = new GameObjectsArray[16];
+    private Array<GameObjectsArray> gameObjectsByTag = new Array<>(true, 16, GameObjectsArray.class);
 
     public void setTag(GameObject go, String tag) {
         int id = tags.get(tag, -1);
@@ -23,35 +23,30 @@ public class TagManager {
         return id >= 0 && go.tag_bits.get(id);
     }
 
-    public int addTag(String tag) {
-        int id = tag_counter++;
-        tags.put(tag, id);
-        if(id == gameObjectsByTag.length) {
-            GameObjectsArray[] temp = new GameObjectsArray[(int)(gameObjectsByTag.length*1.5)];
-            System.arraycopy(gameObjectsByTag, 0, temp, 0, gameObjectsByTag.length);
-            gameObjectsByTag = temp;
-        }
-        gameObjectsByTag[id] = new GameObjectsArray(false, 16);
-        return id;
-    }
-
     public GameObjectsArray getGameObjectsWithTag(String tag) {
         int id = tags.get(tag, -1);
         if(id == -1) id = addTag(tag);
-        return gameObjectsByTag[id];
+        return gameObjectsByTag.get(id);
     }
 
-    public void add(GameObject go) {
+    protected void add(GameObject go) {
         BitSet bits = go.tag_bits;
-        for(int id = bits.nextSetBit(0); id != -1; id = bits.nextSetBit(id+1)) {
-            gameObjectsByTag[id].add(go);
+        for(int i = 0; i < gameObjectsByTag.size; i++) {
+            if(bits.get(i)) gameObjectsByTag.items[i].add(go);
         }
     }
 
-    public void remove(GameObject go) {
+    protected void remove(GameObject go) {
         BitSet bits = go.tag_bits;
-        for(int id = bits.nextSetBit(0); id != -1; id = bits.nextSetBit(id+1)) {
-            gameObjectsByTag[id].removeValue(go, true);
+        for(int i = 0; i < gameObjectsByTag.size; i++) {
+            if(bits.get(i)) gameObjectsByTag.items[i].removeValue(go, true);
         }
+    }
+
+    private int addTag(String tag) {
+        int id = gameObjectsByTag.size;
+        tags.put(tag, id);
+        gameObjectsByTag.add(new GameObjectsArray(false, 16));
+        return id;
     }
 }

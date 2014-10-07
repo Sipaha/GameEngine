@@ -111,10 +111,11 @@ public class Engine {
         gameObjects.add(go);
         tagManager.add(go);
         if(go.renderer != null) renderLayers.addGameObject(go);
+        go.engine = this;
         go.start(this);
     }
 
-    public void removeGameObject(GameObject go) {
+    protected void removeGameObject(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
         if(go.renderer != null) renderLayers.removeGameObject(go);
