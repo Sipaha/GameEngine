@@ -1,8 +1,11 @@
 package ru.sipaha.engine.core.animation;
 
+import com.badlogic.gdx.Gdx;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.gameobjectdata.Transform;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created on 29.09.2014.
@@ -58,4 +61,26 @@ public abstract class Animation {
         return this;
     }
 
+    public void reset(Animation prototype) {
+        run = prototype.run;
+        time = 0;
+        pause = false;
+        pauseTimer = 0;
+    }
+
+    public Animation copy() {
+        Class<? extends Animation> clazz = getClass();
+        Animation script = null;
+        try {
+            script = clazz.getConstructor(clazz).newInstance(this);
+        } catch (InstantiationException | IllegalAccessException
+                | InvocationTargetException | NoSuchMethodException e) {
+            String className = clazz.getSimpleName();
+            String constructor = className+"("+className+" source) {}";
+            Gdx.app.error("GameEngine","Constructor \""+constructor+"\" is not implemented! " +
+                                                        "Full name is "+clazz.getCanonicalName());
+            e.printStackTrace();
+        }
+        return script;
+    }
 }

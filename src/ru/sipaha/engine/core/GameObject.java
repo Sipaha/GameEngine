@@ -200,6 +200,7 @@ public class GameObject {
         life.reset(prototype.life);
         if(rigidBody != null) rigidBody.reset(prototype.rigidBody);
         if(renderer != null) renderer.reset(prototype.renderer);
+        if(animator != null) animator.reset(prototype.animator);
         enable = prototype.enable;
         return this;
     }
@@ -234,8 +235,13 @@ public class GameObject {
     }
 
     public void addAnimation(Animation animation) {
+        addAnimation(animation, false);
+    }
+
+    public void addAnimation(Animation animation, boolean start) {
         if(animator == null) animator = new Animator();
         animator.add(animation);
+        if(start) animation.start(entities.items, transforms.items);
     }
 
     public void startAnimation(String name) {

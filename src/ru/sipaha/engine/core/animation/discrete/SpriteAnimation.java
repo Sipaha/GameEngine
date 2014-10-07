@@ -25,7 +25,9 @@ public class SpriteAnimation extends DiscreteAnimation {
 
     public SpriteAnimation(String name, SpriteFrame[] frames) {
         super(name, new float[frames.length]);
-        for(int i = 0; i < frames.length; i++) framesTime[i] = frames[i].time;
+        for(int i = 0; i < frames.length; i++) {
+            framesTime[i] = frames[i].time;
+        }
         this.frames = frames;
     }
 

@@ -60,8 +60,7 @@ public class ShellsShooting extends Script {
         if(timer >= fireRate && targetCatcher.targetIsCatched()) {
             timer -= fireRate;
             GameObject shell = shellReplicator.get();
-            shell.transform.forceUpdate(weaponTransform);
-            shell.transform.unhook();
+            shell.transform.unhook(weaponTransform);
             gameObject.startAnimation(shootAnimation);
         }
     }

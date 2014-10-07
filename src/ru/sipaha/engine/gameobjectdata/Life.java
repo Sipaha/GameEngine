@@ -42,8 +42,9 @@ public class Life {
         lives = template.lives;
         lifeTime = template.lifeTime;
         durability = template.durability;
-        onLifetimeExpired.clear();
-        onDying.clear();
-        onBreak.clear();
+        onLifetimeExpired.set(template.onLifetimeExpired);
+        onDying.set(template.onDying);
+        onBreak.set(template.onBreak);
+
     }
 }

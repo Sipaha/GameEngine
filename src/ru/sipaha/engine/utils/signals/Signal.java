@@ -3,7 +3,7 @@ package ru.sipaha.engine.utils.signals;
 import com.badlogic.gdx.utils.Array;
 
 public class Signal<T> {
-	private Array<Listener<T>> listeners;
+    private final Array<Listener<T>> listeners;
 
 	public Signal(){
 		listeners = new Array<>(false, 4, Listener.class);
@@ -12,6 +12,15 @@ public class Signal<T> {
 	public void add(Listener<T> listener){
 		listeners.add(listener);
 	}
+
+    public void addAll(Signal<T> signal) {
+        listeners.addAll(signal.listeners);
+    }
+
+    public void set(Signal<T> signal) {
+        listeners.clear();
+        listeners.addAll(signal.listeners);
+    }
 
 	public void remove(Listener<T> listener){
 		listeners.removeValue(listener, true);

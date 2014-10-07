@@ -132,21 +132,24 @@ public class Engine {
     public void update(float delta) {
         if(!isRunning) throw new RuntimeException("Unable to update until the engine is not initialized!");
 
+        float frameTime = Math.min(delta, 0.25f);
+
+        for(GameObject g : gameObjects) {
+            if(g.life.update(g, frameTime)) {
+                g.updateData(frameTime);
+            }
+        }
+
         renderLayers.render();
 
-        float frameTime = Math.min(delta, 0.25f);
         timeCounter += frameTime;
         while(timeCounter >= FIXED_TIME) {
             physicsWorld.update(FIXED_TIME);
-            for(GameObject g : gameObjects) {
-                if(g.life.update(g, FIXED_TIME)) {
-                    g.updateData(FIXED_TIME);
-                }
-            }
             for (GameObject g : gameObjects) g.fixedUpdate(FIXED_TIME);
             timeCounter -= FIXED_TIME;
         }
         for(GameObject g : gameObjects) g.update(frameTime);
+
     }
 
     public PhysicsWorld getPhysicsWorld() {

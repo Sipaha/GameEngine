@@ -26,6 +26,8 @@ public class Transform {
     public AnimatedPosition animatedPosition = null;
     public AnimatedScale animatedScale = null;
 
+    private boolean reqUnhook = false;
+
     public Transform(){
         motion = new Motion();
     }
@@ -37,21 +39,27 @@ public class Transform {
     }
 
     public void update(float delta) {
-        if(rigidBody != null) {
-            if(rigidBody.manualMoving) {
+        if(reqUnhook) {
+            unhook();
+            wasChanged = true;
+            reqUnhook = false;
+        } else {
+            if(rigidBody != null) {
+                if(rigidBody.manualMoving) {
+                    motion.update(this, delta);
+                    if(dirty) updateData();
+                    if(wasChanged) rigidBody.setTransform(x, y, angle);
+                } else {
+                    Vector2 v = rigidBody.getPosition();
+                    x = v.x;
+                    y = v.y;
+                    angle = rigidBody.getAngle();
+                    updateData();
+                }
+            } else {
                 motion.update(this, delta);
                 if(dirty) updateData();
-                if(wasChanged) rigidBody.setTransform(x, y, angle);
-            } else {
-                Vector2 v = rigidBody.getPosition();
-                x = v.x;
-                y = v.y;
-                angle = rigidBody.getAngle();
-                updateData();
             }
-        } else {
-            motion.update(this, delta);
-            if(dirty) updateData();
         }
     }
 
@@ -80,7 +88,13 @@ public class Transform {
         if(parent != null) mul(parent);
     }
 
-    public void unhook() {
+    public void unhook(Transform parent) {
+        updateData();
+        mul(parent);
+        reqUnhook = true;
+    }
+
+    private void unhook() {
         angle = absAngle;
         sin = t10;//MathUtils.sinDeg(angle);
         cos = MathUtils.cosDeg(angle);
@@ -127,6 +141,7 @@ public class Transform {
     }
 
     public void setScale(float scale) {
+        this.scale = scale;
         t00 = cos*scale;
         t11 = t00;
         wasChanged = true;
@@ -147,7 +162,7 @@ public class Transform {
         wasChanged = true;
     }
 
-    public void reset(Transform source) {
+    public Transform reset(Transform source) {
         x = source.x;
         y = source.y;
         angle = source.angle;
@@ -155,5 +170,6 @@ public class Transform {
         cos = source.cos;
         sin = source.sin;
         dirty = true;
+        return this;
     }
 }

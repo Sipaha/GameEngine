@@ -21,7 +21,7 @@ public class Animator {
 
     public Animator(Animator prototype) {
         animations = new Array<>(false, prototype.animations.size, Animation.class);
-        for(Animation a : prototype.animations) animations.add(a);
+        for(Animation a : prototype.animations) animations.add(a.copy());
         animationIdByName = prototype.animationIdByName;
     }
 
@@ -40,5 +40,11 @@ public class Animator {
 
     public void update(Entity[] entities, Transform[] transforms, float delta) {
         for(Animation a : animations) a.update(entities, transforms, delta);
+    }
+
+    public void reset(Animator prototype) {
+        for(int i = 0; i < animations.size; i++) {
+            animations.items[i].reset(prototype.animations.items[i]);
+        }
     }
 }

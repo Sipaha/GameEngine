@@ -83,6 +83,12 @@ public abstract class DiscreteAnimation extends Animation {
         currentFrame = 0;
     }
 
+    @Override
+    public void reset(Animation prototype) {
+        super.reset(prototype);
+        currentFrame = 0;
+    }
+
     public abstract void frameChanged(Entity[] entities, int newFrameIdx);
 
     public void setTargetIdx(int targetIdx) {

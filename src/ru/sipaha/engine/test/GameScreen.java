@@ -18,6 +18,7 @@ import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.scripts.*;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
+import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
 import java.lang.reflect.AnnotatedType;
@@ -76,8 +77,8 @@ public class GameScreen implements Screen {
         g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2),8);
         g.addAnimation(animation);
         g.createBody(1);
-        g.addScript(TargetHolder.class, new Search("Enemy", 1000));
-        g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 0.1f));
+        g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 3f));
+        g.addScript(TargetHolder.class, new Search("Enemy", 250));
         g.addScript(TargetCatcher.class, new AngleTracking());
         engine.setReplicator(g, "SpriteTest");
 
@@ -86,7 +87,29 @@ public class GameScreen implements Screen {
         g.transform.motion.move_forward = true;
         g.transform.setPosition(0, 70);
         g.life.lifeTime = 4;
+        g.life.onLifetimeExpired.add(new Listener<GameObject>() {
+            @Override
+            public void receive(GameObject object) {
+                engine.createGameObject("Explosion").transform.unhook(object.transform);
+            }
+        });
         engine.setReplicator(g, "Shell");
+
+        t = new Texture(Gdx.files.internal("images/explosion.png"));
+        g = new GameObject(new TextureRegion(t, 96, 96));
+        g.transform.setScale(2f);
+        frames = new SpriteFrame[17];
+        for(int i = 0; i < 4; i++) {
+            for(int j = 0; j < (i<3?5:2); j++) {
+                float u = (j*96)/480f;
+                float v = (i*96)/384f;
+                int frameNum = i*5+j;
+                frames[frameNum] = new SpriteFrame(0.07f*frameNum+0.07f, u, v, u+96/480f, v+96/384f);
+            }
+        }
+        g.addAnimation(new SpriteAnimation("explosion_animation", frames), true);
+        g.life.lifeTime = 1.19f;
+        engine.setReplicator(g, "Explosion");
 
         engine.initialize();
 
