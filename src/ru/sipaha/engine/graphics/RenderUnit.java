@@ -8,16 +8,21 @@ import ru.sipaha.engine.utils.Shaders;
 public abstract class RenderUnit {
     public static int DEFAULT_Z_ORDER = 3;
 
-    public String renderLayer = "Default";
-    protected final Texture texture;
-    protected final ShaderProgram shader;
-    protected final int zOrder;
+    public String renderLayerTag = "Default";
+    protected Texture texture;
+    protected ShaderProgram shader;
+    protected int zOrder;
     protected boolean blendingDisabled = false;
     protected int blendSrcFunc = GL20.GL_SRC_ALPHA;
     protected int blendDstFunc = GL20.GL_ONE_MINUS_SRC_ALPHA;
     protected boolean isStatic = false;
 
     private int hash;
+    private boolean isLinearFilter = true;
+
+    public RenderUnit() {
+        shader = Shaders.defaultShader;
+    }
 
     public RenderUnit(RenderUnit renderUnit) {
         texture = renderUnit.texture;
@@ -28,6 +33,7 @@ public abstract class RenderUnit {
         blendDstFunc = renderUnit.blendDstFunc;
         isStatic = renderUnit.isStatic;
         hash = renderUnit.hash;
+        isLinearFilter = renderUnit.isLinearFilter;
     }
 
     public RenderUnit(Texture t) {
@@ -39,7 +45,8 @@ public abstract class RenderUnit {
     }
 
     public RenderUnit(Texture t, ShaderProgram s, int zOrder) {
-        texture = t;
+        setTexture(t);
+
         if(s == null) {
             this.shader = Shaders.defaultShader;
         } else {
@@ -69,8 +76,46 @@ public abstract class RenderUnit {
         blendDstFunc = dstFunc;
     }
 
-    public void setRenderLayer(String renderLayer) {
-        this.renderLayer = renderLayer;
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+        updateTextureFilter();
+        hash = 0;
+    }
+
+    public void setZOrder(int zOrder) {
+        this.zOrder = zOrder;
+        hash = 0;
+    }
+
+    public void setShader(ShaderProgram shader) {
+        this.shader = shader;
+        hash = 0;
+    }
+
+    public void setRenderLayerTag(String renderLayerTag) {
+        this.renderLayerTag = renderLayerTag;
+    }
+
+    public void setLinearFilter() {
+        if(!isLinearFilter) {
+            isLinearFilter = true;
+            if(texture != null) updateTextureFilter();
+        }
+    }
+
+    public void setNearestFilter() {
+        if(isLinearFilter) {
+            isLinearFilter = false;
+            if(texture != null) updateTextureFilter();
+        }
+    }
+
+    private void updateTextureFilter() {
+        if(isLinearFilter) {
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        } else {
+            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
     }
 
     public boolean equalsIgnoreZOrder(RenderUnit r) {

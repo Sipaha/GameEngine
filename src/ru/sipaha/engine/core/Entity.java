@@ -1,5 +1,6 @@
 package ru.sipaha.engine.core;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import ru.sipaha.engine.gameobjectdata.EntityRenderer;
@@ -11,6 +12,10 @@ public class Entity {
 
     public Entity(TextureRegion region) {
         renderer = new EntityRenderer(region);
+    }
+
+    public Entity(Texture texture) {
+        renderer = new EntityRenderer(texture);
     }
 
     public Entity(Entity prototype) {

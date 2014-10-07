@@ -8,6 +8,10 @@ public class Array<T> extends com.badlogic.gdx.utils.Array<T> {
         super(ordered, capacity, arrayType);
     }
 
+    public Array(Class arrayType) {
+        super(true, 4, arrayType);
+    }
+
     /**
      * Replace element a by element b
      */

@@ -38,7 +38,7 @@ public class AngleTracking extends Script {
             idleTimer = 0;
         } else {
             if(updateInactive(delta)) {
-                float randAngle = MathUtils.random(-120, 160);
+                float randAngle = MathUtils.random(-160, 160);
                 while (Math.abs(randAngle) < 40) randAngle = MathUtils.random(-120, 160);
                 trackingTransform.motion.rotateTo(trackingTransform.getAngle() + randAngle);
             }
@@ -46,7 +46,7 @@ public class AngleTracking extends Script {
     }
 
     private boolean updateInactive(float delta) {
-        if((idleTimer+=delta) >= idleLimit) {
+        if(!trackingTransform.motion.haveATarget && (idleTimer+=delta) >= idleLimit) {
             idleTimer -= idleLimit;
             return true;
         }

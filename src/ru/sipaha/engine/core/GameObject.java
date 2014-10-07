@@ -10,11 +10,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.ObjectIntMap;
 import ru.sipaha.engine.core.animation.Animation;
-import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.core.animation.Animator;
 import ru.sipaha.engine.gameobjectdata.*;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.scripts.Script;
+import ru.sipaha.engine.utils.Array;
 
 import java.util.BitSet;
 
@@ -22,9 +22,9 @@ public class GameObject {
     private static int idCounter = 0;
     public final int UID = idCounter++;
 
-    public final Transform transform; //root transform
-    public final GameObjectRenderer renderer;
-    public final Life life;
+    public Transform transform; //root transform
+    public GameObjectRenderer renderer = new GameObjectRenderer();
+    public Life life = new Life();
     public RigidBody rigidBody;
     public boolean enable = true;
 
@@ -32,22 +32,25 @@ public class GameObject {
     protected BitSet tag_bits = new BitSet();
     protected Rectangle bounds;
 
-    private final ObjectIntMap<String> transformByEntityName;
-    private final Entity[] entities;
-    private final Transform[] transforms;
-    private final Script[] scripts;
+    private ObjectIntMap<String> transformByEntityName = new ObjectIntMap<>();;
+    private Array<Script> scripts = new Array<>(true, 4, Script.class);
+    private Array<Entity> entities = new Array<>(true, 4, Entity.class);
+    private Array<Transform> transforms = new Array<>(true, 4, Transform.class);
     private Animator animator;
+
+    private boolean initialized = false;
+
+    public GameObject() {}
 
     public GameObject(Entity[] entities, Transform[] transforms, Script[] scripts,
                                                 Texture t, ShaderProgram s, int zOrder) {
-        renderer = new GameObjectRenderer(t, s, zOrder);
-        this.entities = entities;
-        this.transforms = transforms;
-        this.scripts = scripts;
         transform = transforms[0];
-        life = new Life();
-        transformByEntityName = new ObjectIntMap<>();
-        setup();
+        this.entities.addAll(entities);
+        this.transforms.addAll(transforms);
+        this.scripts.addAll(scripts);
+        renderer.setTexture(t);
+        renderer.setShader(s);
+        renderer.setZOrder(zOrder);
     }
 
     public GameObject(TextureRegion region) {
@@ -59,35 +62,39 @@ public class GameObject {
     }
 
     public GameObject(TextureRegion region, int zOrder, Script... scripts) {
-        entities = new Entity[]{new Entity(region)};
-        renderer = new GameObjectRenderer(region.getTexture(), null, zOrder);
-        life = new Life();
-        transforms = new Transform[]{new Transform()};
-        transform = transforms[0];
-        this.scripts = scripts;
-        transformByEntityName = new ObjectIntMap<>();
-        setup();
+        this.entities.add(new Entity(region));
+        this.transforms.add(new Transform());
+        this.scripts.addAll(scripts);
+        renderer.setZOrder(zOrder);
+        renderer.setTexture(region.getTexture());
+        transform = transforms.get(0);
+    }
+
+    public GameObject(Texture texture) {
+        this.entities.add(new Entity(texture));
+        this.transforms.add(new Transform());
+        transform = transforms.get(0);
     }
 
     public GameObject(GameObject prototype) {
         renderer = new GameObjectRenderer(prototype.renderer);
         life = new Life(prototype.life);
-        entities = new Entity[prototype.entities.length];
-        for(int i = 0; i < entities.length; i++) {
-            entities[i] = new Entity(prototype.entities[i]);
+        entities = new Array<>(true, prototype.entities.size, Entity.class);
+        for(int i = 0; i < prototype.entities.size; i++) {
+            entities.add(new Entity(prototype.entities.items[i]));
         }
-        transforms = new Transform[prototype.transforms.length];
-        for(int i = 0; i < transforms.length; i++) {
-            transforms[i] = new Transform(prototype.transforms[i]);
+        transforms = new Array<>(true, prototype.transforms.size, Transform.class);
+        for(int i = 0; i < prototype.transforms.size; i++) {
+            transforms.add(new Transform(prototype.transforms.items[i]));
         }
-        scripts = new Script[prototype.scripts.length];
-        for(int i = 0; i < scripts.length; i++) {
-            Script script = prototype.scripts[i].copy();
+        scripts = new Array<>(true, prototype.scripts.size, Script.class);
+        for(int i = 0; i < prototype.scripts.size; i++) {
+            Script script = prototype.scripts.items[i].copy();
             script.gameObject = this;
-            scripts[i] = script;
+            scripts.add(script);
         }
-        transform = transforms[0];
-        renderer.setEntities(entities);
+        transform = transforms.items[0];
+        renderer.setEntities(entities.items);
         transformByEntityName = prototype.transformByEntityName;
         if(prototype.rigidBody != null) {
             rigidBody = new RigidBody(prototype.rigidBody);
@@ -96,16 +103,8 @@ public class GameObject {
         if(prototype.animator != null) animator = new Animator(prototype.animator);
     }
 
-    private void setup() {
-        renderer.setEntities(entities);
-        for(Entity e : entities) if(e.name != null) {
-            transformByEntityName.put(e.name, e.transformId);
-        }
-        for(Script s : scripts) s.gameObject = this;
-    }
-
     public void createBody(float boundsScale) {
-        EntityRenderer renderer = entities[0].renderer;
+        EntityRenderer renderer = entities.items[0].renderer;
         Vector2 position = transform.getPosition().sub(renderer.originX, renderer.originY);
         Rectangle rect = new Rectangle(position.x, position.y, renderer.width, renderer.height);
         Vector2 rectPos = rect.getPosition(new Vector2());
@@ -115,7 +114,7 @@ public class GameObject {
     }
 
     public void createBody(float boundsScale, float density, float friction, float restitution) {
-        EntityRenderer renderer = entities[0].renderer;
+        EntityRenderer renderer = entities.items[0].renderer;
         Vector2 position = transform.getPosition().sub(renderer.originX, renderer.originY);
         Rectangle rect = new Rectangle(position.x, position.y, renderer.width, renderer.height);
         Vector2 rectPos = rect.getPosition(new Vector2());
@@ -129,12 +128,24 @@ public class GameObject {
     }
 
     public void initialize(Engine engine) {
-        for(Script s : scripts) s.initialize(engine);
+        entities.shrink();
+        transforms.shrink();
+        scripts.shrink();
+        renderer.setEntities(entities.items);
+
+        for(Entity e : entities) if(e.name != null) {
+            transformByEntityName.put(e.name, e.transformId);
+        }
+        for(Script s : scripts) {
+            s.gameObject = this;
+            s.initialize(engine);
+        }
+        initialized = true;
     }
 
     public void start(Engine engine) {
         if(rigidBody != null) rigidBody.create(this, engine.getPhysicsWorld());
-        for(Script s : scripts) s.start(engine);
+        for(int i = 0; i < scripts.size; i++) scripts.get(i).start(engine);
     }
 
     public void update(float delta) {
@@ -146,14 +157,14 @@ public class GameObject {
     }
 
     public GameObject updateData(float delta) {
-        if(animator != null) animator.update(entities, transforms, delta);
+        if(animator != null) animator.update(entities.items, transforms.items, delta);
         transform.update(delta);
-        for (int i = 1; i < transforms.length; i++) {
-            Transform t = transforms[i];
-            t.update(transforms[t.parentId], delta);
+        for (int i = 1; i < transforms.size; i++) {
+            Transform t = transforms.items[i];
+            t.update(transforms.items[t.parentId], delta);
         }
         for (Entity e : entities) {
-            e.renderer.update(transforms[e.transformId]);
+            e.renderer.update(transforms.items[e.transformId]);
         }
         for (Transform transform : transforms) {
             transform.wasChanged = false;
@@ -162,11 +173,11 @@ public class GameObject {
     }
 
     public GameObject reset(GameObject prototype) {
-        for(int i = 0; i < entities.length; i++) {
-            entities[i].reset(prototype.entities[i]);
+        for(int i = 0; i < entities.size; i++) {
+            entities.items[i].reset(prototype.entities.items[i]);
         }
-        for(int i = 0; i < transforms.length; i++) {
-            transforms[i].reset(prototype.transforms[i]);
+        for(int i = 0; i < transforms.size; i++) {
+            transforms.items[i].reset(prototype.transforms.items[i]);
         }
         for (Script script : scripts) script.reset();
         life.reset(prototype.life);
@@ -178,7 +189,7 @@ public class GameObject {
     }
 
     public Rectangle getBounds() {
-        if(bounds == null) bounds = entities[0].renderer.getBounds(null);
+        if(bounds == null) bounds = entities.items[0].renderer.getBounds(null);
         for(Entity e : entities) e.renderer.getBounds(bounds);
         return bounds;
     }
@@ -207,11 +218,11 @@ public class GameObject {
     }
 
     public void startAnimation(String name) {
-        animator.start(name, entities, transforms);
+        animator.start(name, entities.items, transforms.items);
     }
 
     public void startAnimation(Animation animation) {
-        if(animation != null) animation.start(entities, transforms);
+        if(animation != null) animation.start(entities.items, transforms.items);
     }
 
     public Animation getAnimation(String name) {
@@ -228,6 +239,34 @@ public class GameObject {
         if(name == null) return transform;
         int transformId = transformByEntityName.get(name, -1);
         if(transformId == -1) return transform;
-        return transforms[transformId];
+        return transforms.items[transformId];
+    }
+
+    public void addTransform(Transform t) {
+        transforms.add(t);
+        if(transform == null) transform = t;
+    }
+
+    public void addEntity(Entity e) {
+        entities.add(e);
+    }
+
+    public void addScript(Script s) {
+        scripts.add(s);
+    }
+
+    public void setTexture(Texture t) {
+        if(initialized) Gdx.app.error("GameEngine","Texture setting not available after initializing!");
+        else renderer.setTexture(t);
+    }
+
+    public void setZOrder(int zOrder) {
+        if(initialized) Gdx.app.error("GameEngine","Z order setting not available after initializing!");
+        else renderer.setZOrder(zOrder);
+    }
+
+    public void setShader(ShaderProgram shader) {
+        if(initialized) Gdx.app.error("GameEngine","Shader setting not available after initializing!");
+        else renderer.setShader(shader);
     }
 }

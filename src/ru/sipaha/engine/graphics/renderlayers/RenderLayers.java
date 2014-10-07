@@ -46,9 +46,9 @@ public class RenderLayers {
 
     public void prepareBatchForGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
-        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayer);
+        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayerTag);
         if(layer == null) {
-            layer = new BatchesRenderLayer(renderer.renderLayer);
+            layer = new BatchesRenderLayer(renderer.renderLayerTag);
             addRenderLayer(layer);
         }
         layer.prepareBatchForGameObject(renderer);
@@ -56,23 +56,23 @@ public class RenderLayers {
 
     public void addGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
-        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayer);
+        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayerTag);
         try {
             layer.addGameObject(gameObject);
         } catch (NullPointerException e) {
             Gdx.app.error("GameEngine","Render layer is not created for this game object! " +
-                                                                    "layer name = "+renderer.renderLayer);
+                                                                    "layer name = "+renderer.renderLayerTag);
         }
     }
 
     public void removeGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
-        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayer);
+        BatchesRenderLayer layer = (BatchesRenderLayer)layersByName.get(renderer.renderLayerTag);
         try {
             layer.removeGameObject(gameObject);
         } catch (NullPointerException e) {
             Gdx.app.error("GameEngine","Render layer is not created for this game object! " +
-                                                                    "layer name = "+renderer.renderLayer);
+                                                                    "layer name = "+renderer.renderLayerTag);
         }
     }
 

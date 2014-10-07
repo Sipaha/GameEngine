@@ -11,10 +11,10 @@ public class Camera extends OrthographicCamera {
 
     private final Vector3 tmpVec3 = new Vector3();
     private final Vector2 tmpVec2 = new Vector2();
-    private final Vector2 maxPosition = new Vector2(Float.MAX_VALUE, Float.MAX_VALUE);
-    private final Vector2 minPosition = new Vector2(Float.MIN_VALUE, Float.MIN_VALUE);
-    private final Vector2 maxView = new Vector2(Float.MAX_VALUE, Float.MAX_VALUE);
-    private final Vector2 minView = new Vector2(Float.MIN_VALUE, Float.MIN_VALUE);
+    private final Vector2 maxPosition = new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+    private final Vector2 minPosition = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+    private final Vector2 maxView = new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+    private final Vector2 minView = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 
     private final Signal<Camera> onUpdate = new Signal<>();
 
@@ -65,6 +65,10 @@ public class Camera extends OrthographicCamera {
         move(x - position.x, y - position.y);
     }
 
+    public void setZoom(float newZoom) {
+        zoomChange(newZoom - zoom);
+    }
+
     public void checkPosition(boolean lazyUpdate) {
         Vector3 pos = position;
         boolean needUpdate = !lazyUpdate;
@@ -88,6 +92,11 @@ public class Camera extends OrthographicCamera {
 
     public void move(float dx, float dy) {
         position.add(dx, dy, 0);
+        checkPosition(false);
+    }
+
+    public void moveWithZoom(float dx, float dy) {
+        position.add(dx*zoom, dy*zoom, 0);
         checkPosition(false);
     }
 

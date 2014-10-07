@@ -1,5 +1,6 @@
 package ru.sipaha.engine.gameobjectdata;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.NumberUtils;
@@ -36,6 +37,10 @@ public class EntityRenderer {
 
     public EntityRenderer(TextureRegion r) {
         this(r.getU(), r.getV(), r.getU2(), r.getV2(), r.getRegionWidth(), r.getRegionHeight());
+    }
+
+    public EntityRenderer(Texture t) {
+        this(0, 0, 1, 1, t.getWidth(), t.getHeight());
     }
 
     public EntityRenderer(EntityRenderer renderer) {

@@ -49,6 +49,10 @@ public class Replicator {
         if(gameObject.renderer != null) gameObject.renderer.visible = false;
     }
 
+    protected void initialize(Engine engine) {
+        template.initialize(engine);
+    }
+
     protected void remove(GameObject gameObject) {
         engine.removeGameObject(gameObject);
     }

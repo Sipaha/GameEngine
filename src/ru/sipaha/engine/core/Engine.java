@@ -6,14 +6,17 @@ import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.renderlayers.Box2DDebugRenderLayer;
 import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 import ru.sipaha.engine.graphics.renderlayers.RenderLayers;
+import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.GameObjectsArray;
 
 public class Engine {
     public static final float FIXED_TIME = 0.02f;
 
+    public final Input input = new Input();
     public final TagManager tagManager = new TagManager();
     public final ObjectMap<String, Replicator> replicatorsByName;
     public final IntMap<Replicator> replicatorsById;
+    private final Array<Replicator> replicators = new Array<>(false, 4, Replicator.class);
     private Replicator cachedReplicator;
     private int cachedReplicatorId = -1;
     private String cachedReplicatorName = null;
@@ -57,6 +60,7 @@ public class Engine {
         if(replicator == null) {
             replicator = new Replicator(this, go);
             replicatorsByName.put(name, replicator);
+            replicators.add(replicator);
         } else {
             replicator.setTemplate(go);
         }
@@ -70,6 +74,7 @@ public class Engine {
         if(replicator == null) {
             replicator = new Replicator(this, go);
             replicatorsById.put(id, replicator);
+            replicators.add(replicator);
         } else {
             replicator.setTemplate(go);
         }
@@ -87,6 +92,7 @@ public class Engine {
         if(replicator == null) {
             replicator = new Replicator(this);
             replicatorsByName.put(name, replicator);
+            replicators.add(replicator);
         }
         return replicator;
     }
@@ -96,6 +102,7 @@ public class Engine {
         if(replicator == null) {
             replicator = new Replicator(this);
             replicatorsById.put(id, replicator);
+            replicators.add(replicator);
         }
         return replicator;
     }
@@ -115,8 +122,9 @@ public class Engine {
 
     public void initialize() {
         if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
+        Gdx.input.setInputProcessor(input);
         renderLayers.initialize();
-        for(GameObject g : gameObjects) g.initialize(this);
+        for(Replicator r : replicators) r.initialize(this);
         isRunning = true;
     }
 

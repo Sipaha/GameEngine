@@ -3,6 +3,7 @@ package ru.sipaha.engine.scripts;
 import com.badlogic.gdx.Gdx;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 
 import java.lang.reflect.InvocationTargetException;
 

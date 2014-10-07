@@ -42,6 +42,7 @@ public class BatchesRenderLayer extends RenderLayer {
 
     public void addGameObject(GameObject gameObject) {
         GameObjectRenderer renderer = gameObject.renderer;
+        renderer.renderLayer = this;
         try {
             goBatchesByUnit.get(renderer).addGameObjectRenderer(renderer);
         } catch (NullPointerException n) {

@@ -1,6 +1,7 @@
 package ru.sipaha.engine.test;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -23,7 +24,7 @@ import ru.sipaha.engine.utils.structures.SpriteFrame;
 import java.math.BigDecimal;
 
 public class GameScreen implements Screen {
-    Engine engine = new Engine();
+    final Engine engine = new Engine();
 
     public GameScreen() {
         Gdx.gl.glClearColor(0.5f,0.5f,0.5f,1f);
@@ -33,12 +34,13 @@ public class GameScreen implements Screen {
             textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
         }
 
+
         TextureRegion arrow = new TextureRegion(new Texture(Gdx.files.internal("images/arrow.png")));//textures[0]);//
-        Entity[] entities = new Entity[4];
-        Transform[] transforms = new Transform[4];
-        for(int i = 0; i < entities.length; i++) {
-            entities[i] = new Entity(arrow);
-            entities[i].name = Integer.toString(i);
+        GameObject g = new GameObject();
+        g.setTexture(arrow.getTexture());
+        for(int i = 0; i < 4; i++) {
+            Entity e = new Entity(arrow);
+            e.name = Integer.toString(i);
             float u,v,u2,v2;
             switch (i) {
                 case 0: u = 0; v = 0; u2 = 0.5f; v2 = 0.5f; break;
@@ -47,13 +49,13 @@ public class GameScreen implements Screen {
                 case 3: u = 0; v = 0.5f; u2 = 0.5f; v2 = 1f; break;
                 default: u = 0; v = 0; u2 = 0; v2 = 0;
             }
-            entities[i].renderer.setUV(u,v,u2,v2);
-            transforms[i] = new Transform(new Transform().setPosition(128,128));
-            transforms[i].parentId = i-1;
-            entities[i].transformId = i;
+            e.renderer.setUV(u,v,u2,v2);
+            Transform transform = new Transform().setPosition(128,128);
+            transform.parentId = i-1;
+            e.transformId = i;
+            g.addEntity(e);
+            g.addTransform(transform);
         }
-
-        GameObject g = new GameObject(entities,transforms,new Script[0], arrow.getTexture(),null,5);
         g.renderer.setLinearFilter();
         g.transform.setPosition(100, 100);
         g.transform.motion.va = 1;
@@ -75,7 +77,6 @@ public class GameScreen implements Screen {
         g.createBody(1);
         engine.setReplicator(g, "SpriteTest");
 
-        engine.setPhysicsDebugDrawing(true);
         engine.initialize();
 
         /*for(int i = 0; i < 400; i++) {
@@ -92,7 +93,26 @@ public class GameScreen implements Screen {
         gameObject.transform.setPosition(500,200);
         gameObject.startAnimation("Sprite");
 
-        engine.getRenderLayer().camera.setViewLimits(0, 0, 1000, 1000);
+        engine.input.addProcessor(new InputAdapter(){
+            int oldX,oldY;
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                oldX = screenX;
+                oldY = screenY;
+                return false;
+            }
+            @Override
+            public boolean touchDragged(int screenX, int screenY, int pointer) {
+                int deltaX = oldX - screenX;
+                int deltaY = screenY - oldY;
+                engine.getRenderLayer().camera.moveWithZoom(deltaX, deltaY);
+                oldX = screenX;
+                oldY = screenY;
+                return false;
+            }
+        });
+        engine.getRenderLayer().camera.setZoom(2f);
+        //engine.getRenderLayer().camera.setViewLimits(0, 0, 1000, 1000);
     }
 
     @Override

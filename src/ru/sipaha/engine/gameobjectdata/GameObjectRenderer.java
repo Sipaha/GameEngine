@@ -6,11 +6,15 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.graphics.RenderUnit;
+import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 
 public class GameObjectRenderer extends RenderUnit {
 
     public boolean visible = true;
     public float[] renderData;
+    public RenderLayer renderLayer;
+
+    public GameObjectRenderer() {}
 
     public GameObjectRenderer(GameObjectRenderer renderer) {
         super(renderer);
@@ -46,13 +50,5 @@ public class GameObjectRenderer extends RenderUnit {
 
     public void reset(GameObjectRenderer template) {
         visible = template.visible;
-    }
-
-    public void setLinearFilter() {
-        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-    }
-
-    public void setNearestFilter() {
-        texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 }
