@@ -34,6 +34,7 @@ public class SpriteAnimation extends DiscreteAnimation {
 
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
+        super.start(entities, transforms);
         EntityRenderer renderer = entities[targetIdx].renderer;
         if(renderer.animatedSprite != this && renderer.animatedSprite != null) {
             renderer.animatedSprite.stop();

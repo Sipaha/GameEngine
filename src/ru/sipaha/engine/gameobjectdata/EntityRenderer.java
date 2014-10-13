@@ -167,6 +167,12 @@ public class EntityRenderer {
         offsetU = source.offsetU;
         repeatX = source.repeatX;
         repeatY = source.repeatY;
+        animatedAlpha = null;
+        animatedColor = null;
+        animatedOrigin = null;
+        animatedUOffset = null;
+        animatedVOffset = null;
+        animatedSprite = null;
     }
 
     public Rectangle getBounds(Rectangle bounds) {
