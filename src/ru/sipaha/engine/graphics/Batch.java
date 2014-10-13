@@ -1,4 +1,4 @@
-package ru.sipaha.engine.graphics.batches;
+package ru.sipaha.engine.graphics;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -7,32 +7,28 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
-import ru.sipaha.engine.graphics.Camera;
-import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
 
-public class BatchArray extends RenderUnit {
+public class Batch extends RenderUnit {
     public static final int DEFAULT_MAX_SIZE = 1000;
 
     public static int renderCalls = 0;
 
-    private Array<Batch> batches = new Array<>(true, 4, Batch.class);
+    private Array<RenderUnit> renderUnits = new Array<>(true, 4, RenderUnit.class);
 
     private Mesh mesh;
 
     protected final float[] vertices;
     protected int verticesCount = 0;
 
-    public BatchArray(BatchGroup group) {
-        this(DEFAULT_MAX_SIZE, group);
+    public Batch() {
+        this(DEFAULT_MAX_SIZE);
     }
 
-    public BatchArray(int size, BatchGroup group) {
-        super(group);
+    public Batch(int size) {
         if (size > 5460) throw new IllegalArgumentException("Can't have more than 5460 sprites per BatchArray: " + size);
 
-        add(group);
-        mesh = new Mesh(Mesh.VertexDataType.VertexArray, false, size*4, size*6,
+        mesh = new Mesh(Mesh.VertexDataType.VertexArray, false, size * 4, size * 6,
                 new VertexAttribute(VertexAttributes.Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
@@ -53,13 +49,11 @@ public class BatchArray extends RenderUnit {
         mesh.setIndices(indices);
     }
 
-    public void add(BatchGroup group) {
-        for(int i = 0; i < group.size(); i++) {
-            Batch b = group.batches.get(i);
-            if(isStatic) {
-                verticesCount = b.prepareVertices(vertices, verticesCount);
-            }
-            batches.add(b);
+    public void add(RenderUnit unit) {
+        if(renderUnits.size == 0) set(unit);
+        renderUnits.add(unit);
+        if(isStatic) {
+            verticesCount = unit.render(vertices, verticesCount);
         }
     }
 
@@ -67,12 +61,22 @@ public class BatchArray extends RenderUnit {
         begin(combined);
         if(!isStatic) {
             verticesCount = 0;
-            Batch[] batchesArr = batches.items;
-            for (int i = 0, s = batches.size; i < s; i++) {
-                verticesCount = batchesArr[i].prepareVertices(vertices, verticesCount);
+            try {
+                RenderUnit[] drawableArr = renderUnits.items;
+                for (int i = 0, s = renderUnits.size; i < s; i++) {
+                    verticesCount = drawableArr[i].render(vertices, verticesCount);
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Gdx.app.error("Game Engine", "Vertices length is too low! Length = "+vertices.length);
             }
         }
         end();
+    }
+
+    @Override
+    public int render(float[] vertices, int pos) {
+        for(RenderUnit unit : renderUnits) pos = unit.render(vertices, pos);
+        return pos;
     }
 
     public void begin (Matrix4 combined) {
@@ -110,9 +114,15 @@ public class BatchArray extends RenderUnit {
         mesh.render(shader, GL20.GL_TRIANGLES, 0, count);
     }
 
+    public void clear() {
+        renderUnits.clear();
+    }
+
+    public int getSize() {
+        return renderUnits.size;
+    }
+
     public void dispose () {
         mesh.dispose();
     }
-
-
 }

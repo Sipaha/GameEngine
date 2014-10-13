@@ -1,7 +1,5 @@
 package ru.sipaha.engine.utils;
 
-import java.util.function.Predicate;
-
 public class Array<T> extends com.badlogic.gdx.utils.Array<T> {
 
     public Array (boolean ordered, int capacity, Class arrayType) {
@@ -25,12 +23,12 @@ public class Array<T> extends com.badlogic.gdx.utils.Array<T> {
         }
     }
 
-    public T find(Predicate<T> predicate) {
+    /*public T find(Predicate<T> predicate) {
         for(int i = 0, n = size; i <= n; i++) {
             if(predicate.test(items[i])) return items[i];
         }
         return null;
-    }
+    }*/
 
     public T last() {
         return items[size-1];

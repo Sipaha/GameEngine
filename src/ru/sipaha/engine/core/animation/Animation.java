@@ -46,6 +46,10 @@ public abstract class Animation {
         pauseTimer = 0;
     }
 
+    public void stop() {
+        run = false;
+    }
+
     public Animation setLoop(boolean loop) {
         this.loop = loop;
         return this;

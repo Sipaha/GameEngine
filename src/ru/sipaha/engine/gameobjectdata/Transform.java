@@ -5,6 +5,13 @@ import com.badlogic.gdx.math.Vector2;
 import ru.sipaha.engine.core.animation.сontinuous.AnimatedPosition;
 import ru.sipaha.engine.core.animation.сontinuous.AnimatedScale;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Transform {
     public float t00, t01, t10, t11, tx, ty;
     public boolean wasChanged;
@@ -13,7 +20,7 @@ public class Transform {
     public RigidBody rigidBody;
 
     protected float x = 0, y = 0;
-    protected float scale = 1;
+    protected float scaleX = 1, scaleY = 1;
 
     protected float angle = 0;
     protected float absAngle = 0;
@@ -26,7 +33,7 @@ public class Transform {
     public AnimatedPosition animatedPosition = null;
     public AnimatedScale animatedScale = null;
 
-    private boolean reqUnhook = false;
+    private boolean unhooked = false;
 
     public Transform(){
         motion = new Motion();
@@ -39,10 +46,9 @@ public class Transform {
     }
 
     public void update(float delta) {
-        if(reqUnhook) {
-            unhook();
+        if(unhooked) {
             wasChanged = true;
-            reqUnhook = false;
+            unhooked = false;
         } else {
             if(rigidBody != null) {
                 if(rigidBody.manualMoving) {
@@ -65,10 +71,10 @@ public class Transform {
 
     private void updateData() {
         absAngle = angle;
-        t00 = cos*scale;
+        t00 = cos*scaleX;
         t01 = -sin;
         t10 = sin;
-        t11 = t00;//cos*scale;
+        t11 = cos*scaleY;
         tx = x; ty = y;
         dirty = false;
         wasChanged = true;
@@ -91,15 +97,14 @@ public class Transform {
     public void unhook(Transform parent) {
         updateData();
         mul(parent);
-        reqUnhook = true;
-    }
-
-    private void unhook() {
         angle = absAngle;
-        sin = t10;//MathUtils.sinDeg(angle);
+        scaleX = parent.scaleX*scaleX;
+        scaleY = parent.scaleY*scaleY;
+        sin = t10;
         cos = MathUtils.cosDeg(angle);
-        scale = cos != 0 ? t00 / cos : 1;
-        x = tx; y = ty;
+        x = tx;
+        y = ty;
+        unhooked = true;
     }
 
     protected Transform mul(Transform trn) {
@@ -141,9 +146,22 @@ public class Transform {
     }
 
     public void setScale(float scale) {
-        this.scale = scale;
+        this.scaleX = scale;
+        this.scaleY = scale;
         t00 = cos*scale;
         t11 = t00;
+        wasChanged = true;
+    }
+
+    public void setScaleX(float scaleX) {
+        this.scaleX = scaleX;
+        t00 = cos*scaleX;
+        wasChanged = true;
+    }
+
+    public void setScaleY(float scaleY) {
+        this.scaleY = scaleY;
+        t11 = cos*scaleY;
         wasChanged = true;
     }
 
@@ -166,7 +184,8 @@ public class Transform {
         x = source.x;
         y = source.y;
         angle = source.angle;
-        scale = source.scale;
+        scaleX = source.scaleX;
+        scaleY = source.scaleY;
         cos = source.cos;
         sin = source.sin;
         dirty = true;

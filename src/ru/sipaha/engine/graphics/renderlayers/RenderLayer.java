@@ -1,17 +1,17 @@
 package ru.sipaha.engine.graphics.renderlayers;
 
 import ru.sipaha.engine.graphics.Camera;
+import ru.sipaha.engine.graphics.RenderUnit;
 
 /**
  * Created on 30.09.2014.
  */
 
 public abstract class RenderLayer implements Comparable<RenderLayer> {
-    private static int orderCounter = 0;
 
     public final String name;
-    public final Camera camera;
-    private int order = orderCounter++;
+    public Camera camera;
+    private int order;
 
     public RenderLayer(String name) {
         this(name, new Camera());
@@ -19,24 +19,34 @@ public abstract class RenderLayer implements Comparable<RenderLayer> {
 
     public RenderLayer(String name, Camera camera) {
         this.name = name;
-        if(camera != null) {
-            this.camera = camera;
-        } else {
-            this.camera = new Camera();
-        }
+        this.camera = camera == null ? new Camera() : camera;
     }
 
     public abstract void render();
 
-    public void setOrder(int order) {
+    public RenderLayer setOrder(int order) {
         this.order = order;
+        return this;
     }
 
-    public void reset() {
+    public RenderLayer reset() {
         camera.reset();
+        return this;
     }
 
     public void initialize(){}
+    public void add(RenderUnit renderUnit){}
+    public void prepare(RenderUnit renderUnit){}
+    public void remove(RenderUnit renderUnit){}
+
+    public void resize(int width, int height) {
+        camera.setViewport(width, height);
+    }
+
+    public RenderLayer setCamera(Camera camera) {
+        this.camera = camera;
+        return this;
+    }
 
     @SuppressWarnings("NullableProblems")
     @Override

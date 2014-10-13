@@ -3,9 +3,10 @@ package ru.sipaha.engine.core;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectMap;
+import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.graphics.renderlayers.Box2DDebugRenderLayer;
 import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
-import ru.sipaha.engine.graphics.renderlayers.RenderLayers;
+import ru.sipaha.engine.graphics.Renderer;
 import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.GameObjectsArray;
 
@@ -14,6 +15,7 @@ public class Engine {
 
     public final Input input = new Input();
     public final TagManager tagManager = new TagManager();
+    public final Renderer renderer;
     public final ObjectMap<String, Replicator> replicatorsByName;
     public final IntMap<Replicator> replicatorsById;
     private final Array<Replicator> replicators = new Array<>(false, 4, Replicator.class);
@@ -25,8 +27,6 @@ public class Engine {
 
     private final GameObjectsArray gameObjects;
 
-    private RenderLayers renderLayers;
-
     private final PhysicsWorld physicsWorld = new PhysicsWorld();
     private boolean physicsDebugDrawing = false;
 
@@ -36,7 +36,7 @@ public class Engine {
         gameObjects = new GameObjectsArray(false, 128);
         replicatorsByName = new ObjectMap<>();
         replicatorsById = new IntMap<>();
-        renderLayers = new RenderLayers();
+        renderer = new Renderer();
     }
 
     public GameObject createGameObject(String name) {
@@ -64,7 +64,7 @@ public class Engine {
         } else {
             replicator.setTemplate(go);
         }
-        if(go.renderer != null) renderLayers.prepareBatchForGameObject(go);
+        if(go.renderer != null) renderer.prepareRenderUnit(go.renderer);
         return replicator;
     }
 
@@ -78,7 +78,7 @@ public class Engine {
         } else {
             replicator.setTemplate(go);
         }
-        if(go.renderer != null) renderLayers.prepareBatchForGameObject(go);
+        if(go.renderer != null) renderer.prepareRenderUnit(go.renderer);
         return replicator;
     }
 
@@ -110,7 +110,7 @@ public class Engine {
     public void addGameObject(GameObject go) {
         gameObjects.add(go);
         tagManager.add(go);
-        if(go.renderer != null) renderLayers.addGameObject(go);
+        if(go.renderer != null) renderer.addRenderUnit(go.renderer);
         go.engine = this;
         go.start(this);
     }
@@ -118,13 +118,13 @@ public class Engine {
     protected void removeGameObject(GameObject go) {
         gameObjects.removeValue(go, true);
         tagManager.remove(go);
-        if(go.renderer != null) renderLayers.removeGameObject(go);
+        if(go.renderer != null) renderer.removeRenderUnit(go.renderer);
     }
 
     public void initialize() {
         if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
         Gdx.input.setInputProcessor(input);
-        renderLayers.initialize();
+        renderer.initialize();
         for(Replicator r : replicators) r.initialize(this);
         isRunning = true;
     }
@@ -140,7 +140,7 @@ public class Engine {
             }
         }
 
-        renderLayers.render();
+        renderer.render();
 
         timeCounter += frameTime;
         while(timeCounter >= FIXED_TIME) {
@@ -159,10 +159,12 @@ public class Engine {
     public void setPhysicsDebugDrawing(boolean physicsDebugDrawing) {
         boolean oldVal = this.physicsDebugDrawing;
         if(physicsDebugDrawing && !oldVal) {
-            renderLayers.addRenderLayer(new Box2DDebugRenderLayer(physicsWorld.getWorld(),
-                                        renderLayers.getRenderLayer("Default").camera));
+            Camera camera = renderer.getRenderLayer().camera;
+            RenderLayer layer = physicsWorld.getDebugRenderLayer();
+            layer.setCamera(camera).initialize();
+            renderer.addRenderLayer(layer);
         } else if(!physicsDebugDrawing && oldVal) {
-            renderLayers.removeRenderLayer(Box2DDebugRenderLayer.RENDER_LAYER_TAG);
+            renderer.removeRenderLayer(physicsWorld.getDebugRenderLayer());
         }
         this.physicsDebugDrawing = physicsDebugDrawing;
     }
@@ -170,10 +172,4 @@ public class Engine {
     public int getGameObjectsCount() {
         return gameObjects.size;
     }
-
-    public RenderLayer getRenderLayer(String name) {
-        return renderLayers.getRenderLayer(name);
-    }
-
-    public RenderLayer getRenderLayer() {return renderLayers.getRenderLayer();}
 }

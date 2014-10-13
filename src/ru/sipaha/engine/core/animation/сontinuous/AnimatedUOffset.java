@@ -27,6 +27,5 @@ public class AnimatedUOffset extends AnimatedFloat {
             renderer.animatedUOffset.continuousAnimation.stop();
         }
         renderer.animatedUOffset = this;
-        String d = new String("dadawdawdaw");
     }
 }

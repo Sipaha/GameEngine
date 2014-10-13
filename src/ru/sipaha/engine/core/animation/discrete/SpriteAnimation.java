@@ -3,6 +3,7 @@ package ru.sipaha.engine.core.animation.discrete;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.gameobjectdata.EntityRenderer;
+import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
 /**
@@ -29,6 +30,15 @@ public class SpriteAnimation extends DiscreteAnimation {
             framesTime[i] = frames[i].time;
         }
         this.frames = frames;
+    }
+
+    @Override
+    public void start(Entity[] entities, Transform[] transforms) {
+        EntityRenderer renderer = entities[targetIdx].renderer;
+        if(renderer.animatedSprite != this && renderer.animatedSprite != null) {
+            renderer.animatedSprite.stop();
+        }
+        renderer.animatedSprite = this;
     }
 
     @Override

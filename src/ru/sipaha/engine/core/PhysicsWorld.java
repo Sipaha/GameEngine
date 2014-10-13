@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import ru.sipaha.engine.graphics.Camera;
+import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
+import ru.sipaha.engine.utils.signals.Listener;
 
 public class PhysicsWorld {
     public static final float WORLD_UNITS_TO_ENGINE_UNITS = 32f;
@@ -12,10 +14,10 @@ public class PhysicsWorld {
     public static final int POSITION_ITERATIONS = 2;
 
     private World world;
-    private Box2DDebugRenderer box2DDebugRenderer;
-    private Matrix4 projectionDebugMatrix;
     private boolean enable = false;
     private Vector2 tmp = new Vector2();
+
+    private Box2DDebugRenderLayer debugRenderLayer;
 
     public PhysicsWorld() {
         world = new World(new Vector2(0, 0), true);
@@ -55,8 +57,42 @@ public class PhysicsWorld {
         return body;
     }
 
-    public World getWorld() {
-        return world;
+    public RenderLayer getDebugRenderLayer() {
+        if(debugRenderLayer == null) debugRenderLayer = new Box2DDebugRenderLayer(world);
+        return debugRenderLayer;
     }
 
+    private class Box2DDebugRenderLayer extends RenderLayer {
+
+        public static final String RENDER_LAYER_TAG = "Box2DDebug";
+
+        public final Matrix4 cameraMatrix = new Matrix4();
+        private final World world;
+        private final Box2DDebugRenderer renderer;
+
+        public Box2DDebugRenderLayer(World world) {
+            super(RENDER_LAYER_TAG);
+            this.world = world;
+            renderer = new Box2DDebugRenderer();
+        }
+
+        @Override
+        public void initialize() {
+            camera.addOnUpdateListener(new Listener<Camera>() {
+                @Override
+                public void receive(Camera object) {
+                    cameraMatrix.set(camera.combined);
+                    cameraMatrix.scl(PhysicsWorld.WORLD_UNITS_TO_ENGINE_UNITS);
+                }
+            });
+        }
+
+        @Override
+        public void render() {
+            renderer.render(world, cameraMatrix);
+        }
+
+        @Override
+        public void resize(int width, int height) {}
+    }
 }

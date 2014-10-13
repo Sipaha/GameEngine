@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.NumberUtils;
 import ru.sipaha.engine.core.animation.discrete.DiscreteAnimation;
+import ru.sipaha.engine.core.animation.discrete.SpriteAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.*;
 
 public class EntityRenderer {
@@ -33,7 +34,7 @@ public class EntityRenderer {
     public AnimatedOrigin animatedOrigin = null;
     public AnimatedUOffset animatedUOffset = null;
     public AnimatedVOffset animatedVOffset = null;
-    public DiscreteAnimation animatedSprite = null;
+    public SpriteAnimation animatedSprite = null;
 
     public EntityRenderer(TextureRegion r) {
         this(r.getU(), r.getV(), r.getU2(), r.getV2(), r.getRegionWidth(), r.getRegionHeight());

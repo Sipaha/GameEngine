@@ -41,4 +41,7 @@ public class Box2DDebugRenderLayer extends RenderLayer {
         camera.setToOrtho(false);
         renderer.render(world, cameraMatrix);
     }
+
+    @Override
+    public void resize(int width, int height) {}
 }

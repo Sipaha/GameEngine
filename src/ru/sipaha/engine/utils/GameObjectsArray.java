@@ -62,5 +62,8 @@ public class GameObjectsArray extends Array<GameObject> implements Iterable<Game
             peeked = false;
             return result;
         }
+
+        @Override
+        public void remove() {}
     }
 }

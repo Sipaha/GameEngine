@@ -60,8 +60,4 @@ public class ContinuousAnimation extends Animation {
             u.start(entities, transforms);
         }
     }
-
-    public void stop() {
-        run = false;
-    }
 }

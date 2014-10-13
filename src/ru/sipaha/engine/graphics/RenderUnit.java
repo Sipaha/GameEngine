@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import ru.sipaha.engine.utils.Shaders;
 
-public abstract class RenderUnit {
+public abstract class RenderUnit implements Comparable<RenderUnit> {
     public static int DEFAULT_Z_ORDER = 3;
 
     public String renderLayerTag = "Default";
@@ -24,16 +24,8 @@ public abstract class RenderUnit {
         shader = Shaders.defaultShader;
     }
 
-    public RenderUnit(RenderUnit renderUnit) {
-        texture = renderUnit.texture;
-        shader = renderUnit.shader;
-        zOrder = renderUnit.zOrder;
-        blendingDisabled = renderUnit.blendingDisabled;
-        blendSrcFunc = renderUnit.blendSrcFunc;
-        blendDstFunc = renderUnit.blendDstFunc;
-        isStatic = renderUnit.isStatic;
-        hash = renderUnit.hash;
-        isLinearFilter = renderUnit.isLinearFilter;
+    public RenderUnit(RenderUnit unit) {
+        set(unit);
     }
 
     public RenderUnit(Texture t) {
@@ -46,7 +38,6 @@ public abstract class RenderUnit {
 
     public RenderUnit(Texture t, ShaderProgram s, int zOrder) {
         setTexture(t);
-
         if(s == null) {
             this.shader = Shaders.defaultShader;
         } else {
@@ -118,6 +109,20 @@ public abstract class RenderUnit {
         }
     }
 
+    public void set(RenderUnit unit) {
+        texture = unit.texture;
+        shader = unit.shader;
+        zOrder = unit.zOrder;
+        blendingDisabled = unit.blendingDisabled;
+        blendSrcFunc = unit.blendSrcFunc;
+        blendDstFunc = unit.blendDstFunc;
+        isStatic = unit.isStatic;
+        hash = unit.hash;
+        isLinearFilter = unit.isLinearFilter;
+    }
+
+    public abstract int render(float[] vertices, int pos);
+
     public boolean equalsIgnoreZOrder(RenderUnit r) {
         return this == r
                 || r != null
@@ -152,5 +157,12 @@ public abstract class RenderUnit {
         hash = 31 * hash + shader.hashCode();
         hash = 31 * hash + zOrder;
         return hash;
+    }
+
+    @Override
+    public int compareTo(RenderUnit unit) {
+        if (zOrder > unit.zOrder) return 1;
+        if (zOrder < unit.zOrder) return -1;
+        return 0;
     }
 }

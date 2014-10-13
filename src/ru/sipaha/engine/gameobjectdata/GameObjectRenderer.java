@@ -1,10 +1,8 @@
 package ru.sipaha.engine.gameobjectdata;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import ru.sipaha.engine.core.Entity;
-import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 

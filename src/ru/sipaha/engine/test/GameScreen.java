@@ -3,7 +3,6 @@ package ru.sipaha.engine.test;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -15,26 +14,25 @@ import ru.sipaha.engine.core.animation.discrete.SpriteAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.AnimatedAlpha;
 import ru.sipaha.engine.gameobjectdata.Transform;
-import ru.sipaha.engine.graphics.Camera;
+import ru.sipaha.engine.graphics.gui.InterfaceLayer;
+import ru.sipaha.engine.graphics.gui.UIElement;
 import ru.sipaha.engine.scripts.*;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
-import java.lang.reflect.AnnotatedType;
-import java.math.BigDecimal;
+import java.util.Scanner;
 
 public class GameScreen implements Screen {
     final Engine engine = new Engine();
 
     public GameScreen() {
-        Gdx.gl.glClearColor(0.5f,0.5f,0.5f,1f);
 
+        System.out.println();
         Texture[] textures = new Texture[3];
         for(int i = 0; i < textures.length; i++) {
             textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
         }
-
 
         TextureRegion arrow = new TextureRegion(new Texture(Gdx.files.internal("images/arrow.png")));//textures[0]);//
         GameObject g = new GameObject();
@@ -77,7 +75,7 @@ public class GameScreen implements Screen {
         g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2),8);
         g.addAnimation(animation);
         g.createBody(1);
-        g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 3f));
+        g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 2f));
         g.addScript(TargetHolder.class, new Search("Enemy", 250));
         g.addScript(TargetCatcher.class, new AngleTracking());
         engine.setReplicator(g, "SpriteTest");
@@ -111,6 +109,14 @@ public class GameScreen implements Screen {
         g.life.lifeTime = 1.19f;
         engine.setReplicator(g, "Explosion");
 
+
+        InterfaceLayer interfaceLayer = new InterfaceLayer();
+        UIElement element = new UIElement(new Texture(Gdx.files.internal("images/blackbox.png")));
+        element.setRightPadding(50);
+        element.setTopPadding(50);
+        interfaceLayer.add(element);
+        engine.renderer.addRenderLayer(interfaceLayer);
+
         engine.initialize();
 
         /*for(int i = 0; i < 400; i++) {
@@ -139,25 +145,24 @@ public class GameScreen implements Screen {
             public boolean touchDragged(int screenX, int screenY, int pointer) {
                 int deltaX = oldX - screenX;
                 int deltaY = screenY - oldY;
-                engine.getRenderLayer().camera.moveWithZoom(deltaX, deltaY);
+                engine.renderer.getRenderLayer().camera.moveWithZoom(deltaX, deltaY);
                 oldX = screenX;
                 oldY = screenY;
                 return false;
             }
         });
-        engine.getRenderLayer().camera.setZoom(2f);
-        //engine.getRenderLayer().camera.setViewLimits(0, 0, 1000, 1000);
+        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+        engine.renderer.getRenderLayer().camera.setZoom(2f);
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         engine.update(delta);
     }
 
     @Override
     public void resize(int width, int height) {
-        engine.getRenderLayer().camera.setViewport(width, height);
+        engine.renderer.resize(width, height);
     }
 
     @Override
