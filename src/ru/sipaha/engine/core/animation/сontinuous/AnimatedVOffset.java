@@ -1,7 +1,6 @@
 package ru.sipaha.engine.core.animation.сontinuous;
 
 import ru.sipaha.engine.core.Entity;
-import ru.sipaha.engine.gameobjectdata.EntityRenderer;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.curves.Curve;
 
@@ -17,15 +16,15 @@ public class AnimatedVOffset extends AnimatedFloat {
 
     @Override
     public void update(Entity[] entities, Transform[] transforms, float time) {
-        entities[targetIdx].renderer.setOffsetV(curves[0].get(time));
+        entities[targetIdx].setOffsetV(curves[0].get(time));
     }
 
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
-        EntityRenderer renderer = entities[targetIdx].renderer;
-        if(renderer.animatedVOffset != this && renderer.animatedVOffset != null) {
-            renderer.animatedVOffset.continuousAnimation.stop();
+        Entity entity = entities[targetIdx];
+        if(entity.animatedVOffset != this && entity.animatedVOffset != null) {
+            entity.animatedVOffset.continuousAnimation.stop();
         }
-        renderer.animatedVOffset = this;
+        entity.animatedVOffset = this;
     }
 }

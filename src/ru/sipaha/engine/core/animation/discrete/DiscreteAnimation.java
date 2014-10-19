@@ -1,5 +1,9 @@
 package ru.sipaha.engine.core.animation.discrete;
 
+import javafx.scene.control.Button;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.animation.Animation;
 import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimatedUnit;
@@ -81,6 +85,7 @@ public abstract class DiscreteAnimation extends Animation {
         frameChanged(entities, 0);
         back = false;
         currentFrame = 0;
+
     }
 
     @Override

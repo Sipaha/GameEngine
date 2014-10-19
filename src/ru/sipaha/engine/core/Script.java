@@ -1,34 +1,30 @@
-package ru.sipaha.engine.scripts;
+package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.Gdx;
-import ru.sipaha.engine.core.Engine;
-import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class Script {
+    protected GameObject gameObject;
 
-    public GameObject gameObject;
+    protected void update(float delta) {}
+    protected void fixedUpdate(float delta) {}
+    protected void initialize(Engine engine) {}
+    protected void start(Engine engine) {}
 
-    public void start(Engine engine){}
-    public void initialize(Engine engine){}
-    public void update(float delta) {}
-    public void fixedUpdate(float delta) {}
-
-    public abstract Script reset();
+    protected abstract void reset();
 
     public Script copy() {
-        Class<? extends Script> clazz = getClass();
         Script script = null;
+        Class<? extends Script> clazz = getClass();
         try {
             script = clazz.getConstructor(clazz).newInstance(this);
         } catch (InstantiationException | IllegalAccessException
                 | InvocationTargetException | NoSuchMethodException e) {
             String className = clazz.getSimpleName();
-            String constructor = className+"("+className+" source) {}";
+            String constructor = "public "+className+"("+className+" source) {}";
             Gdx.app.error("GameEngine","Constructor \""+constructor+"\" is not implemented! " +
-                          "Full name is "+clazz.getCanonicalName());
+                    "Full name is "+clazz.getCanonicalName());
             e.printStackTrace();
         }
         return script;

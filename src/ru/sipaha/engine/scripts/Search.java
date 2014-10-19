@@ -1,9 +1,9 @@
 package ru.sipaha.engine.scripts;
 
-import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.Script;
 import ru.sipaha.engine.gameobjectdata.Transform;
-import ru.sipaha.engine.utils.GameObjectsArray;
 import ru.sipaha.engine.utils.MathHelper;
 
 public class Search extends Script implements TargetHolder {
@@ -16,8 +16,10 @@ public class Search extends Script implements TargetHolder {
     public SearchStrategy strategy = SearchStrategy.NEAREST;
 
     private Search template;
-    private GameObjectsArray searchTargets;
+    private Iterable<GameObject> searchTargets;
     private String searchTag;
+
+    private Transform transform;
 
     public Search(String searchTag){
         this(searchTag, 200);
@@ -35,6 +37,12 @@ public class Search extends Script implements TargetHolder {
     }
 
     @Override
+    protected void start(Engine engine) {
+        super.start(engine);
+        transform = gameObject.getTransform();
+    }
+
+    @Override
     public void initialize(Engine engine) {
         super.initialize(engine);
         searchTargets = engine.tagManager.getGameObjectsWithTag(searchTag);
@@ -42,12 +50,12 @@ public class Search extends Script implements TargetHolder {
 
     @Override
     public void fixedUpdate(float delta) {
-        Transform transform = gameObject.transform;
+
         target = null;
         distance = radius * radius;
 
         for(GameObject target : searchTargets) {
-            Transform targetTransform = target.transform;
+            Transform targetTransform = target.getTransform();
 
             float distanceToTarget = MathHelper.sqrDistance(transform.tx, transform.ty,
                     targetTransform.tx, targetTransform.ty);
@@ -84,12 +92,11 @@ public class Search extends Script implements TargetHolder {
     }
 
     @Override
-    public Script reset() {
+    public void reset() {
         radius = template.radius;
         searchTag = template.searchTag;
         target = null;
         distance = template.distance;
         strategy = template.strategy;
-        return this;
     }
 }

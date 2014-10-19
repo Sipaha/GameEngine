@@ -1,8 +1,8 @@
 package ru.sipaha.engine.scripts;
 
-import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.core.Replicator;
+import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.Script;
 import ru.sipaha.engine.core.animation.Animation;
 import ru.sipaha.engine.gameobjectdata.Transform;
 
@@ -21,7 +21,7 @@ public class ShellsShooting extends Script {
 
     private TargetCatcher targetCatcher;
     private Transform weaponTransform;
-    private Replicator shellReplicator;
+    private GameObject shellTemplate;
     private Animation shootAnimation;
 
     public ShellsShooting(String shellName, String weaponName) {
@@ -37,16 +37,19 @@ public class ShellsShooting extends Script {
 
     public ShellsShooting(ShellsShooting prototype) {
         shellName = prototype.shellName;
-        shellReplicator = prototype.shellReplicator;
         template = prototype;
         reset();
     }
 
     @Override
     public void start(Engine engine) {
-        shellReplicator = engine.getReplicator(shellName);
+        shellTemplate = engine.factory.getTemplate(shellName);
         targetCatcher = gameObject.getScript(TargetCatcher.class);
-        weaponTransform = gameObject.getTransform(weaponName);
+        if(weaponName != null) {
+            weaponTransform = gameObject.getTransform(weaponName);
+        } else {
+            weaponTransform = gameObject.getTransform();
+        }
         if(shootAnimationName != null) shootAnimation = gameObject.getAnimation(shootAnimationName);
     }
 
@@ -59,19 +62,18 @@ public class ShellsShooting extends Script {
         }
         if(timer >= fireRate && targetCatcher.targetIsCatched()) {
             timer -= fireRate;
-            GameObject shell = shellReplicator.get();
-            shell.transform.unhook(weaponTransform);
+            GameObject shell = shellTemplate.copy();
+            shell.getTransform().unhook(weaponTransform);
             gameObject.startAnimation(shootAnimation);
         }
     }
 
     @Override
-    public Script reset() {
+    public void reset() {
         fireRate = template.fireRate;
         timer = 0;
-        shellReplicator = template.shellReplicator;
+        shellTemplate = template.shellTemplate;
         damage = template.damage;
-        return this;
     }
 
 }

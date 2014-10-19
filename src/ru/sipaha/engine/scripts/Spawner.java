@@ -1,7 +1,9 @@
 package ru.sipaha.engine.scripts;
 
-import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.Script;
+import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.signals.Signal;
 import ru.sipaha.engine.utils.structures.Spawn;
@@ -23,6 +25,8 @@ public class Spawner extends Script {
     private final Listener<GameObject> spawnedDead;
     private final Listener<GameObject> spawnedBroken;
 
+    private Transform transform;
+
     public Spawner() {
         spawnedDead = new Listener<GameObject>() {
             @Override
@@ -41,6 +45,7 @@ public class Spawner extends Script {
     @Override
     public void start(Engine engine) {
         this.engine = engine;
+        transform = gameObject.getTransform();
     }
 
     @Override
@@ -55,16 +60,16 @@ public class Spawner extends Script {
                 currentSpawn = 0;
                 active = loop;
             }
-            GameObject gObject = engine.createGameObject(currSpawn.unit);
-            gObject.transform.setPosition(gameObject.transform.tx, gameObject.transform.ty);
+            GameObject gObject = engine.factory.create(currSpawn.unit);
+            gObject.getTransform().setPosition(transform.tx, transform.ty);
             spawnCounter++;
             //gObject.components.get(Life.class).death.add(spawner.spawnedDead);
         }
     }
 
 
-    public Script reset() {
-        return this;
+    public void reset() {
+
     }
 
     public void startSpawn() {

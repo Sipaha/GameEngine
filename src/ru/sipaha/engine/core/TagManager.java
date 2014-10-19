@@ -2,9 +2,9 @@ package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.utils.ObjectIntMap;
 import ru.sipaha.engine.utils.Array;
-import ru.sipaha.engine.utils.GameObjectsArray;
 
 import java.util.BitSet;
+import java.util.Iterator;
 
 public class TagManager {
 
@@ -23,7 +23,7 @@ public class TagManager {
         return id >= 0 && go.tag_bits.get(id);
     }
 
-    public GameObjectsArray getGameObjectsWithTag(String tag) {
+    public Iterable<GameObject> getGameObjectsWithTag(String tag) {
         int id = tags.get(tag, -1);
         if(id == -1) id = addTag(tag);
         return gameObjectsByTag.get(id);
@@ -48,5 +48,69 @@ public class TagManager {
         tags.put(tag, id);
         gameObjectsByTag.add(new GameObjectsArray(false, 16));
         return id;
+    }
+
+    private class GameObjectsArray extends Array<GameObject> implements Iterable<GameObject> {
+
+        private GameObjectsIterator iterator;
+
+        public GameObjectsArray(boolean ordered, int capacity) {
+            super(ordered, capacity, GameObject.class);
+        }
+
+        @Override
+        public Iterator<GameObject> iterator () {
+            if (iterator == null) {
+                iterator = new GameObjectsIterator((ArrayIterator<GameObject>)super.iterator());
+            } else {
+                iterator.reset();
+            }
+            return iterator;
+        }
+
+        public class GameObjectsIterator implements Iterator<GameObject> {
+
+            public ArrayIterator<GameObject> iterator;
+            public boolean end = false;
+            public boolean peeked = false;
+            public GameObject next = null;
+
+            public GameObjectsIterator(ArrayIterator<GameObject> iterator) {
+                this.iterator = iterator;
+            }
+
+            public void reset () {
+                iterator.reset();
+                end = peeked = false;
+                next = null;
+            }
+
+            @Override
+            public boolean hasNext () {
+                if (end) return false;
+                if (next != null) return true;
+                peeked = true;
+                while (iterator.hasNext()) {
+                    final GameObject gameObject = iterator.next();
+                    if (gameObject.enable) {
+                        next = gameObject;
+                        return true;
+                    }
+                }
+                end = true;
+                return false;
+            }
+
+            @Override
+            public GameObject next () {
+                GameObject result = next;
+                next = null;
+                peeked = false;
+                return result;
+            }
+
+            @Override
+            public void remove() {}
+        }
     }
 }

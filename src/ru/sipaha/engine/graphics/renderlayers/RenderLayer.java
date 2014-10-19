@@ -19,10 +19,14 @@ public abstract class RenderLayer implements Comparable<RenderLayer> {
 
     public RenderLayer(String name, Camera camera) {
         this.name = name;
-        this.camera = camera == null ? new Camera() : camera;
+        this.camera = camera;
     }
 
-    public abstract void render();
+    public void draw() {
+        render();
+    }
+
+    protected abstract void render();
 
     public RenderLayer setOrder(int order) {
         this.order = order;

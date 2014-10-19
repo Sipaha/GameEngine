@@ -71,7 +71,7 @@ public class PhysicsWorld {
         private final Box2DDebugRenderer renderer;
 
         public Box2DDebugRenderLayer(World world) {
-            super(RENDER_LAYER_TAG);
+            super(RENDER_LAYER_TAG, null);
             this.world = world;
             renderer = new Box2DDebugRenderer();
         }

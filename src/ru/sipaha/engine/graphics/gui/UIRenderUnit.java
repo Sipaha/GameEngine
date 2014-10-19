@@ -20,10 +20,6 @@ public abstract class UIRenderUnit extends RenderUnit {
         super(t);
     }
 
-    protected UIRenderUnit(Texture t, int zOrder) {
-        super(t, zOrder);
-    }
-
     protected UIRenderUnit(Texture t, ShaderProgram s, int zOrder) {
         super(t, s, zOrder);
     }

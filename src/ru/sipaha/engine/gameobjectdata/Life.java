@@ -18,10 +18,7 @@ public class Life {
         reset(life);
     }
 
-    /**
-     * @return true if game object is alive
-     */
-    public boolean update(GameObject go, float delta) {
+    public void update(GameObject go, float delta) {
         if(lives <= 0) {
             onDying.dispatch(go);
             go.free();
@@ -35,7 +32,6 @@ public class Life {
                 go.free();
             }
         }
-        return go.enable;
     }
 
     public void reset(Life template) {
@@ -45,6 +41,5 @@ public class Life {
         onLifetimeExpired.set(template.onLifetimeExpired);
         onDying.set(template.onDying);
         onBreak.set(template.onBreak);
-
     }
 }

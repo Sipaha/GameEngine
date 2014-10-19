@@ -6,9 +6,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.Entity;
-import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.animation.Animation;
 import ru.sipaha.engine.core.animation.discrete.SpriteAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.ContinuousAnimation;
@@ -20,8 +20,6 @@ import ru.sipaha.engine.scripts.*;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
-
-import java.util.Scanner;
 
 public class GameScreen implements Screen {
     final Engine engine = new Engine();
@@ -39,7 +37,7 @@ public class GameScreen implements Screen {
         g.setTexture(arrow.getTexture());
         for(int i = 0; i < 4; i++) {
             Entity e = new Entity(arrow);
-            e.name = Integer.toString(i);
+            e.setName(Integer.toString(i));
             float u,v,u2,v2;
             switch (i) {
                 case 0: u = 0; v = 0; u2 = 0.5f; v2 = 0.5f; break;
@@ -48,17 +46,17 @@ public class GameScreen implements Screen {
                 case 3: u = 0; v = 0.5f; u2 = 0.5f; v2 = 1f; break;
                 default: u = 0; v = 0; u2 = 0; v2 = 0;
             }
-            e.renderer.setUV(u,v,u2,v2);
+            e.setUV(u,v,u2,v2);
             Transform transform = new Transform().setPosition(128,128);
             transform.parentId = i-1;
-            e.transformId = i;
+            e.setTransformId(i);
             g.addEntity(e);
             g.addTransform(transform);
         }
-        g.renderer.setLinearFilter();
-        g.transform.setPosition(100, 100);
-        g.transform.motion.va = 1;
-        g.transform.motion.a_velocity = 10;
+        g.setLinearFilter();
+        g.getTransform().setPosition(100, 100);
+        g.getTransform().motion.va = 1;
+        g.getTransform().motion.a_velocity = 10;
         engine.tagManager.setTag(g, "Enemy");
         //g.createBody(0.85f);
 
@@ -66,36 +64,35 @@ public class GameScreen implements Screen {
         AnimatedAlpha animatedAlpha = new AnimatedAlpha(curve);
         Animation animation = new ContinuousAnimation("Test",animatedAlpha).setPauseTime(3f);
         g.addAnimation(animation);
-        engine.setReplicator(g, "Name");
+        engine.factory.addTemplate(g, "Name");
 
         Texture t = new Texture(Gdx.files.internal("images/sprite.png"));
         SpriteFrame[] frames = new SpriteFrame[5];
         for(int i = 0; i < frames.length;i++) frames[i] = new SpriteFrame(i*i+1, 0, 0.2f*i, 1, 0.2f*(i+1));
         animation = new SpriteAnimation("Sprite", frames).setLoop(true).setPauseTime(3f).setNeedBackMove(true);
-        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2),8);
+        g = new GameObject(new TextureRegion(t,frames[0].u,frames[0].v,frames[0].u2,frames[0].v2));
         g.addAnimation(animation);
-        g.createBody(1);
         g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 2f));
         g.addScript(TargetHolder.class, new Search("Enemy", 250));
         g.addScript(TargetCatcher.class, new AngleTracking());
-        engine.setReplicator(g, "SpriteTest");
+        engine.factory.addTemplate(g, "SpriteTest");
 
         g = new GameObject(new Texture(Gdx.files.internal("images/4.png")));
-        g.transform.motion.xy_velocity = 140;
-        g.transform.motion.move_forward = true;
-        g.transform.setPosition(0, 70);
+        g.getTransform().motion.xy_velocity = 140;
+        g.getTransform().motion.move_forward = true;
+        g.getTransform().setPosition(0, 70);
         g.life.lifeTime = 4;
         g.life.onLifetimeExpired.add(new Listener<GameObject>() {
             @Override
             public void receive(GameObject object) {
-                engine.createGameObject("Explosion").transform.unhook(object.transform);
+                engine.factory.create("Explosion").getTransform().unhook(object.getTransform());
             }
         });
-        engine.setReplicator(g, "Shell");
+        engine.factory.addTemplate(g, "Shell");
 
         t = new Texture(Gdx.files.internal("images/explosion.png"));
         g = new GameObject(new TextureRegion(t, 96, 96));
-        g.transform.setScale(2f);
+        g.getTransform().setScale(2f);
         frames = new SpriteFrame[17];
         for(int i = 0; i < 4; i++) {
             for(int j = 0; j < (i<3?5:2); j++) {
@@ -107,11 +104,11 @@ public class GameScreen implements Screen {
         }
         g.addAnimation(new SpriteAnimation("explosion_animation", frames), true);
         g.life.lifeTime = 1.19f;
-        engine.setReplicator(g, "Explosion");
+        engine.factory.addTemplate(g, "Explosion");
 
 
         InterfaceLayer interfaceLayer = new InterfaceLayer();
-        UIElement element = new UIElement(new Texture(Gdx.files.internal("images/blackbox.png")));
+        UIElement element = new UIElement(new Texture(Gdx.files.internal("images/1.png")));
         element.setRightPadding(50);
         element.setTopPadding(50);
         interfaceLayer.add(element);
@@ -124,13 +121,13 @@ public class GameScreen implements Screen {
             gg.transform.setPosition(Math.random()*Gdx.graphics.getWidth(), Math.random()*Gdx.graphics.getHeight());
         }*/
 
-        GameObject gameObject = engine.createGameObject("Name");
-        gameObject.transform.setPosition(200, 200);
-        gameObject.transform.motion.moveTo(600, 600);
+        GameObject gameObject = engine.factory.create("Name");
+        gameObject.getTransform().setPosition(200, 200);
+        gameObject.getTransform().motion.moveTo(600, 600);
         gameObject.startAnimation("Test");
 
-        gameObject = engine.createGameObject("SpriteTest");
-        gameObject.transform.setPosition(500,200);
+        gameObject = engine.factory.create("SpriteTest");
+        gameObject.getTransform().setPosition(500,200);
         gameObject.startAnimation("Sprite");
 
         engine.input.addProcessor(new InputAdapter(){

@@ -50,16 +50,16 @@ public class Batch extends RenderUnit {
     }
 
     public void add(RenderUnit unit) {
-        if(renderUnits.size == 0) set(unit);
+        if(renderUnits.size == 0) setPropertiesFrom(unit);
         renderUnits.add(unit);
-        if(isStatic) {
-            verticesCount = unit.render(vertices, verticesCount);
+        if(isStatic()) {
+            verticesCount = unit.setRenderData(vertices, verticesCount);
         }
     }
 
     public void draw(Matrix4 combined) {
         begin(combined);
-        if(!isStatic) {
+        if(!isStatic()) {
             verticesCount = 0;
             try {
                 RenderUnit[] drawableArr = renderUnits.items;
@@ -75,13 +75,23 @@ public class Batch extends RenderUnit {
 
     @Override
     public int render(float[] vertices, int pos) {
-        for(RenderUnit unit : renderUnits) pos = unit.render(vertices, pos);
+        for(RenderUnit unit : renderUnits) {
+            pos = unit.render(vertices, pos);
+        }
         return pos;
+    }
+
+    @Override
+    public int getRenderSize() {
+        int sum = 0;
+        for(RenderUnit u : renderUnits) sum += u.getRenderSize();
+        return sum;
     }
 
     public void begin (Matrix4 combined) {
         GL20 gl = Gdx.gl;
         gl.glDepthMask(false);
+        ShaderProgram shader = getShader();
         shader.begin();
         shader.setUniformMatrix("u_projTrans", combined);
         shader.setUniformi("u_texture", 0);
@@ -91,27 +101,27 @@ public class Batch extends RenderUnit {
         if (verticesCount > 0) flush();
         GL20 gl = Gdx.gl;
         gl.glDepthMask(true);
-        shader.end();
+        getShader().end();
     }
 
     public void flush () {
         int count = verticesCount * 6/20;
 
-        texture.bind();
+        getTexture().bind();
         Mesh mesh = this.mesh;
         mesh.setVertices(vertices, 0, verticesCount);
         mesh.getIndicesBuffer().position(0);
         mesh.getIndicesBuffer().limit(count);
 
-        if (blendingDisabled) {
-            Gdx.gl.glDisable(GL20.GL_BLEND);
-        } else {
+        if (isBlendingEnabled()) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
-            if (blendSrcFunc != -1) Gdx.gl.glBlendFunc(blendSrcFunc, blendDstFunc);
+            Gdx.gl.glBlendFunc(getBlendSrcFunc(), getBlendDstFunc());
+        } else {
+            Gdx.gl.glDisable(GL20.GL_BLEND);
         }
 
         renderCalls++;
-        mesh.render(shader, GL20.GL_TRIANGLES, 0, count);
+        mesh.render(getShader(), GL20.GL_TRIANGLES, 0, count);
     }
 
     public void clear() {

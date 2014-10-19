@@ -170,9 +170,23 @@ public class BatchesRenderLayer extends RenderLayer {
         }
 
         @Override
+        public int setRenderData(float[] data, int offset) {
+            super.setRenderData(data, offset);
+            for(RenderUnit unit : array) offset = unit.setRenderData(data, offset);
+            return offset;
+        }
+
+        @Override
         public int render(float[] vertices, int pos) {
             for(RenderUnit unit : array) pos = unit.render(vertices, pos);
             return pos;
+        }
+
+        @Override
+        public int getRenderSize() {
+            int sum = 0;
+            for(RenderUnit u : array) sum += u.getRenderSize();
+            return sum;
         }
 
         public void reset() {

@@ -1,8 +1,9 @@
 package ru.sipaha.engine.scripts;
 
 import com.badlogic.gdx.math.MathUtils;
-import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.Engine;
+import ru.sipaha.engine.core.Script;
 import ru.sipaha.engine.gameobjectdata.Transform;
 
 /**
@@ -27,8 +28,13 @@ public class AngleTracking extends Script implements TargetCatcher {
 
     @Override
     public void start(Engine engine) {
-        trackingTransform = gameObject.getTransform(trackingTransformName);
+        if(trackingTransformName != null) {
+            trackingTransform = gameObject.getTransform(trackingTransformName);
+        } else {
+            trackingTransform = gameObject.getTransform();
+        }
         targetHolder = gameObject.getScript(TargetHolder.class);
+        gameObject.getTransform();
     }
 
     @Override
@@ -37,8 +43,8 @@ public class AngleTracking extends Script implements TargetCatcher {
             GameObject target = targetHolder.getTarget();
             if (target != null) {
                 float distance = targetHolder.getDistanceToTarget();
-                float angle = calcAngle(trackingTransform, target.transform, distance);
-                gameObject.transform.motion.rotateTo(angle);
+                float angle = calcAngle(trackingTransform, target.getTransform(), distance);
+                trackingTransform.motion.rotateTo(angle);
                 idleTimer = 0;
             } else {
                 if(updateInactive(delta)) {
@@ -72,8 +78,7 @@ public class AngleTracking extends Script implements TargetCatcher {
     }
 
     @Override
-    public Script reset() {
-        return this;
+    public void reset(){
     }
 
     @Override

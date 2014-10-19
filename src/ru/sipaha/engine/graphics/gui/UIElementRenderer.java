@@ -3,7 +3,6 @@ package ru.sipaha.engine.graphics.gui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.NumberUtils;
-import ru.sipaha.engine.graphics.RenderUnit;
 
 /**
  * Created on 12.10.2014.
@@ -25,7 +24,7 @@ public class UIElementRenderer extends UIRenderUnit {
     public UIElementRenderer(TextureRegion region) {
         super(region.getTexture());
         renderData = new float[20];
-        texture = region.getTexture();
+        setTexture(region.getTexture());
         setColor(1,1,1,1);
         setUV(region.getU(), region.getV(), region.getU2(), region.getV2());
     }
@@ -33,7 +32,7 @@ public class UIElementRenderer extends UIRenderUnit {
     public UIElementRenderer(Texture texture) {
         super(texture);
         renderData = new float[20];
-        this.texture = texture;
+        setTexture(texture);
         setColor(1,1,1,1);
         setUV(0, 0, 1, 1);
     }
@@ -56,6 +55,11 @@ public class UIElementRenderer extends UIRenderUnit {
         renderData[U3] = u2; renderData[V3] = v;
         renderData[U4] = u2; renderData[V4] = v2;
         flip(flippedX, flippedY);
+
+        renderData[U1] = 0;  renderData[V1] = 0;
+        renderData[U2] = 0;  renderData[V2] = 0;
+        renderData[U3] = 0; renderData[V3] = 0;
+        renderData[U4] = 0; renderData[V4] = 0;
     }
 
     public void flip(boolean x, boolean y) {
@@ -90,6 +94,11 @@ public class UIElementRenderer extends UIRenderUnit {
         } else {
             return pos;
         }
+    }
+
+    @Override
+    public int getRenderSize() {
+        return 20;
     }
 
     public void setBounds(float left, float right, float top, float bottom) {

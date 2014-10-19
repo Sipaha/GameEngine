@@ -2,7 +2,6 @@ package ru.sipaha.engine.core.animation.discrete;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import ru.sipaha.engine.core.Entity;
-import ru.sipaha.engine.gameobjectdata.EntityRenderer;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
@@ -35,17 +34,17 @@ public class SpriteAnimation extends DiscreteAnimation {
     @Override
     public void start(Entity[] entities, Transform[] transforms) {
         super.start(entities, transforms);
-        EntityRenderer renderer = entities[targetIdx].renderer;
-        if(renderer.animatedSprite != this && renderer.animatedSprite != null) {
-            renderer.animatedSprite.stop();
+        Entity entity = entities[targetIdx];
+        if(entity.animatedSprite != this && entity.animatedSprite != null) {
+            entity.animatedSprite.stop();
         }
-        renderer.animatedSprite = this;
+        entity.animatedSprite = this;
     }
 
     @Override
     public void frameChanged(Entity[] entities, int newFrameIdx) {
-        EntityRenderer renderer = entities[targetIdx].renderer;
+        Entity entity = entities[targetIdx];
         SpriteFrame frame = frames[newFrameIdx];
-        renderer.setUV(frame.u, frame.v, frame.u2, frame.v2);
+        entity.setUV(frame.u, frame.v, frame.u2, frame.v2);
     }
 }

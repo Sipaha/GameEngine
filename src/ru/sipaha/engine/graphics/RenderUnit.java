@@ -2,167 +2,232 @@ package ru.sipaha.engine.graphics;
 
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import ru.sipaha.engine.utils.Shaders;
 
+/**
+ * Created on 18.10.2014.
+ */
+
 public abstract class RenderUnit implements Comparable<RenderUnit> {
-    public static int DEFAULT_Z_ORDER = 3;
+    private RenderProperties properties;
+    private boolean propertiesOwner;
+    private int hash = 0;
 
-    public String renderLayerTag = "Default";
-    protected Texture texture;
-    protected ShaderProgram shader;
-    protected int zOrder;
-    protected boolean blendingDisabled = false;
-    protected int blendSrcFunc = GL20.GL_SRC_ALPHA;
-    protected int blendDstFunc = GL20.GL_ONE_MINUS_SRC_ALPHA;
-    protected boolean isStatic = false;
+    protected int offset;
+    protected float[] renderData;
 
-    private int hash;
-    private boolean isLinearFilter = true;
+    public RenderUnit(){}
 
-    public RenderUnit() {
-        shader = Shaders.defaultShader;
+    public RenderUnit(Texture texture) {
+        setTexture(texture);
     }
 
-    public RenderUnit(RenderUnit unit) {
-        set(unit);
-    }
-
-    public RenderUnit(Texture t) {
-        this(t, null, DEFAULT_Z_ORDER);
-    }
-
-    public RenderUnit(Texture t, int zOrder) {
-        this(t, null, zOrder);
+    public RenderUnit(RenderUnit renderUnit) {
+        setPropertiesFrom(renderUnit);
     }
 
     public RenderUnit(Texture t, ShaderProgram s, int zOrder) {
         setTexture(t);
-        if(s == null) {
-            this.shader = Shaders.defaultShader;
-        } else {
-            this.shader = s;
-        }
-        this.zOrder = zOrder;
-    }
-
-    public Texture getTexture() {
-        return texture;
-    }
-
-    public ShaderProgram getShader() {
-        return shader;
-    }
-
-    public int getZOrder() {
-        return zOrder;
-    }
-
-    public void setBlending(boolean blendingEnabled) {
-        blendingDisabled = !blendingEnabled;
-    }
-
-    public void setBlendFunction (int srcFunc, int dstFunc) {
-        blendSrcFunc = srcFunc;
-        blendDstFunc = dstFunc;
+        setShader(s);
     }
 
     public void setTexture(Texture texture) {
-        this.texture = texture;
-        updateTextureFilter();
-        hash = 0;
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.texture = texture;
+            updateTextureFilter();
+            hash = 0;
+        }
     }
-
-    public void setZOrder(int zOrder) {
-        this.zOrder = zOrder;
-        hash = 0;
+    public Texture getTexture() {
+        return properties.texture;
     }
 
     public void setShader(ShaderProgram shader) {
-        this.shader = shader;
-        hash = 0;
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.shader = shader;
+            hash = 0;
+        }
+    }
+    public ShaderProgram getShader() {
+        return properties.shader;
+    }
+
+    public void setZOrder(int zOrder) {
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.zOrder = zOrder;
+            hash = 0;
+        }
+    }
+    public int getZOrder() {
+        return properties.zOrder;
+    }
+
+    public void setBlending(boolean blendingEnabled) {
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.blendingDisabled = !blendingEnabled;
+        }
+    }
+    public boolean isBlendingEnabled() {
+        return !properties.blendingDisabled;
+    }
+
+    public void setBlendFunctions (int srcFunc, int dstFunc) {
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.blendSrcFunc = srcFunc;
+            properties.blendDstFunc = dstFunc;
+        }
+    }
+    public int getBlendSrcFunc() {
+        return properties.blendSrcFunc;
+    }
+    public int getBlendDstFunc() {
+        return properties.blendDstFunc;
     }
 
     public void setRenderLayerTag(String renderLayerTag) {
-        this.renderLayerTag = renderLayerTag;
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.renderLayerTag = renderLayerTag;
+        }
+    }
+    public String getRenderLayerTag() {
+        return properties.renderLayerTag;
     }
 
     public void setLinearFilter() {
-        if(!isLinearFilter) {
-            isLinearFilter = true;
-            if(texture != null) updateTextureFilter();
+        checkOwnerForChangeProperty();
+        if(propertiesOwner && !properties.isLinearFilter) {
+            properties.isLinearFilter = true;
+            if(properties.texture != null) updateTextureFilter();
+        }
+    }
+    public void setNearestFilter() {
+        checkOwnerForChangeProperty();
+        if(propertiesOwner && properties.isLinearFilter) {
+            properties.isLinearFilter = false;
+            if(properties.texture != null) updateTextureFilter();
         }
     }
 
-    public void setNearestFilter() {
-        if(isLinearFilter) {
-            isLinearFilter = false;
-            if(texture != null) updateTextureFilter();
+    public void setStatic(boolean isStatic) {
+        checkOwnerForChangeProperty();
+        if(propertiesOwner) {
+            properties.isStatic = isStatic;
         }
+    }
+    public boolean isStatic() {
+        return properties.isStatic;
     }
 
     private void updateTextureFilter() {
-        if(isLinearFilter) {
-            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        if(properties.isLinearFilter) {
+            properties.texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         } else {
-            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            properties.texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
     }
 
-    public void set(RenderUnit unit) {
-        texture = unit.texture;
-        shader = unit.shader;
-        zOrder = unit.zOrder;
-        blendingDisabled = unit.blendingDisabled;
-        blendSrcFunc = unit.blendSrcFunc;
-        blendDstFunc = unit.blendDstFunc;
-        isStatic = unit.isStatic;
-        hash = unit.hash;
-        isLinearFilter = unit.isLinearFilter;
+    private void checkOwnerForChangeProperty() {
+        if(properties == null) {
+            properties = new RenderProperties();
+            propertiesOwner = true;
+        }
+        if(!propertiesOwner) throw new RuntimeException("This object can't change render properties!");
     }
 
-    public abstract int render(float[] vertices, int pos);
-
     public boolean equalsIgnoreZOrder(RenderUnit r) {
-        return this == r
-                || r != null
-                && shader == r.shader
-                && texture == r.texture
-                && isStatic == r.isStatic
-                && blendingDisabled == r.blendingDisabled
-                && blendDstFunc == r.blendDstFunc
-                && blendSrcFunc == r.blendSrcFunc;
+        return properties.equalsIgnoreZOrder(r.properties);
+    }
+
+    public boolean canBeRendered() {
+        return properties != null && properties.texture != null && properties.shader != null;
+    }
+
+    public void setPropertiesFrom(RenderUnit unit) {
+        properties = unit.properties;
+        propertiesOwner = properties == null;
+    }
+
+    public int setRenderData(float[] data, int offset) {
+        this.offset = offset;
+        this.renderData = data;
+        return getRenderSize()+offset;
+    }
+
+    public abstract int render(float[] renderData, int position);
+
+    public abstract int getRenderSize();
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof RenderUnit && properties.equals(((RenderUnit)obj).properties);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        RenderUnit r = (RenderUnit) o;
-
-        return zOrder == r.zOrder
-                && shader == r.shader
-                && texture == r.texture
-                && isStatic == r.isStatic
-                && blendingDisabled == r.blendingDisabled
-                && blendDstFunc == r.blendDstFunc
-                && blendSrcFunc == r.blendSrcFunc;
+    public int compareTo(RenderUnit unit) {
+        if (properties.zOrder > unit.properties.zOrder) return 1;
+        if (properties.zOrder < unit.properties.zOrder) return -1;
+        return 0;
     }
 
     @Override
     public int hashCode() {
         if(hash != 0) return hash;
-        hash = texture.hashCode();
-        hash = 31 * hash + shader.hashCode();
-        hash = 31 * hash + zOrder;
+        hash = properties.hashCode();
         return hash;
     }
 
-    @Override
-    public int compareTo(RenderUnit unit) {
-        if (zOrder > unit.zOrder) return 1;
-        if (zOrder < unit.zOrder) return -1;
-        return 0;
+    private class RenderProperties {
+        String renderLayerTag = Renderer.DEFAULT_LAYER;
+        Texture texture;
+        ShaderProgram shader = Shaders.defaultShader;
+        int zOrder = Renderer.DEFAULT_Z_ORDER;
+        boolean blendingDisabled = false;
+        int blendSrcFunc = GL20.GL_SRC_ALPHA;
+        int blendDstFunc = GL20.GL_ONE_MINUS_SRC_ALPHA;
+        boolean isStatic = false;
+        boolean isLinearFilter = true;
+
+        public boolean equalsIgnoreZOrder(RenderProperties r) {
+            return this == r
+                    || r != null
+                    && shader == r.shader
+                    && texture == r.texture
+                    && isStatic == r.isStatic
+                    && blendingDisabled == r.blendingDisabled
+                    && blendDstFunc == r.blendDstFunc
+                    && blendSrcFunc == r.blendSrcFunc;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RenderProperties r = (RenderProperties) o;
+
+            return zOrder == r.zOrder
+                    && shader == r.shader
+                    && texture == r.texture
+                    && isStatic == r.isStatic
+                    && blendingDisabled == r.blendingDisabled
+                    && blendDstFunc == r.blendDstFunc
+                    && blendSrcFunc == r.blendSrcFunc;
+        }
+
+        @Override
+        public int hashCode() {
+            hash = texture.hashCode();
+            hash = 31 * hash + shader.hashCode();
+            hash = 31 * hash + zOrder;
+            return hash;
+        }
     }
 }

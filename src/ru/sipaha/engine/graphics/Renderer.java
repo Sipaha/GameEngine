@@ -13,6 +13,7 @@ import ru.sipaha.engine.utils.Array;
 
 public class Renderer {
     public final static String DEFAULT_LAYER = "Default";
+    public final static int DEFAULT_Z_ORDER = 3;
 
     private ObjectMap<String, RenderLayer> layersByName;
     private Array<RenderLayer> layers;
@@ -24,7 +25,7 @@ public class Renderer {
 
     public void render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        for(RenderLayer layer : layers) layer.render();
+        for(RenderLayer layer : layers) layer.draw();
     }
 
     public void addRenderLayer(RenderLayer layer) {
@@ -56,16 +57,16 @@ public class Renderer {
         return layer;
     }
 
-    public void addRenderUnit(RenderUnit renderUnit) {
-        getRenderLayer(renderUnit.renderLayerTag).add(renderUnit);
+    public void addRenderUnit(RenderUnit renderProperties) {
+        getRenderLayer(renderProperties.getRenderLayerTag()).add(renderProperties);
     }
 
-    public void removeRenderUnit(RenderUnit renderUnit) {
-        layersByName.get(renderUnit.renderLayerTag).remove(renderUnit);
+    public void removeRenderUnit(RenderUnit renderProperties) {
+        layersByName.get(renderProperties.getRenderLayerTag()).remove(renderProperties);
     }
 
-    public void prepareRenderUnit(RenderUnit renderUnit) {
-        getRenderLayer(renderUnit.renderLayerTag).prepare(renderUnit);
+    public void prepareRenderUnit(RenderUnit renderProperties) {
+        getRenderLayer(renderProperties.getRenderLayerTag()).prepare(renderProperties);
     }
 
     public void resize(int width ,int height) {
