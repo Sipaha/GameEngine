@@ -10,75 +10,35 @@ import com.badlogic.gdx.math.Matrix4;
 import ru.sipaha.engine.utils.Array;
 
 public class Batch extends RenderUnit {
-    public static final int DEFAULT_MAX_SIZE = 1000;
-
-    public static int renderCalls = 0;
 
     private Array<RenderUnit> renderUnits = new Array<>(true, 4, RenderUnit.class);
+    private RenderBuffer renderBuffer;
 
-    private Mesh mesh;
-
-    protected final float[] vertices;
-    protected int verticesCount = 0;
-
-    public Batch() {
-        this(DEFAULT_MAX_SIZE);
-    }
-
-    public Batch(int size) {
-        if (size > 5460) throw new IllegalArgumentException("Can't have more than 5460 sprites per BatchArray: " + size);
-
-        mesh = new Mesh(Mesh.VertexDataType.VertexArray, false, size * 4, size * 6,
-                new VertexAttribute(VertexAttributes.Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE),
-                new VertexAttribute(VertexAttributes.Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
-                new VertexAttribute(VertexAttributes.Usage.TextureCoordinates, 2, ShaderProgram.TEXCOORD_ATTRIBUTE + "0"));
-
-        vertices = new float[size*20];
-
-        int len = size * 6;
-        short[] indices = new short[len];
-        short j = 0;
-        for (int i = 0; i < len; i += 6, j += 4) {
-            indices[i] = j;
-            indices[i + 1] = (short)(j + 1);
-            indices[i + 2] = (short)(j + 2);
-            indices[i + 3] = (short)(j + 2);
-            indices[i + 4] = (short)(j + 3);
-            indices[i + 5] = j;
-        }
-        mesh.setIndices(indices);
-    }
+    public Batch() {}
 
     public void add(RenderUnit unit) {
-        if(renderUnits.size == 0) setPropertiesFrom(unit);
+        if(renderUnits.size == 0) {
+            setPropertiesFrom(unit);
+            renderBuffer = isStatic() ? RenderBuffer.getStaticBuffer() : RenderBuffer.getDynamicBuffer();
+        }
         renderUnits.add(unit);
-        if(isStatic()) {
-            verticesCount = unit.setRenderData(vertices, verticesCount);
+        if(isStatic() && !renderBuffer.setRenderDataTo(unit)) {
+            renderBuffer.ensureCapacity();
+            for(RenderUnit u : renderUnits) {
+                renderBuffer.setRenderDataTo(u);
+            }
         }
     }
 
     public void draw(Matrix4 combined) {
         begin(combined);
-        if(!isStatic()) {
-            verticesCount = 0;
-            try {
-                RenderUnit[] drawableArr = renderUnits.items;
-                for (int i = 0, s = renderUnits.size; i < s; i++) {
-                    verticesCount = drawableArr[i].render(vertices, verticesCount);
-                }
-            } catch (ArrayIndexOutOfBoundsException e) {
-                Gdx.app.error("Game Engine", "Vertices length is too low! Length = "+vertices.length);
-            }
-        }
+        if(!isStatic()) for(RenderUnit unit : renderUnits) renderBuffer.render(unit);
         end();
     }
 
     @Override
-    public int render(float[] vertices, int pos) {
-        for(RenderUnit unit : renderUnits) {
-            pos = unit.render(vertices, pos);
-        }
-        return pos;
+    public void render(RenderBuffer buffer) {
+        for(RenderUnit unit : renderUnits) unit.render(buffer);
     }
 
     @Override
@@ -95,37 +55,30 @@ public class Batch extends RenderUnit {
         shader.begin();
         shader.setUniformMatrix("u_projTrans", combined);
         shader.setUniformi("u_texture", 0);
-    }
-
-    public void end () {
-        if (verticesCount > 0) flush();
-        GL20 gl = Gdx.gl;
-        gl.glDepthMask(true);
-        getShader().end();
-    }
-
-    public void flush () {
-        int count = verticesCount * 6/20;
-
         getTexture().bind();
-        Mesh mesh = this.mesh;
-        mesh.setVertices(vertices, 0, verticesCount);
-        mesh.getIndicesBuffer().position(0);
-        mesh.getIndicesBuffer().limit(count);
-
         if (isBlendingEnabled()) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(getBlendSrcFunc(), getBlendDstFunc());
         } else {
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
+        renderBuffer.begin(getShader());
+    }
 
-        renderCalls++;
-        mesh.render(getShader(), GL20.GL_TRIANGLES, 0, count);
+    public void end () {
+        if(isStatic()) renderBuffer.flush();
+        else renderBuffer.end();
+        GL20 gl = Gdx.gl;
+        gl.glDepthMask(true);
+        getShader().end();
     }
 
     public void clear() {
         renderUnits.clear();
+        if(renderBuffer != null) {
+            renderBuffer.free();
+            renderBuffer = null;
+        }
     }
 
     public int getSize() {
@@ -133,6 +86,6 @@ public class Batch extends RenderUnit {
     }
 
     public void dispose () {
-        mesh.dispose();
+        renderBuffer.dispose();
     }
 }

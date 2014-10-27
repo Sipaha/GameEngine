@@ -15,6 +15,7 @@ import java.util.List;
 public class Transform {
     public float t00, t01, t10, t11, tx, ty;
     public boolean wasChanged;
+    public boolean childUpdateRequest;
     public int parentId = 0;
     public Motion motion;
     public RigidBody rigidBody;
@@ -48,6 +49,7 @@ public class Transform {
     public void update(float delta) {
         if(unhooked) {
             wasChanged = true;
+            childUpdateRequest = true;
             unhooked = false;
         } else {
             if(rigidBody != null) {
@@ -78,20 +80,15 @@ public class Transform {
         tx = x; ty = y;
         dirty = false;
         wasChanged = true;
+        childUpdateRequest = true;
     }
 
     public void update(Transform parent, float delta) {
         motion.update(this, delta);
-        if(dirty || parent.wasChanged) {
+        if(dirty || parent.childUpdateRequest) {
             updateData();
             mul(parent);
         }
-    }
-
-    public void forceUpdate(Transform parent) {
-        dirty = true;
-        update(0f);
-        if(parent != null) mul(parent);
     }
 
     public void unhook(Transform parent) {
@@ -151,18 +148,21 @@ public class Transform {
         t00 = cos*scale;
         t11 = t00;
         wasChanged = true;
+        childUpdateRequest = true;
     }
 
     public void setScaleX(float scaleX) {
         this.scaleX = scaleX;
         t00 = cos*scaleX;
         wasChanged = true;
+        childUpdateRequest = true;
     }
 
     public void setScaleY(float scaleY) {
         this.scaleY = scaleY;
         t11 = cos*scaleY;
         wasChanged = true;
+        childUpdateRequest = true;
     }
 
     public Vector2 getPosition() {
@@ -178,6 +178,7 @@ public class Transform {
         ty += dy;
         if(rigidBody != null) rigidBody.translate(dx, dy);
         wasChanged = true;
+        childUpdateRequest = true;
     }
 
     public Transform reset(Transform source) {

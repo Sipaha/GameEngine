@@ -1,4 +1,4 @@
-package ru.sipaha.engine.scripts;
+package ru.sipaha.engine.test.scripts;
 
 import ru.sipaha.engine.core.GameObject;
 

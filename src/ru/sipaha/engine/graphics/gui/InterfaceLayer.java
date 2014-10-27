@@ -28,9 +28,9 @@ public class InterfaceLayer extends RenderLayer {
 
     public void add(UIElement element) {
         container.add(element);
-        if(element.renderer != null) {
+        /*if(element.renderer != null) {
             batch.add(element.renderer);
-        }
+        }*/
     }
 
     public void remove(UIElement element) {

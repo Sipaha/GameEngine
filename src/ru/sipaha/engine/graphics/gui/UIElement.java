@@ -2,80 +2,56 @@ package ru.sipaha.engine.graphics.gui;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.ObjectMap;
+import ru.sipaha.engine.core.Entity;
+import ru.sipaha.engine.graphics.RenderBuffer;
+import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.structures.Bounds;
 
 /**
  * Created on 12.10.2014.
  */
 
-public class UIElement {
+public class UIElement extends Entity {
 
-    public boolean anchorLeft = false;
-    public boolean anchorRight = false;
-    public boolean anchorBottom = false;
-    public boolean anchorTop = false;
+    private Array<UIElement> children;
+    private Layout layout = null;
+    private ObjectMap<String, String> parameters;
 
-    protected float width;
-    protected float height;
-
-    protected float leftPadding = 0f;
-    protected float rightPadding = 0f;
-    protected float topPadding = 0f;
-    protected float bottomPadding = 0f;
-
-    protected final Bounds bounds = new Bounds();
-
-    public final UIRenderUnit renderer;
-
-    public UIElement() {
-        renderer = null;
+    public UIElement(TextureRegion r) {
+        super(r);
     }
 
-    public UIElement(TextureRegion region) {
-        renderer = new UIElementRenderer(region);
-        width = region.getRegionWidth();
-        height = region.getRegionHeight();
+    public UIElement(Texture t) {
+        super(t);
     }
 
-    public UIElement(Texture texture) {
-        renderer = new UIElementRenderer(texture);
-        width = texture.getWidth();
-        height = texture.getHeight();
+    public UIElement(Entity entity) {
+        super(entity);
     }
 
-    public UIElement(UIRenderUnit renderer) {
-        this.renderer = renderer;
-        width = bounds.getWidth();
-        height = bounds.getHeight();
+    public UIElement(float u, float v, float u2, float v2, float width, float height) {
+        super(u, v, u2, v2, width, height);
     }
 
-    public void setLeftPadding(float leftPadding) {
-        this.leftPadding = leftPadding;
-        anchorLeft = true;
+    public void setParameter(String name, String value) {
+        if(parameters == null) parameters = new ObjectMap<>();
+        parameters.put(name, value);
+        if(name.equalsIgnoreCase("width")) setWidth(Float.parseFloat(value));
+        if(name.equalsIgnoreCase("height")) setHeight(Float.parseFloat(value));
+        if(name.equalsIgnoreCase("size")) {
+            String[] params = value.split("\\s+");
+            setSize(Float.parseFloat(params[0]), Float.parseFloat(params[1]));
+        }
     }
 
-    public void setRightPadding(float rightPadding) {
-        this.rightPadding = rightPadding;
-        anchorRight = true;
+    public void addChild(UIElement child) {
+        if(children == null) children = new Array<>(false, 4, UIElement.class);
+        children.add(child);
     }
 
-    public void setBottomPadding(float bottomPadding) {
-        this.bottomPadding = bottomPadding;
-        anchorBottom = true;
-    }
-
-    public void setTopPadding(float topPadding) {
-        this.topPadding = topPadding;
-        anchorTop = true;
-    }
-
-    public void setSize(float newWidth, float newHeight) {
-        width = newWidth;
-        height = newHeight;
-    }
-
-    protected void setBounds(float left, float right, float top, float bottom) {
-        bounds.set(left, right, top, bottom);
-        if(renderer != null) renderer.setBounds(bounds.minX, bounds.maxX, bounds.maxY, bounds.minY);
+    @Override
+    public void render(RenderBuffer buffer) {
+        super.render(buffer);
     }
 }

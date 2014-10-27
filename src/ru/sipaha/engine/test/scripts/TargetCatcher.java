@@ -1,4 +1,4 @@
-package ru.sipaha.engine.scripts;
+package ru.sipaha.engine.test.scripts;
 
 /**
  * Created on 07.10.2014.

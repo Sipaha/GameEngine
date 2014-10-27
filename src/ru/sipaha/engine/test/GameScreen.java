@@ -5,7 +5,8 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Rectangle;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.Entity;
@@ -16,7 +17,7 @@ import ru.sipaha.engine.core.animation.сontinuous.AnimatedAlpha;
 import ru.sipaha.engine.gameobjectdata.Transform;
 import ru.sipaha.engine.graphics.gui.InterfaceLayer;
 import ru.sipaha.engine.graphics.gui.UIElement;
-import ru.sipaha.engine.scripts.*;
+import ru.sipaha.engine.test.scripts.*;
 import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
 import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
@@ -25,8 +26,6 @@ public class GameScreen implements Screen {
     final Engine engine = new Engine();
 
     public GameScreen() {
-
-        System.out.println();
         Texture[] textures = new Texture[3];
         for(int i = 0; i < textures.length; i++) {
             textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
@@ -46,7 +45,7 @@ public class GameScreen implements Screen {
                 case 3: u = 0; v = 0.5f; u2 = 0.5f; v2 = 1f; break;
                 default: u = 0; v = 0; u2 = 0; v2 = 0;
             }
-            e.setUV(u,v,u2,v2);
+            e.setUV(u, v, u2, v2);
             Transform transform = new Transform().setPosition(128,128);
             transform.parentId = i-1;
             e.setTransformId(i);
@@ -107,27 +106,27 @@ public class GameScreen implements Screen {
         engine.factory.addTemplate(g, "Explosion");
 
 
-        InterfaceLayer interfaceLayer = new InterfaceLayer();
+        /*InterfaceLayer interfaceLayer = new InterfaceLayer();
         UIElement element = new UIElement(new Texture(Gdx.files.internal("images/1.png")));
         element.setRightPadding(50);
         element.setTopPadding(50);
         interfaceLayer.add(element);
-        engine.renderer.addRenderLayer(interfaceLayer);
+        engine.renderer.addRenderLayer(interfaceLayer);*/
 
         engine.initialize();
 
-        /*for(int i = 0; i < 400; i++) {
-            GameObject gg = engine.createGameObject("Name");
-            gg.transform.setPosition(Math.random()*Gdx.graphics.getWidth(), Math.random()*Gdx.graphics.getHeight());
-        }*/
-
+        /*for(int i = 0; i < 200; i++) {
+            GameObject gg = engine.factory.create("Name");
+            gg.getTransform().setPosition(Math.random()*Gdx.graphics.getWidth(), Math.random()*Gdx.graphics.getHeight());
+        }
+*/
         GameObject gameObject = engine.factory.create("Name");
         gameObject.getTransform().setPosition(200, 200);
         gameObject.getTransform().motion.moveTo(600, 600);
         gameObject.startAnimation("Test");
 
         gameObject = engine.factory.create("SpriteTest");
-        gameObject.getTransform().setPosition(500,200);
+        gameObject.getTransform().setPosition(500, 200);
         gameObject.startAnimation("Sprite");
 
         engine.input.addProcessor(new InputAdapter(){

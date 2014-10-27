@@ -2,9 +2,9 @@ package ru.sipaha.engine.graphics.renderlayers;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.Batch;
+import ru.sipaha.engine.graphics.RenderBuffer;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
-import ru.sipaha.engine.utils.IntIntMap;
 
 /**
  * Created on 30.09.2014.
@@ -177,9 +177,8 @@ public class BatchesRenderLayer extends RenderLayer {
         }
 
         @Override
-        public int render(float[] vertices, int pos) {
-            for(RenderUnit unit : array) pos = unit.render(vertices, pos);
-            return pos;
+        public void render(RenderBuffer buffer) {
+            for(RenderUnit unit : array) unit.render(buffer);
         }
 
         @Override
@@ -193,6 +192,47 @@ public class BatchesRenderLayer extends RenderLayer {
             upPriority = 0;
             nextLink = null;
             replaced = false;
+        }
+    }
+
+    private class IntIntMap {
+
+        public final Array<Entry> entries = new Array<>(true, 16, Entry.class);
+
+        public void put(int key, int value) {
+            entries.add(new Entry(key, value));
+        }
+
+        public Entry getByIndex(int i) {
+            return entries.get(i);
+        }
+
+        public Entry get(int key) {
+            for(Entry e : entries) if(e.key == key) return e;
+            return null;
+        }
+
+        public int getIndex(int key) {
+            for(int i = 0; i < entries.size; i++) if(entries.get(i).key == key) return i;
+            return -1;
+        }
+
+        public int size() {
+            return entries.size;
+        }
+
+        public class Entry {
+            public int key, value;
+
+            public Entry(int key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+
+            @Override
+            public String toString() {
+                return "key="+key+" value="+value;
+            }
         }
     }
 }

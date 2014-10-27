@@ -16,6 +16,8 @@ public class Factory {
     private final IntMap<GameObject> templatesById = new IntMap<>();
     private final HashSet<GameObject> hashSet = new HashSet<>();
 
+    private boolean initialized = false;
+
     public Factory(Engine engine) {
         this.engine = engine;
     }
@@ -23,20 +25,20 @@ public class Factory {
     public void addTemplate(GameObject template, String name) {
         templatesByName.put(name, template);
         template.engine = engine;
-        hashSet.add(template);
+        if(hashSet.add(template) && initialized) template.initialize(engine);
     }
 
     public void addTemplate(GameObject template, int id) {
         templatesById.put(id, template);
         template.engine = engine;
-        hashSet.add(template);
+        if(hashSet.add(template) && initialized) template.initialize(engine);
     }
 
     public void addTemplate(GameObject template, String name, int id) {
         templatesByName.put(name, template);
         templatesById.put(id, template);
         template.engine = engine;
-        hashSet.add(template);
+        if(hashSet.add(template) && initialized) template.initialize(engine);
     }
 
     public GameObject getTemplate(String name) {
@@ -57,5 +59,6 @@ public class Factory {
 
     protected void initialize() {
         for(GameObject template : hashSet) template.initialize(engine);
+        initialized = true;
     }
 }

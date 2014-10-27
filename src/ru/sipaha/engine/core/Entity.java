@@ -7,38 +7,38 @@ import com.badlogic.gdx.utils.NumberUtils;
 import ru.sipaha.engine.core.animation.discrete.SpriteAnimation;
 import ru.sipaha.engine.core.animation.сontinuous.*;
 import ru.sipaha.engine.gameobjectdata.Transform;
+import ru.sipaha.engine.graphics.RenderBuffer;
 import ru.sipaha.engine.graphics.RenderUnit;
+import ru.sipaha.engine.utils.structures.Bounds;
 
 public class Entity extends RenderUnit {
     public static final int ENTITY_RENDER_SIZE = 20;
 
-    private int X1,Y1,C1,U1,V1;
-    private int X2,Y2,C2,U2,V2;
-    private int X3,Y3,C3,U3,V3;
-    private int X4,Y4,C4,U4,V4;
+    public static final int X1 = 0, Y1 = 1, C1 = 2, U1 = 3, V1 = 4;
+    public static final int X2 = 5, Y2 = 6, C2 = 7, U2 = 8, V2 = 9;
+    public static final int X3 = 10, Y3 = 11, C3 = 12, U3 = 13, V3 = 14;
+    public static final int X4 = 15, Y4 = 16, C4 = 17, U4 = 18, V4 = 19;
 
     private String name;
     private int transformId = 0;
+    private Transform transform;
 
     private float a = 1, r = 1, g = 1, b = 1;
-    private float u,v,u2,v2,dv,du;
+    private float u, v, u2, v2;
     private float width, height;
     private float originX, originY;
-    private float offsetV = 0, offsetU = 0;
-    private float repeatX = 1, repeatY = 1;
-    public boolean fixedRotation = false;
+    private boolean fixedRotation = false;
 
-    private boolean dirtyBody = true;
-    private boolean dirtyColor = true;
-    private boolean dirtyUV = true;
+    private boolean dirty = true;
+    private boolean boundsWasChanged = true;
 
-    public boolean visible = true;
+    protected boolean visible = true;
+
+    protected Bounds bounds;
 
     public AnimatedAlpha animatedAlpha = null;
     public AnimatedColor animatedColor = null;
     public AnimatedOrigin animatedOrigin = null;
-    public AnimatedUOffset animatedUOffset = null;
-    public AnimatedVOffset animatedVOffset = null;
     public SpriteAnimation animatedSprite = null;
 
     public Entity(TextureRegion r) {
@@ -68,32 +68,31 @@ public class Entity extends RenderUnit {
         this.v = v;
         this.u2 = u2;
         this.v2 = v2;
-        dv = v2 - v;
-        du = u2 - u;
-        dirtyUV = true;
+        if(renderData != null) updateUV();
+    }
+
+    private void updateUV() {
+        renderData[offset+U1] = u;  renderData[offset+V1] = v2;
+        renderData[offset+U2] = u;  renderData[offset+V2] = v;
+        renderData[offset+U3] = u2; renderData[offset+V3] = v;
+        renderData[offset+U4] = u2; renderData[offset+V4] = v2;
     }
 
     @Override
     public int setRenderData(float[] renderData, int offset) {
-        X1 =   +offset; Y1 = 1 +offset; C1 = 2 +offset; U1 = 3 +offset; V1 = 4 +offset;
-        X2 = 5 +offset; Y2 = 6 +offset; C2 = 7 +offset; U2 = 8 +offset; V2 = 9 +offset;
-        X3 = 10+offset; Y3 = 11+offset; C3 = 12+offset; U3 = 13+offset; V3 = 14+offset;
-        X4 = 15+offset; Y4 = 16+offset; C4 = 17+offset; U4 = 18+offset; V4 = 19+offset;
-        this.renderData = renderData;
-        dirtyBody = true;
-        dirtyColor = true;
-        dirtyUV = true;
-        this.offset = offset;
-        return offset+ENTITY_RENDER_SIZE;
+        int res = super.setRenderData(renderData, offset);
+        dirty = true;
+        updateColor();
+        updateUV();
+        return res;
     }
 
     @Override
-    public int render(float[] vertices, int pos) {
+    public void render(RenderBuffer buffer) {
         if(visible) {
-            System.arraycopy(renderData, offset, vertices, pos, ENTITY_RENDER_SIZE);
-            pos += ENTITY_RENDER_SIZE;
+            updateBody();
+            buffer.render(renderData, offset, ENTITY_RENDER_SIZE);
         }
-        return pos;
     }
 
     @Override
@@ -101,45 +100,21 @@ public class Entity extends RenderUnit {
         return ENTITY_RENDER_SIZE;
     }
 
-    public void update(Transform[] transforms) {
-        updateBody(transforms[transformId]);
-        updateColor();
-        updateUV();
-    }
-
-    private void updateUV() {
-        if(dirtyUV) {
-            float u  = this.u  + offsetU;
-            float v  = this.v  + offsetV;
-            float u2 = this.u2 + offsetU;
-            float v2 = this.v2 + offsetV;
-            renderData[U1] = u;  renderData[V1] = v2;
-            renderData[U2] = u;  renderData[V2] = v;
-            renderData[U3] = u2; renderData[V3] = v;
-            renderData[U4] = u2; renderData[V4] = v2;
-
-            dirtyUV = false;
-        }
-    }
-
     private void updateColor() {
-        if(dirtyColor) {
-            int intBits = ((int) (255 * a) << 24)
-                    | ((int) (255 * b) << 16)
-                    | ((int) (255 * g) << 8)
-                    | ((int) (255 * r));
-            float color = NumberUtils.intToFloatColor(intBits);
-            renderData[C1] = color;
-            renderData[C2] = color;
-            renderData[C3] = color;
-            renderData[C4] = color;
-
-            dirtyColor = false;
-        }
+        int intBits = ((int) (255 * a) << 24)
+                | ((int) (255 * b) << 16)
+                | ((int) (255 * g) << 8)
+                | ((int) (255 * r));
+        float color = NumberUtils.intToFloatColor(intBits);
+        renderData[offset+C1] = color;
+        renderData[offset+C2] = color;
+        renderData[offset+C3] = color;
+        renderData[offset+C4] = color;
     }
 
-    private void updateBody(Transform t) {
-        if(!t.wasChanged && !dirtyBody) return;
+    public void updateBody() {
+        Transform t = this.transform;
+        if(!t.wasChanged && !dirty) return;
         float localX  = -originX;
         float localY  = -originY;
         float localX2 = localX + width;
@@ -150,35 +125,36 @@ public class Entity extends RenderUnit {
             final float x_m10  = localX  * t.t10, y_m11  = localY  * t.t11;
             final float x2_m00 = localX2 * t.t00, y2_m01 = localY2 * t.t01;
             final float x2_m10 = localX2 * t.t10, y2_m11 = localY2 * t.t11;
-            float x1 = x_m00  + y_m01  + t.tx;
-            float y1 = x_m10  + y_m11  + t.ty;
-            float x2 = x_m00  + y2_m01 + t.tx;
-            float y2 = x_m10  + y2_m11 + t.ty;
-            float x3 = x2_m00 + y2_m01 + t.tx;
-            float y3 = x2_m10 + y2_m11 + t.ty;
-            renderData[X1] = x1;
-            renderData[Y1] = y1;
-            renderData[X2] = x2;
-            renderData[Y2] = y2;
-            renderData[X3] = x3;
-            renderData[Y3] = y3;
-            renderData[X4] = x1 + (x3 - x2);
-            renderData[Y4] = y3 - (y2 - y1);
+            final float x1 = x_m00  + y_m01  + t.tx;
+            final float y1 = x_m10  + y_m11  + t.ty;
+            final float x2 = x_m00  + y2_m01 + t.tx;
+            final float y2 = x_m10  + y2_m11 + t.ty;
+            final float x3 = x2_m00 + y2_m01 + t.tx;
+            final float y3 = x2_m10 + y2_m11 + t.ty;
+            renderData[offset+X1] = x1;
+            renderData[offset+Y1] = y1;
+            renderData[offset+X2] = x2;
+            renderData[offset+Y2] = y2;
+            renderData[offset+X3] = x3;
+            renderData[offset+Y3] = y3;
+            renderData[offset+X4] = x1 + (x3 - x2);
+            renderData[offset+Y4] = y3 - (y2 - y1);
         } else {
-            float x1 = localX  + t.tx;
-            float y1 = localY  + t.ty;
-            float x3 = localX2 + t.tx;
-            float y3 = localY2 + t.ty;
-            renderData[X1] = x1;
-            renderData[Y1] = y1;
-            renderData[X3] = x3;
-            renderData[Y3] = y3;
-            renderData[X2] = x1;
-            renderData[Y2] = y3;
-            renderData[X4] = x3;
-            renderData[Y4] = y1;
+            final float x1 = localX  + t.tx;
+            final float y1 = localY  + t.ty;
+            final float x3 = localX2 + t.tx;
+            final float y3 = localY2 + t.ty;
+            renderData[offset+X1] = x1;
+            renderData[offset+Y1] = y1;
+            renderData[offset+X3] = x3;
+            renderData[offset+Y3] = y3;
+            renderData[offset+X2] = x1;
+            renderData[offset+Y2] = y3;
+            renderData[offset+X4] = x3;
+            renderData[offset+Y4] = y1;
         }
-        dirtyBody = false;
+        dirty = false;
+        boundsWasChanged = true;
     }
 
     public void reset(Entity source) {
@@ -186,86 +162,57 @@ public class Entity extends RenderUnit {
         r = source.r;
         g = source.g;
         b = source.b;
-        offsetV = source.offsetV;
-        offsetU = source.offsetU;
-        repeatX = source.repeatX;
-        repeatY = source.repeatY;
         animatedAlpha = null;
         animatedColor = null;
         animatedOrigin = null;
-        animatedUOffset = null;
-        animatedVOffset = null;
         animatedSprite = null;
     }
 
-    public Rectangle getBounds(Rectangle bounds) {
+    public Bounds getBounds() {
+        if(bounds == null) {
+            bounds = new Bounds();
+        } else if(!boundsWasChanged) {
+            return bounds;
+        }
         final float[] vertices = renderData;
 
-        float minx = vertices[X1];
-        float miny = vertices[Y1];
-        float maxx = vertices[X1];
-        float maxy = vertices[Y1];
+        float minX = Math.min(vertices[offset+X1],
+                     Math.min(vertices[offset+X2],
+                     Math.min(vertices[offset+X3],
+                              vertices[offset+X4])));
+        float maxX = Math.max(vertices[offset+X1],
+                     Math.max(vertices[offset+X2],
+                     Math.max(vertices[offset+X3],
+                              vertices[offset+X4])));
+        float minY = Math.min(vertices[offset+Y1],
+                     Math.min(vertices[offset+Y2],
+                     Math.min(vertices[offset+Y3],
+                              vertices[offset+Y4])));
+        float maxY = Math.max(vertices[offset+Y1],
+                     Math.max(vertices[offset+Y2],
+                     Math.max(vertices[offset+Y3],
+                              vertices[offset+Y4])));
 
-        minx = minx > vertices[X2] ? vertices[X2] : minx;
-        minx = minx > vertices[X3] ? vertices[X3] : minx;
-        minx = minx > vertices[X4] ? vertices[X4] : minx;
-
-        maxx = maxx < vertices[X2] ? vertices[X2] : maxx;
-        maxx = maxx < vertices[X3] ? vertices[X3] : maxx;
-        maxx = maxx < vertices[X4] ? vertices[X4] : maxx;
-
-        miny = miny > vertices[Y2] ? vertices[Y2] : miny;
-        miny = miny > vertices[Y3] ? vertices[Y3] : miny;
-        miny = miny > vertices[Y4] ? vertices[Y4] : miny;
-
-        maxy = maxy < vertices[Y2] ? vertices[Y2] : maxy;
-        maxy = maxy < vertices[Y3] ? vertices[Y3] : maxy;
-        maxy = maxy < vertices[Y4] ? vertices[Y4] : maxy;
-
-        if (bounds == null) {
-            bounds = new Rectangle();
-            bounds.x = minx;
-            bounds.y = miny;
-            bounds.width = maxx - minx;
-            bounds.height = maxy - miny;
-        } else {
-            float maxWidth = maxx - minx;
-            float maxHeight = maxy - miny;
-            bounds.x = Math.min(bounds.x, minx);
-            bounds.y = Math.min(bounds.y, miny);
-            bounds.width = Math.max(bounds.width, maxWidth);
-            bounds.height = Math.max(bounds.height, maxHeight);
-        }
-
-        return bounds;
+        boundsWasChanged = false;
+        return bounds.set(minX, maxX, maxY, minY);
     }
 
     public void setAlpha(float alpha) {
         a = alpha;
-        dirtyColor = true;
+        if(renderData != null) updateColor();
     }
 
     public void setColor(float r, float g, float b) {
         this.r = r;
         this.g = g;
         this.b = b;
-        dirtyColor = true;
+        if(renderData != null) updateColor();
     }
 
     public void setOrigin(float x, float y) {
         originX = x;
         originY = y;
-        dirtyBody = true;
-    }
-
-    public void setOffsetU(float u) {
-        offsetU = u;
-        dirtyUV = true;
-    }
-
-    public void setOffsetV(float v) {
-        offsetV = v;
-        dirtyUV = true;
+        dirty = true;
     }
 
     public void setName(String name) {
@@ -280,5 +227,37 @@ public class Entity extends RenderUnit {
     }
     public int getTransformId() {
         return transformId;
+    }
+
+    public void setTransform(Transform[] transforms) {
+        transform = transforms[transformId];
+    }
+
+    public Transform getTransform() {
+        return transform;
+    }
+
+    public void setFixedRotation(boolean fixedRotation) {
+        this.fixedRotation = fixedRotation;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    public void setWidth(float width) {
+        this.width = width;
+        dirty = true;
+    }
+
+    public void setHeight(float height) {
+        this.height = height;
+        dirty = true;
+    }
+
+    public void setSize(float width, float height) {
+        this.width = width;
+        this.height = height;
+        dirty = true;
     }
 }

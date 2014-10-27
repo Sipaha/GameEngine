@@ -8,24 +8,16 @@ import ru.sipaha.engine.utils.Array;
  * Created on 12.10.2014.
  */
 
-public class UIContainer extends UIElement {
+public class UIContainer {
 
     private Array<UIElement> children = new Array<>(UIElement.class);
 
     protected UIContainer() {}
 
-    protected UIContainer(TextureRegion region) {
-        super(region);
-    }
 
-    protected UIContainer(Texture texture) {
-        super(texture);
-    }
-
-    @Override
     protected void setBounds(float left, float right, float top, float bottom) {
-        float width = bounds.maxX - bounds.minX;
-        float height = bounds.maxY - bounds.minY;
+        /*float width = bounds.getWidth();
+        float height = bounds.getHeight();
         float newWidth = right - left;
         float newHeight = top - bottom;
 
@@ -48,8 +40,8 @@ public class UIContainer extends UIElement {
                 }
             }
             if(!element.anchorLeft && !element.anchorRight) {
-                float halfWidth = (element.bounds.maxX - element.bounds.minX) / 2f;
-                float center = (element.bounds.minX + halfWidth) * wRatio;
+                float halfWidth = element.bounds.getWidth() / 2f;
+                float center = (element.bounds.min.x + halfWidth) * wRatio;
                 newLeft = left + center - halfWidth;
                 newRight = left + center + halfWidth;
             }
@@ -67,32 +59,32 @@ public class UIContainer extends UIElement {
                 }
             }
             if(!element.anchorBottom && !element.anchorTop) {
-                float halfHeight = (element.bounds.maxY - element.bounds.minY) / 2f;
-                float center = (element.bounds.minY + halfHeight) * hRatio;
-                newTop = bottom + center + halfHeight;
-                newBottom = bottom + center - halfHeight;
+                //float halfHeight = (element.bounds.maxY - element.bounds.minY) / 2f;
+                //float center = (element.bounds.minY + halfHeight) * hRatio;
+                //newTop = bottom + center + halfHeight;
+                //newBottom = bottom + center - halfHeight;
             }
 
             element.setBounds(newLeft, newRight, newTop, newBottom);
         }
 
-        super.setBounds(left, right, top, bottom);
+        super.setBounds(left, right, top, bottom);*/
     }
 
     public void add(UIElement element) {
         children.add(element);
 
-        float left = bounds.minX + element.leftPadding;
-        float right = bounds.maxX - element.rightPadding;
-        float top = bounds.maxY - element.topPadding;
-        float bottom = bounds.minY + element.bottomPadding;
+        //float left = bounds.minX + element.leftPadding;
+        //float right = bounds.maxX - element.rightPadding;
+        //float top = bounds.maxY - element.topPadding;
+        //float bottom = bounds.minY + element.bottomPadding;
 
-        if(element.anchorLeft && !element.anchorRight) right = left + element.width;
-        if(element.anchorRight && !element.anchorLeft) left = right - element.width;
-        if(element.anchorTop && !element.anchorBottom) bottom = top - element.height;
-        if(element.anchorBottom && !element.anchorTop) top = bottom + element.height;
+        //if(element.anchorLeft && !element.anchorRight) right = left + element.width;
+        //if(element.anchorRight && !element.anchorLeft) left = right - element.width;
+       // if(element.anchorTop && !element.anchorBottom) bottom = top - element.height;
+       // if(element.anchorBottom && !element.anchorTop) top = bottom + element.height;
 
-        element.setBounds(left, right, top, bottom);
+       // element.setBounds(left, right, top, bottom);
     }
 
     public void remove(UIElement element) {

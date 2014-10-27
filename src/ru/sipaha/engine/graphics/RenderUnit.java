@@ -161,7 +161,7 @@ public abstract class RenderUnit implements Comparable<RenderUnit> {
         return getRenderSize()+offset;
     }
 
-    public abstract int render(float[] renderData, int position);
+    public abstract void render(RenderBuffer buffer);
 
     public abstract int getRenderSize();
 

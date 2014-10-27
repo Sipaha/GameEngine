@@ -1,6 +1,7 @@
 package ru.sipaha.engine.graphics.renderlayers;
 
 import ru.sipaha.engine.graphics.Camera;
+import ru.sipaha.engine.graphics.RenderBuffer;
 import ru.sipaha.engine.graphics.RenderUnit;
 
 /**
