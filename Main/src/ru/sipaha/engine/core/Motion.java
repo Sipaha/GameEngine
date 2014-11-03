@@ -1,6 +1,5 @@
-package ru.sipaha.engine.gameobjectdata;
+package ru.sipaha.engine.core;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import ru.sipaha.engine.utils.MathHelper;
 
@@ -55,8 +54,8 @@ public class Motion {
 
         if(xyTargetIsAdded) {
             if(!move_forward) {
-                float vecX = xTarget - t.x;
-                float vecY = yTarget - t.y;
+                float vecX = xTarget - t.x.value;
+                float vecY = yTarget - t.y.value;
                 float length = (float)Math.sqrt(vecX*vecX + vecY*vecY);
                 vx = vecX / length;
                 vy = vecY / length;
@@ -79,23 +78,21 @@ public class Motion {
 
         float da = va * a_velocity * delta;
         if(da != 0) {
+            float angle = t.angle.value;
             if(haveATarget) {
                 float absDelta = Math.abs(da);
                 float absDistance = Math.abs(aTarget - t.absAngle);
                 if(absDelta >= absDistance || absDelta >= (360-absDistance)) {
-                    t.angle = aTarget;
+                    angle = aTarget;
                     haveATarget = false;
                     va = 0;
                 } else {
-                    t.angle += da;
+                    angle += da;
                 }
-            } else t.angle += da;
+            } else angle += da;
 
-            t.angle = MathHelper.angle360Limit(t.angle);
-            t.cos = MathUtils.cosDeg(t.angle);
-            t.sin = MathUtils.sinDeg(t.angle);
-
-            t.dirty = true;
+            t.angle.value = MathHelper.angle360Limit(angle);
+            t.updateAngle();
         }
 
         if(move_forward) {
@@ -107,8 +104,8 @@ public class Motion {
             float deltaXY = delta * xy_velocity;
             t.translate(vx * deltaXY, vy * deltaXY);
             if(haveXYTarget) {
-                float vecX = xTarget - t.x;
-                float vecY = yTarget - t.y;
+                float vecX = xTarget - t.x.value;
+                float vecY = yTarget - t.y.value;
                 if(vecX * vx + vecY * vy <= 0) {
                     vx = 0;
                     vy = 0;
