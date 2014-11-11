@@ -23,7 +23,7 @@ public class EditorRenderLayer extends RenderLayer {
     private Color selectionBoxBorderColor = new Color(1,1,1,0.6f);
     private Color selectionBoxFillColor = new Color(158/255f,196/255f,1,0.3f);
 
-    public final Bounds selectionBounds = new Bounds();
+    private Bounds selectionBounds;
 
     public EditorRenderLayer(Camera gameCamera) {
         super("EditorLayer", gameCamera);
@@ -35,7 +35,7 @@ public class EditorRenderLayer extends RenderLayer {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         drawAxisLines();
-        if(!selectionBounds.isEmpty()) {
+        if(selectionBounds != null && !selectionBounds.isEmpty()) {
             drawSelectionBox();
         }
         shapeRenderer.end();
@@ -60,6 +60,10 @@ public class EditorRenderLayer extends RenderLayer {
         shapeRenderer.rect(selectionBounds.max.x-1,selectionBounds.min.y-1, 2, height+2);
         shapeRenderer.setColor(selectionBoxFillColor);
         shapeRenderer.rect(selectionBounds.min.x+1,selectionBounds.min.y+1,width-2,height-2);
+    }
+
+    public void setSelectionBounds(Bounds bounds) {
+        selectionBounds = bounds;
     }
 
     public Camera getGameCamera() {

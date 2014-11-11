@@ -2,12 +2,10 @@ package ru.sipaha.engine.desktop;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
-import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.EngineUnit;
-import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.structures.Bounds;
 
 /**
  * Created on 12.11.2014.
@@ -22,8 +20,11 @@ public class EditorController implements InputProcessor {
     private final Vector2 currentPoint = new Vector2();
     private boolean selectMode = false;
 
+    private final Bounds selectionBounds = new Bounds();
+
     public EditorController(EditorRenderLayer layer) {
         this.editorLayer = layer;
+        layer.setSelectionBounds(selectionBounds);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class EditorController implements InputProcessor {
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if(selectMode) {
             currentPoint.set(editorLayer.camera.unproject(screenX, screenY));
-            editorLayer.selectionBounds.set(downPoint, currentPoint);
+            selectionBounds.set(downPoint, currentPoint);
         } else {
             int deltaX = oldX - screenX;
             int deltaY = screenY - oldY;
@@ -61,7 +62,7 @@ public class EditorController implements InputProcessor {
         switch (pointer) {
             case Input.Buttons.LEFT:
                 selectMode = false;
-                editorLayer.selectionBounds.reset();
+                selectionBounds.reset();
                 break;
         }
         return false;
@@ -82,8 +83,6 @@ public class EditorController implements InputProcessor {
         return false;
     }
 
-
-
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;
@@ -91,6 +90,7 @@ public class EditorController implements InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
+        editorLayer.camera.zoomChange(amount/10f);
         return false;
     }
 }

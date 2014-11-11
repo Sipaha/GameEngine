@@ -43,7 +43,7 @@ public class Camera extends OrthographicCamera {
     }
 
     public void zoomChange(float dz) {
-        zoom += dz;
+        zoom += dz*zoom;
         update();
     }
 
