@@ -1,6 +1,5 @@
 package ru.sipaha.engine.desktop;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
@@ -8,18 +7,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.core.Values;
 import ru.sipaha.engine.desktop.properties.GameProperties;
-import ru.sipaha.engine.desktop.properties.PropertiesTable;
-import ru.sipaha.engine.desktop.properties.PropertiesTableModel;
 import ru.sipaha.engine.desktop.properties.Property;
-import ru.sipaha.engine.desktop.properties.editors.BlendingEditor;
-import ru.sipaha.engine.desktop.properties.editors.ColorEditor;
-import ru.sipaha.engine.desktop.properties.renderers.ColorRenderer;
-import ru.sipaha.engine.desktop.properties.editors.FloatValueEditor;
-import ru.sipaha.engine.desktop.properties.renderers.SectionRenderer;
-import ru.sipaha.engine.desktop.properties.sections.RenderUnitSection;
-import ru.sipaha.engine.desktop.properties.sections.TransformSection;
 import ru.sipaha.engine.test.GameScreen;
 import ru.sipaha.engine.test.TestGame;
 
@@ -84,6 +73,9 @@ public class GameEditor extends JFrame {
                 table.setEngine(engine);
                 editableObjects = (Iterable)engine.tagManager.getUnitsWithTag("Editable");
                 for(GameObject g : editableObjects) table.set(g);
+                EditorRenderLayer layer = new EditorRenderLayer(engine.renderer.getRenderLayer().camera);
+                engine.input.addProcessor(new EditorController(layer));
+                engine.renderer.addRenderLayer(layer);
                 currFrame.repaint();
             }
         });

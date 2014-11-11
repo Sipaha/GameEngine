@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.Engine;
-import ru.sipaha.engine.core.Entity;
+import ru.sipaha.engine.core.Sprite;
 import ru.sipaha.engine.core.animation.AnimatedFloat;
 import ru.sipaha.engine.core.animation.AnimatedSprite;
 import ru.sipaha.engine.core.animation.Animation;
@@ -17,7 +17,6 @@ import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.functions.IntFunction;
 import ru.sipaha.engine.utils.functions.PiecewiseLinFunction;
 import ru.sipaha.engine.utils.signals.Listener;
-import ru.sipaha.engine.utils.structures.SpriteFrame;
 
 public class GameScreen implements Screen {
     public final Engine engine = new Engine();
@@ -31,9 +30,9 @@ public class GameScreen implements Screen {
         TextureRegion arrow = new TextureRegion(new Texture(Gdx.files.internal("images/arrow.png")));//textures[0]);//
         GameObject g = new GameObject();
         g.setTexture(arrow.getTexture());
-        Entity prev = null;
+        Sprite prev = null;
         for(int i = 0; i < 4; i++) {
-            Entity e = new Entity(arrow);
+            Sprite e = new Sprite(arrow);
             e.setName(Integer.toString(i));
             float u,v,u2,v2;
             switch (i) {
@@ -139,7 +138,7 @@ public class GameScreen implements Screen {
         gameObject.getTransform().setPosition(500, 200);
         //gameObject.startAnimation("Sprite");
 
-        engine.input.addProcessor(new InputAdapter(){
+        /*engine.input.addProcessor(new InputAdapter(){
             int oldX,oldY;
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -156,7 +155,7 @@ public class GameScreen implements Screen {
                 oldY = screenY;
                 return false;
             }
-        });
+        });*/
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         engine.renderer.getRenderLayer().camera.setZoom(0.5f);
     }

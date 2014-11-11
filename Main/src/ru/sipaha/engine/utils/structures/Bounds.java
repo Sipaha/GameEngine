@@ -1,5 +1,6 @@
 package ru.sipaha.engine.utils.structures;
 
+import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -10,12 +11,14 @@ public class Bounds {
     public final Vector2 min = new Vector2();
     public final Vector2 max = new Vector2();
     private final Vector2 temp = new Vector2();
+    private boolean empty = true;
 
     public Bounds() {}
 
     public Bounds set(Bounds bounds) {
         min.set(bounds.min);
         max.set(bounds.max);
+        empty = false;
         return this;
     }
 
@@ -24,6 +27,16 @@ public class Bounds {
         max.x = right;
         min.y = bottom;
         max.y = top;
+        empty = false;
+        return this;
+    }
+
+    public Bounds set(Vector2 p1, Vector2 p2) {
+        min.x = Math.min(p1.x, p2.x);
+        min.y = Math.min(p1.y, p2.y);
+        max.x = Math.max(p1.x, p2.x);
+        max.y = Math.max(p1.y, p2.y);
+        empty = false;
         return this;
     }
 
@@ -32,6 +45,7 @@ public class Bounds {
         max.x += dx;
         min.y += dy;
         max.y += dy;
+        empty = false;
         return this;
     }
 
@@ -46,7 +60,25 @@ public class Bounds {
                 max.y = Math.max(max.y, bounds.max.y);
             }
         }
+        empty = false;
         return this;
+    }
+
+    public void expand(Vector2 point) {
+        if(isEmpty()) {
+            max.set(point);
+            min.set(point);
+        } else {
+            max.x = Math.max(max.x, point.x);
+            max.y = Math.max(max.y, point.y);
+            min.x = Math.min(min.x, point.x);
+            min.y = Math.min(min.y, point.y);
+        }
+        empty = false;
+    }
+
+    public void expand(float x, float y) {
+        expand(temp.set(x,y));
     }
 
     public Vector2 getCenter() {
@@ -65,7 +97,7 @@ public class Bounds {
     }
 
     public boolean isEmpty() {
-        return getWidth() == 0 && getHeight() == 0;
+        return empty;
     }
 
     public float getWidth() {
@@ -78,5 +110,6 @@ public class Bounds {
 
     public void reset() {
         set(0,0,0,0);
+        empty = true;
     }
 }

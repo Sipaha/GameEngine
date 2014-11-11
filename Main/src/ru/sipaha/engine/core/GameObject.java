@@ -30,7 +30,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     private final ObjectIntMap<String> entityIdByName;
     private final ObjectIntMap<Class> scriptsIdByClass;
     private final Array<Script> scripts;
-    private final Array<Entity> entities;
+    private final Array<Sprite> entities;
     private Animator animator;
 
     private GameObject prototype;
@@ -44,18 +44,18 @@ public class GameObject extends RenderUnit implements EngineUnit {
         entityIdByName = new ObjectIntMap<>();
         scriptsIdByClass = new ObjectIntMap<>();
         scripts = new Array<>(true, 4, Script.class);
-        entities = new Array<>(true, 4, Entity.class);
+        entities = new Array<>(true, 4, Sprite.class);
     }
 
     public GameObject(TextureRegion region) {
         this();
-        entities.add(new Entity(region));
+        entities.add(new Sprite(region));
         setTexture(region.getTexture());
     }
 
     public GameObject(Texture texture) {
         this();
-        entities.add(new Entity(texture));
+        entities.add(new Sprite(texture));
         setTexture(texture);
     }
 
@@ -65,12 +65,12 @@ public class GameObject extends RenderUnit implements EngineUnit {
         this.engine = prototype.engine;
         life = new Life(prototype.life);
 
-        entities = new Array<>(true, prototype.entities.size, Entity.class);
+        entities = new Array<>(true, prototype.entities.size, Sprite.class);
         for(int i = 0; i < prototype.entities.size; i++) {
-            Entity e = new Entity(prototype.entities.items[i]);
+            Sprite e = new Sprite(prototype.entities.items[i]);
             entities.add(e);
         }
-        for(Entity e : entities) {
+        for(Sprite e : entities) {
             e.setLinks(entities);
         }
 
@@ -78,7 +78,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
         if(!dynamicRenderSize) {
             renderData = new float[prototype.renderData.length];
             offset = 0;
-            for(Entity e : entities) {
+            for(Sprite e : entities) {
                 offset = e.setRenderData(renderData, offset);
             }
             offset = 0;
@@ -105,7 +105,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     @Override
     public void setRenderData(RenderBuffer buffer) {
         super.setRenderData(buffer);
-        for(Entity e : entities) {
+        for(Sprite e : entities) {
             e.setRenderData(buffer);
         }
     }
@@ -114,7 +114,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     public void render(RenderBuffer buffer) {
         if(enable) {
             if(dynamicRenderSize) {
-                for(Entity e : entities) e.render(buffer);
+                for(Sprite e : entities) e.render(buffer);
             } else {
                 buffer.render(renderData, 0, renderData.length);
             }
@@ -124,7 +124,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     @Override
     public int getRenderSize() {
         int sum = 0;
-        for(Entity e : entities) sum += e.getRenderSize();
+        for(Sprite e : entities) sum += e.getRenderSize();
         return sum;
     }
 
@@ -138,7 +138,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
         scripts.shrink();
 
         for(int i = 0; i < entities.size; i++) {
-            Entity e = entities.items[i];
+            Sprite e = entities.items[i];
             e.updateLinks(entities);
             String name = e.getName();
             if(name != null) entityIdByName.put(name, i);
@@ -150,7 +150,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
         }
 
         int renderSize = 0;
-        for(Entity e : entities) {
+        for(Sprite e : entities) {
             int size = e.getRenderSize();
             if(size != -1) {
                 renderSize += size;
@@ -162,13 +162,13 @@ public class GameObject extends RenderUnit implements EngineUnit {
         if(!dynamicRenderSize) {
             renderData = new float[renderSize];
             offset = 0;
-            for(Entity e : entities) {
+            for(Sprite e : entities) {
                 offset = e.setRenderData(renderData, offset);
             }
             offset = 0;
         }
 
-        for(Entity e : entities) {
+        for(Sprite e : entities) {
             e.start(engine);
         }
 
@@ -180,7 +180,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     public void start(Engine engine) {
         for(int i = 0; i < scripts.size; i++) scripts.get(i).start(engine);
         if(rigidBody != null) rigidBody.create(this, engine.physicsWorld);
-        for(Entity e : entities) e.start(engine);
+        for(Sprite e : entities) e.start(engine);
     }
 
     @Override
@@ -213,10 +213,10 @@ public class GameObject extends RenderUnit implements EngineUnit {
             if(animator != null) {
                 animator.update(delta);
             }
-            for(Entity e : entities) {
+            for(Sprite e : entities) {
                 e.update(delta);
             }
-            for(Entity e : entities) {
+            for(Sprite e : entities) {
                 e.transform.wasChanged = false;
             }
         }
@@ -241,8 +241,8 @@ public class GameObject extends RenderUnit implements EngineUnit {
         updateData(0);
         if(bounds == null) bounds = new Bounds();
         bounds.reset();
-        for(Entity entity : entities) {
-            bounds.union(entity.getBounds());
+        for(Sprite sprite : entities) {
+            bounds.union(sprite.getBounds());
         }
         return bounds;
     }
@@ -260,13 +260,13 @@ public class GameObject extends RenderUnit implements EngineUnit {
         return animator.get(name);
     }
 
-    public Entity getEntity(String name) {
+    public Sprite getEntity(String name) {
         return entities.items[entityIdByName.get(name, -1)];
     }
-    public Entity getEntity(int idx) {
+    public Sprite getEntity(int idx) {
         return entities.items[idx];
     }
-    public void addEntity(Entity e) {
+    public void addEntity(Sprite e) {
         entities.add(e);
     }
 
@@ -303,8 +303,8 @@ public class GameObject extends RenderUnit implements EngineUnit {
         reqDisable = true;
         if(rigidBody != null) rigidBody.disable();
         if(isStatic.get()) {
-            for(Entity entity : entities) {
-                entity.visible.set(false);
+            for(Sprite sprite : entities) {
+                sprite.visible.set(false);
             }
         }
         return this;
@@ -314,8 +314,8 @@ public class GameObject extends RenderUnit implements EngineUnit {
         reqEnable = true;
         if(rigidBody != null) rigidBody.enable();
         if(isStatic.get()) {
-            for(Entity entity : entities) {
-                entity.visible.set(true);
+            for(Sprite sprite : entities) {
+                sprite.visible.set(true);
             }
         }
         return this;

@@ -8,7 +8,7 @@ import ru.sipaha.engine.graphics.Renderable;
 import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.structures.Bounds;
 
-public class Entity extends Renderable {
+public class Sprite extends Renderable {
     public static final int ENTITY_RENDER_SIZE = 20;
 
     public static final int X1 = 0, Y1 = 1, C1 = 2, U1 = 3, V1 = 4;
@@ -19,7 +19,7 @@ public class Entity extends Renderable {
     public final Transform transform = new Transform();
 
     private String name;
-    private Entity parent = null;
+    private Sprite parent = null;
     private int parentId = -1;
 
     private final Values.Flag colorChanged = new Values.Flag();
@@ -46,22 +46,22 @@ public class Entity extends Renderable {
 
     protected Bounds bounds;
 
-    public Entity(TextureRegion r) {
+    public Sprite(TextureRegion r) {
         this(r.getRegionWidth(), r.getRegionHeight(), r.getU(), r.getV(), r.getU2(), r.getV2());
     }
 
-    public Entity(Texture t) {
+    public Sprite(Texture t) {
         this(t.getWidth(), t.getHeight(), 0, 0, 1, 1);
     }
 
-    public Entity(Entity entity) {
-        this(entity.width.value, entity.height.value, entity.uv.value);
-        reset(entity);
-        name = entity.name;
-        parentId = entity.parentId;
+    public Sprite(Sprite sprite) {
+        this(sprite.width.value, sprite.height.value, sprite.uv.value);
+        reset(sprite);
+        name = sprite.name;
+        parentId = sprite.parentId;
     }
 
-    public Entity(float width, float height, float... uv) {
+    public Sprite(float width, float height, float... uv) {
         this.uv.setValues(uv);
         this.width.set(width);
         this.height.set(height);
@@ -76,7 +76,7 @@ public class Entity extends Renderable {
         }
     }
 
-    public void updateLinks(Array<Entity> entities) {
+    public void updateLinks(Array<Sprite> entities) {
         for(int i = 0; i < entities.size; i++) {
             if(entities.get(i) == parent) {
                 parentId = i;
@@ -85,7 +85,7 @@ public class Entity extends Renderable {
         }
     }
 
-    public void setLinks(Array<Entity> entities) {
+    public void setLinks(Array<Sprite> entities) {
         if(parentId >= 0) parent = entities.get(parentId);
     }
 
@@ -202,7 +202,7 @@ public class Entity extends Renderable {
         verticesUpdateRequest.value = false;
     }
 
-    public void reset(Entity source) {
+    public void reset(Sprite source) {
         colorA.set(source.colorA);
         colorR.set(source.colorR);
         colorG.set(source.colorG);
@@ -262,11 +262,11 @@ public class Entity extends Renderable {
         this.height.set(height);
     }
 
-    public void setParent(Entity parent) {
+    public void setParent(Sprite parent) {
         this.parent = parent;
     }
 
-    public Entity setName(String name) {
+    public Sprite setName(String name) {
         this.name = name;
         return this;
     }

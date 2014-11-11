@@ -1,8 +1,6 @@
 package ru.sipaha.engine.core.animation;
 
 import com.badlogic.gdx.utils.ObjectMap;
-import ru.sipaha.engine.core.Entity;
-import ru.sipaha.engine.core.Transform;
 import ru.sipaha.engine.utils.Array;
 
 /**

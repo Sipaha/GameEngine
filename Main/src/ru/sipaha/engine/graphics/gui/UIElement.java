@@ -3,16 +3,15 @@ package ru.sipaha.engine.graphics.gui;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ObjectMap;
-import ru.sipaha.engine.core.Entity;
+import ru.sipaha.engine.core.Sprite;
 import ru.sipaha.engine.graphics.RenderBuffer;
 import ru.sipaha.engine.utils.Array;
-import ru.sipaha.engine.utils.structures.Bounds;
 
 /**
  * Created on 12.10.2014.
  */
 
-public class UIElement extends Entity {
+public class UIElement extends Sprite {
 
     private Array<UIElement> children;
     private Layout layout = null;
@@ -26,8 +25,8 @@ public class UIElement extends Entity {
         super(t);
     }
 
-    public UIElement(Entity entity) {
-        super(entity);
+    public UIElement(Sprite sprite) {
+        super(sprite);
     }
 
     public UIElement(float u, float v, float u2, float v2, float width, float height) {
