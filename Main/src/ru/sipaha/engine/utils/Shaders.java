@@ -4,9 +4,12 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.ObjectIntMap;
 import com.badlogic.gdx.utils.ObjectMap;
 
+import java.util.Iterator;
+
 public class Shaders {
 
-    public static final ShaderProgram defaultShader;
+    public static final String DEFAULT_SHADER_NAME = "default_shader";
+    private static ObjectMap<String, ShaderProgram> shadersByName = new ObjectMap<>();
 
     static {
         String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
@@ -37,9 +40,22 @@ public class Shaders {
                 + "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);\n" //
                 + "}";
 
-        defaultShader = new ShaderProgram(vertexShader, fragmentShader);
+        ShaderProgram defaultShader = new ShaderProgram(vertexShader, fragmentShader);
         if (!defaultShader.isCompiled()) {
             throw new IllegalArgumentException("Error compiling shader: " + defaultShader.getLog());
         }
+        shadersByName.put(DEFAULT_SHADER_NAME, defaultShader);
+    }
+
+    public static ShaderProgram get(String name) {
+        return shadersByName.get(name);
+    }
+
+    public static void add(String name, ShaderProgram shaderProgram) {
+        shadersByName.put(name, shaderProgram);
+    }
+
+    public static Iterable<String> getNamesOfShaders() {
+        return shadersByName.keys();
     }
 }

@@ -13,6 +13,7 @@ import ru.sipaha.engine.utils.Array;
 public class BatchesRenderLayer extends RenderLayer {
 
     private ObjectMap<RenderUnit, RenderUnitsGroup> drawableGroups = new ObjectMap<>();
+    private Array<RenderUnitsGroup> unitsGroupsCache = new Array<>(false, 2, RenderUnitsGroup.class);
     private Array<Batch> batches = new Array<>(true, 16, Batch.class);
 
     private boolean notSorted = true;
@@ -34,8 +35,24 @@ public class BatchesRenderLayer extends RenderLayer {
         getGroup(unit).add(unit);
     }
 
-    public void remove(RenderUnit unit) {
-        drawableGroups.get(unit).remove(unit);
+    public boolean remove(RenderUnit unit) {
+        RenderUnitsGroup group = drawableGroups.get(unit);
+        if(group != null) {
+            group.remove(unit);
+        } else {
+            for(RenderUnitsGroup g : drawableGroups.values()) {
+                if(g.remove(unit)) {
+                    group = g;
+                    break;
+                }
+            }
+        }
+        if(group == null) return false;
+        if(group.isEmpty()) {
+            drawableGroups.remove(group);
+            unitsGroupsCache.add(group);
+        }
+        return true;
     }
 
     public void prepare(RenderUnit unit) {
@@ -45,8 +62,13 @@ public class BatchesRenderLayer extends RenderLayer {
     private RenderUnitsGroup getGroup(RenderUnit unit) {
         RenderUnitsGroup group = drawableGroups.get(unit);
         if(group == null) {
-            group = new RenderUnitsGroup(unit);
-            drawableGroups.put(unit, group);
+            if(unitsGroupsCache.size > 0) {
+                group = unitsGroupsCache.pop();
+                group.setPropertiesFrom(unit);
+            } else {
+                group = new RenderUnitsGroup(unit);
+            }
+            drawableGroups.put(group, group);
             notSorted = true;
         }
         return group;
@@ -59,7 +81,7 @@ public class BatchesRenderLayer extends RenderLayer {
 
         IntIntMap layers = new IntIntMap();
         for(int i = 0, layer = -1, size = groups.size; i < size; i++) {
-            int currLayer = groups.get(i).getZOrder();
+            int currLayer = groups.get(i).zOrder.get();
             if(currLayer > layer) {
                 layer = currLayer;
                 layers.put(currLayer, i);
@@ -93,7 +115,7 @@ public class BatchesRenderLayer extends RenderLayer {
         for(int i = 1; i < groups.size; i++) {
             if(groups.get(i).upPriority > groups.get(max_idx).upPriority) max_idx = i;
         }
-        int start_layer_idx = layers.getIndex(groups.get(max_idx).getZOrder());
+        int start_layer_idx = layers.getIndex(groups.get(max_idx).zOrder.get());
         for(int layer_idx = start_layer_idx; layer_idx >= 0; layer_idx--) {
             int currFirst = layers.getByIndex(layer_idx).value;
             int currLast = layer_idx < layers.size()-1 ? layers.getByIndex(layer_idx + 1).value-1 : groups.size-1;
@@ -190,17 +212,24 @@ public class BatchesRenderLayer extends RenderLayer {
 
         public void add(RenderUnit unit) {
             units.add(unit);
-            if(isStatic() && batch != null) batch.add(unit);
+            if(isStatic.get() && batch != null) batch.add(unit);
         }
 
-        public void remove(RenderUnit unit) {
-            units.removeValue(unit, true);
-            if(isStatic() && batch != null) batch.remove(unit);
+        public boolean remove(RenderUnit unit) {
+            if(units.removeValue(unit, true)) {
+                if(isStatic.get() && batch != null) batch.remove(unit);
+                return true;
+            }
+            return false;
+        }
+
+        public boolean isEmpty() {
+            return units.size == 0;
         }
 
         public void setBatch(Batch batch) {
             this.batch = batch;
-            if(isStatic()) {
+            if(isStatic.get()) {
                 for(RenderUnit unit : units) batch.add(unit);
             } else {
                 batch.add(this);

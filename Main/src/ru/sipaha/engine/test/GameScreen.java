@@ -10,14 +10,17 @@ import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.Entity;
 import ru.sipaha.engine.core.animation.AnimatedFloat;
+import ru.sipaha.engine.core.animation.AnimatedSprite;
 import ru.sipaha.engine.core.animation.Animation;
 import ru.sipaha.engine.test.scripts.*;
-import ru.sipaha.engine.utils.curves.PiecewiseLinCurve;
+import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.functions.IntFunction;
+import ru.sipaha.engine.utils.functions.PiecewiseLinFunction;
 import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.structures.SpriteFrame;
 
 public class GameScreen implements Screen {
-    final Engine engine = new Engine();
+    public final Engine engine = new Engine();
 
     public GameScreen() {
         Texture[] textures = new Texture[3];
@@ -46,30 +49,37 @@ public class GameScreen implements Screen {
             g.addEntity(e);
             prev = e;
         }
-        g.setLinearFilter();
         g.getTransform().setPosition(100, 100);
         g.getTransform().motion.va = 1;
         g.getTransform().motion.a_velocity = 10;
-        g.setZOrder(1);
+        g.zOrder.set(1);
         engine.tagManager.setTag(g, "Enemy");
         //g.createBody(0.85f);
 
-        PiecewiseLinCurve curve = new PiecewiseLinCurve(new Vector2(0,0), new Vector2(4,1), new Vector2(5,0.8f),
+        PiecewiseLinFunction curve = new PiecewiseLinFunction(new Vector2(0,0), new Vector2(4,1), new Vector2(5,0.8f),
                                                         new Vector2(6,1f), new Vector2(7,0.8f), new Vector2(8,1f), new Vector2(12,0));
         Animation animation = new Animation("test", new AnimatedFloat(g.getEntity(0).colorA, curve)).setLoop(true).start();
         g.addAnimation(animation);
         engine.factory.addTemplate(g, "Name");
 
         Texture t = new Texture(Gdx.files.internal("images/sprite.png"));
-        SpriteFrame[] frames = new SpriteFrame[5];
-        for(int i = 0; i < frames.length;i++) frames[i] = new SpriteFrame(i*i+1, 0, 0.2f*i, 1, 0.2f*(i+1));
-        //AnimationProperties animation = new SpriteAnimation("Sprite", frames).setLoop(true).setPauseTime(3f).setPingPong(true);
-        g = new GameObject(new TextureRegion(t, frames[0].u, frames[0].v, frames[0].u2, frames[0].v2));
-        //g.addAnimation(animation);
+        Array<float[]> frames = new Array<>(true, 5, float[].class);
+        Vector2[] points = new Vector2[6];
+        for(int i = 0; i < 5; i++) {
+            frames.add(new float[]{0, 0.2f*i, 1, 0.2f*(i+1)});
+            points[i] = new Vector2(i*3,i);
+        }
+        points[5] = new Vector2(5*3, 4);
+        float[] f = frames.get(0);
+        g = new GameObject(new TextureRegion(t, f[0], f[1], f[2], f[3]));
+        animation = new Animation("SpriteTest",new AnimatedSprite(g.getEntity(0).uv, frames, new IntFunction(points)));
+        g.addAnimation(animation.start().setLoop(true));
         g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 1f));
         g.addScript(TargetHolder.class, new Search("Enemy", 250));
         g.addScript(TargetCatcher.class, new AngleTracking());
-        g.setZOrder(5);
+        g.zOrder.set(5);
+        g.getEntity(0).colorA.set(0.5f);
+        engine.tagManager.setTag(g,"Editable");
         engine.factory.addTemplate(g, "SpriteTest");
 
         g = new GameObject(new Texture(Gdx.files.internal("images/4.png")));
@@ -80,26 +90,28 @@ public class GameScreen implements Screen {
         g.life.onLifetimeExpired.add(new Listener<GameObject>() {
             @Override
             public void receive(GameObject object) {
-                engine.factory.create("Explosion").getTransform().unhook(object.getTransform());
+                engine.factory.<GameObject>create("Explosion").getTransform().unhook(object.getTransform());
             }
         });
-        g.setZOrder(10);
+        g.zOrder.set(10);
         engine.factory.addTemplate(g, "Shell");
 
         t = new Texture(Gdx.files.internal("images/explosion.png"));
         g = new GameObject(new TextureRegion(t, 96, 96));
-        g.setLinearFilter();
         g.getTransform().setScale(2f);
-        frames = new SpriteFrame[17];
+        frames = new Array<>(true, 17, float[].class);
+        points = new Vector2[18];
         for(int i = 0; i < 4; i++) {
             for(int j = 0; j < (i<3?5:2); j++) {
                 float u = (j*96)/480f;
                 float v = (i*96)/384f;
                 int frameNum = i*5+j;
-                frames[frameNum] = new SpriteFrame(0.07f*frameNum+0.07f, u, v, u+96/480f, v+96/384f);
+                points[frameNum] = new Vector2(0.07f*frameNum, frameNum);
+                frames.add(new float[]{u, v, u+96/480f, v+96/384f});
             }
         }
-        //g.addAnimation(new SpriteAnimation("explosion_animation", frames), true);
+        points[17] = new Vector2(0.07f*17, 16);
+        g.addAnimation(new Animation("explosion_animation", new AnimatedSprite(g.getEntity(0).uv, frames, new IntFunction(points))).start());
         g.life.lifeTime = 1.19f;
         engine.factory.addTemplate(g, "Explosion");
 
@@ -113,10 +125,10 @@ public class GameScreen implements Screen {
 
         engine.initialize();
 
-        for(int i = 0; i < 200; i++) {
+       /* for(int i = 0; i < 200; i++) {
             GameObject gg = engine.factory.create("Name");
             gg.getTransform().setPosition((float)Math.random()*Gdx.graphics.getWidth(), (float)Math.random()*Gdx.graphics.getHeight());
-        }
+        }*/
 
         GameObject gameObject = engine.factory.create("Name");
         gameObject.getTransform().setPosition(200, 200);

@@ -22,22 +22,22 @@ public class Entity extends Renderable {
     private Entity parent = null;
     private int parentId = -1;
 
-    private final Values.Bool colorChanged = new Values.Bool();
+    private final Values.Flag colorChanged = new Values.Flag();
     public final Values.Float colorA = new Values.Float(colorChanged, 1);
     public final Values.Float colorR = new Values.Float(colorChanged, 1);
     public final Values.Float colorG = new Values.Float(colorChanged, 1);
     public final Values.Float colorB = new Values.Float(colorChanged, 1);
 
-    public final Values.Bool uvChanged = new Values.Bool();
+    public final Values.Flag uvChanged = new Values.Flag();
     public final Values.FloatArray uv = new Values.FloatArray(uvChanged, new float[4]);
 
-    private final Values.Bool originChanged = new Values.Bool();
+    private final Values.Flag originChanged = new Values.Flag();
     public final Values.Float pivotX = new Values.Float(originChanged);
     public final Values.Float pivotY = new Values.Float(originChanged);
 
     private boolean boundsWasChanged = true;
 
-    private final Values.Bool verticesUpdateRequest = new Values.Bool(false);
+    private final Values.Flag verticesUpdateRequest = new Values.Flag(false);
     public final Values.Bool visible = new Values.Bool(verticesUpdateRequest, true);
     public final Values.Bool fixedRotation = new Values.Bool(verticesUpdateRequest, false);
 
@@ -102,14 +102,15 @@ public class Entity extends Renderable {
             updateBody();
             updateColor();
             updateUV();
+            renderDataChanged = false;
         } else if(renderData != null && visible.check()) {
-            if(colorChanged.check()) {
+            if(colorChanged.value) {
                 updateColor();
             }
-            if(uvChanged.check()) {
+            if(uvChanged.value) {
                 updateUV();
             }
-            if(transform.wasChanged || verticesUpdateRequest.check()) {
+            if(transform.wasChanged || verticesUpdateRequest.value) {
                 updateBody();
             }
         }

@@ -45,7 +45,7 @@ public class Search extends Script implements TargetHolder {
     @Override
     public void initialize(Engine engine) {
         super.initialize(engine);
-        searchTargets = engine.tagManager.getGameObjectsWithTag(searchTag);
+        searchTargets = (Iterable)engine.tagManager.getUnitsWithTag(searchTag);
     }
 
     @Override

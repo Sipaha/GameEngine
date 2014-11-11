@@ -12,13 +12,13 @@ public class Transform {
 
     public RigidBody rigidBody;
 
-    private final Values.Bool positionChanged = new Values.Bool();
+    private final Values.Flag positionChanged = new Values.Flag();
     public final Values.Float x = new Values.Float(positionChanged);
     public final Values.Float y = new Values.Float(positionChanged);
-    private final Values.Bool scaleChanged = new Values.Bool();
+    private final Values.Flag scaleChanged = new Values.Flag();
     public final Values.Float scaleX = new Values.Float(scaleChanged, 1);
     public final Values.Float scaleY = new Values.Float(scaleChanged, 1);
-    private final Values.Bool angleChanged = new Values.Bool();
+    private final Values.Flag angleChanged = new Values.Flag();
     public final Values.Float angle = new Values.Float(angleChanged);
     protected float absAngle = 0;
     protected float cos = 1, sin = 0;
@@ -60,12 +60,12 @@ public class Transform {
     }
 
     private void updateData() {
-        if(forceUpdate || positionChanged.check()) {
+        if(forceUpdate || positionChanged.value) {
             updatePosition();
         }
-        if(forceUpdate || angleChanged.check()) {
+        if(forceUpdate || angleChanged.value) {
             updateAngle();
-        } else if(scaleChanged.check()) {
+        } else if(scaleChanged.value) {
             updateScale();
         }
         meshUpdateRequest |= wasChanged;

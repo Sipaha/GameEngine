@@ -13,8 +13,7 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 8 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="android-libs" level="project" />
     <orderEntry type="module" module-name="Main" />
+    <orderEntry type="library" name="android-libs" level="project" />
   </component>
 </module>
-

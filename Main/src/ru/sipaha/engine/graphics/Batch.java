@@ -18,15 +18,15 @@ public class Batch extends RenderUnit {
     public void add(RenderUnit unit) {
         if(renderUnits.size == 0) {
             setPropertiesFrom(unit);
-            if(!isStatic()) renderBuffers.add(RenderBuffer.getDynamicBuffer());
+            if(!isStatic.get()) renderBuffers.add(RenderBuffer.getDynamicBuffer());
         }
         renderUnits.add(unit);
-        if(isStatic()) reqStaticUpdate = !addStaticUnit(unit);
+        if(isStatic.get()) reqStaticUpdate = !addStaticUnit(unit);
     }
 
     public void remove(RenderUnit unit) {
         renderUnits.removeValue(unit, true);
-        if(isStatic()) reqStaticUpdate = true;
+        if(isStatic.get()) reqStaticUpdate = true;
     }
 
     private RenderBuffer getCurrentStaticBuffer() {
@@ -60,7 +60,7 @@ public class Batch extends RenderUnit {
 
     public void draw(Matrix4 combined) {
         begin(combined);
-        if(isStatic()) {
+        if(isStatic.get()) {
             if(reqStaticUpdate) {
                 for(RenderBuffer buffer : renderBuffers) {
                     buffer.reset();
@@ -103,24 +103,24 @@ public class Batch extends RenderUnit {
     public void begin (Matrix4 combined) {
         GL20 gl = Gdx.gl;
         gl.glDepthMask(false);
-        ShaderProgram shader = getShader();
+        ShaderProgram shader = this.shader.get();
         shader.begin();
         shader.setUniformMatrix("u_projTrans", combined);
         shader.setUniformi("u_texture", 0);
         getTexture().bind();
-        if (isBlendingEnabled()) {
+        if (blendingEnabled.get()) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(getBlendSrcFunc(), getBlendDstFunc());
+            Gdx.gl.glBlendFunc(blendSrcFunc.get(), blendDstFunc.get());
         } else {
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
         for(RenderBuffer buffer : renderBuffers) {
-            buffer.begin(getShader());
+            buffer.begin(shader);
         }
     }
 
     public void end () {
-        if(isStatic()) {
+        if(isStatic.get()) {
             for(RenderBuffer buffer : renderBuffers) {
                 buffer.flush();
             }
@@ -129,7 +129,7 @@ public class Batch extends RenderUnit {
         }
         GL20 gl = Gdx.gl;
         gl.glDepthMask(true);
-        getShader().end();
+        shader.get().end();
     }
 
     public void clear() {

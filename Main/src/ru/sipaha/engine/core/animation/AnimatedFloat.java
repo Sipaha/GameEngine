@@ -2,7 +2,7 @@ package ru.sipaha.engine.core.animation;
 
 import ru.sipaha.engine.core.LinkedValue;
 import ru.sipaha.engine.core.Values;
-import ru.sipaha.engine.utils.curves.Curve;
+import ru.sipaha.engine.utils.functions.Function1f1f;
 
 /**
  * Created on 02.11.2014.
@@ -10,16 +10,16 @@ import ru.sipaha.engine.utils.curves.Curve;
 
 public class AnimatedFloat extends LinkedValue<Values.Float> implements LinkedAnimatedValue {
 
-    private Curve curve;
+    private Function1f1f function1f1f;
 
-    public AnimatedFloat(Values.Float value, Curve curve) {
+    public AnimatedFloat(Values.Float value, Function1f1f function1f1f) {
         super(value);
-        this.curve = curve;
+        this.function1f1f = function1f1f;
     }
 
     public AnimatedFloat(AnimatedFloat prototype) {
         super(prototype);
-        curve = prototype.curve;
+        function1f1f = prototype.function1f1f;
     }
 
     public AnimatedFloat copy() {
@@ -28,12 +28,12 @@ public class AnimatedFloat extends LinkedValue<Values.Float> implements LinkedAn
 
     @Override
     public void update(float time) {
-        value.set(curve.get(time));
+        value.set(function1f1f.get(time));
 
     }
 
     @Override
     public float getMaxDefinedTime() {
-        return curve.getMaxArgument();
+        return function1f1f.getMaxDefinedArgument();
     }
 }

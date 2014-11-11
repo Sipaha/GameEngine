@@ -1,5 +1,6 @@
 package ru.sipaha.engine.graphics.renderlayers;
 
+import com.badlogic.gdx.utils.ObjectMap;
 import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.graphics.RenderBuffer;
 import ru.sipaha.engine.graphics.RenderUnit;
@@ -42,7 +43,7 @@ public abstract class RenderLayer implements Comparable<RenderLayer> {
     public void initialize(){}
     public void add(RenderUnit renderUnit){}
     public void prepare(RenderUnit renderUnit){}
-    public void remove(RenderUnit renderUnit){}
+    public boolean remove(RenderUnit renderUnit){return false;}
 
     public void resize(int width, int height) {
         camera.setViewport(width, height);
@@ -57,5 +58,10 @@ public abstract class RenderLayer implements Comparable<RenderLayer> {
     @Override
     public int compareTo(RenderLayer layer) {
         return order - layer.order;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

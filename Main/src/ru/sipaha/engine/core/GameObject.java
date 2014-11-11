@@ -14,12 +14,12 @@ import ru.sipaha.engine.utils.structures.Bounds;
 
 import java.util.BitSet;
 
-public class GameObject extends RenderUnit {
+public class GameObject extends RenderUnit implements EngineUnit {
 
     public final Life life;
     protected RigidBody rigidBody;
 
-    protected final BitSet tag_bits;
+    protected final BitSet tagBits;
     protected Engine engine;
     protected boolean enable = true;
 
@@ -40,7 +40,7 @@ public class GameObject extends RenderUnit {
 
     public GameObject() {
         life = new Life();
-        tag_bits = new BitSet();
+        tagBits = new BitSet();
         entityIdByName = new ObjectIntMap<>();
         scriptsIdByClass = new ObjectIntMap<>();
         scripts = new Array<>(true, 4, Script.class);
@@ -92,7 +92,7 @@ public class GameObject extends RenderUnit {
         }
         entityIdByName = prototype.entityIdByName;
         scriptsIdByClass = prototype.scriptsIdByClass;
-        tag_bits = prototype.tag_bits;
+        tagBits = prototype.tagBits;
         if(prototype.rigidBody != null) {
             rigidBody = new RigidBody(prototype.rigidBody);
             entities.items[0].transform.rigidBody = rigidBody;
@@ -133,6 +133,7 @@ public class GameObject extends RenderUnit {
     }
 
     public void initialize(Engine engine) {
+        this.engine = engine;
         entities.shrink();
         scripts.shrink();
 
@@ -182,15 +183,26 @@ public class GameObject extends RenderUnit {
         for(Entity e : entities) e.start(engine);
     }
 
+    @Override
+    public BitSet getTagBits() {
+        return tagBits;
+    }
+
+    @Override
+    public boolean isEnable() {
+        return enable;
+    }
+
     public void update(float delta) {
         if(enable) for (Script s : scripts) s.update(delta);
     }
 
     public void fixedUpdate(float delta) {
+        updateData(delta);
         if(enable) for (Script s : scripts) s.fixedUpdate(delta);
     }
 
-    public void updateData(float delta) {
+    private void updateData(float delta) {
         if(reqEnable) {
             enable = true;
             reqEnable = false;
@@ -283,14 +295,14 @@ public class GameObject extends RenderUnit {
     }
 
     public void remove() {
-        engine.removeGameObject(this);
+        engine.remove(this);
         engine = null;
     }
 
     public GameObject disable() {
         reqDisable = true;
         if(rigidBody != null) rigidBody.disable();
-        if(isStatic()) {
+        if(isStatic.get()) {
             for(Entity entity : entities) {
                 entity.visible.set(false);
             }
@@ -301,7 +313,7 @@ public class GameObject extends RenderUnit {
     public GameObject enable() {
         reqEnable = true;
         if(rigidBody != null) rigidBody.enable();
-        if(isStatic()) {
+        if(isStatic.get()) {
             for(Entity entity : entities) {
                 entity.visible.set(true);
             }
@@ -314,7 +326,7 @@ public class GameObject extends RenderUnit {
         if(cache.size == 0) {
             GameObject gameObject = new GameObject(this);
             gameObject.cache = cache;
-            engine.addGameObject(gameObject);
+            engine.add(gameObject);
             return gameObject;
         } else {
             GameObject gameObject = cache.pop();

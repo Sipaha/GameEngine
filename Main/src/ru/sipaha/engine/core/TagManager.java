@@ -10,72 +10,76 @@ public class TagManager {
 
     private ObjectIntMap<String> tags = new ObjectIntMap<>();
 
-    private Array<GameObjectsArray> gameObjectsByTag = new Array<>(true, 16, GameObjectsArray.class);
+    private Array<EngineUnitsArray> unitsByTag = new Array<>(true, 16, EngineUnitsArray.class);
 
-    public void setTag(GameObject go, String tag) {
+    public void setTag(EngineUnit unit, String tag) {
         int id = tags.get(tag, -1);
         if(id == -1) id = addTag(tag);
-        go.tag_bits.set(id);
+        unit.getTagBits().set(id);
     }
 
-    public boolean haveTag(GameObject go, String tag) {
+    public boolean haveTag(EngineUnit unit, String tag) {
         int id = tags.get(tag, -1);
-        return id >= 0 && go.tag_bits.get(id);
+        return id >= 0 && unit.getTagBits().get(id);
     }
 
-    public Iterable<GameObject> getGameObjectsWithTag(String tag) {
+    public Iterable<EngineUnit> getUnitsWithTag(String tag) {
         int id = tags.get(tag, -1);
         if(id == -1) id = addTag(tag);
-        return gameObjectsByTag.get(id);
+        return unitsByTag.get(id);
     }
 
-    protected void add(GameObject go) {
-        BitSet bits = go.tag_bits;
-        for(int i = 0; i < gameObjectsByTag.size; i++) {
-            if(bits.get(i)) gameObjectsByTag.items[i].add(go);
+    protected void add(EngineUnit units) {
+        BitSet bits = units.getTagBits();
+        if(bits != null) {
+            for(int i = 0; i < unitsByTag.size; i++) {
+                if(bits.get(i)) unitsByTag.items[i].add(units);
+            }
         }
     }
 
-    protected void remove(GameObject go) {
-        BitSet bits = go.tag_bits;
-        for(int i = 0; i < gameObjectsByTag.size; i++) {
-            if(bits.get(i)) gameObjectsByTag.items[i].removeValue(go, true);
+    protected void remove(EngineUnit unit) {
+        BitSet bits = unit.getTagBits();
+        if(bits != null) {
+            for(int i = 0; i < unitsByTag.size; i++) {
+                if(bits.get(i)) unitsByTag.items[i].removeValue(unit, true);
+            }
         }
     }
 
     private int addTag(String tag) {
-        int id = gameObjectsByTag.size;
+        int id = unitsByTag.size;
         tags.put(tag, id);
-        gameObjectsByTag.add(new GameObjectsArray(false, 16));
+        unitsByTag.add(new EngineUnitsArray(false, 16, EngineUnit.class));
         return id;
     }
 
-    private class GameObjectsArray extends Array<GameObject> implements Iterable<GameObject> {
+    private class EngineUnitsArray extends Array<EngineUnit> implements Iterable<EngineUnit> {
 
-        private GameObjectsIterator iterator;
+        private EngineUnitsIterator iterator;
 
-        public GameObjectsArray(boolean ordered, int capacity) {
-            super(ordered, capacity, GameObject.class);
+        public EngineUnitsArray(boolean ordered, int capacity, Class arrayType) {
+            super(ordered, capacity, arrayType);
         }
 
         @Override
-        public Iterator<GameObject> iterator () {
+        public Iterator<EngineUnit> iterator () {
             if (iterator == null) {
-                iterator = new GameObjectsIterator((ArrayIterator<GameObject>)super.iterator());
+                iterator = new EngineUnitsIterator((ArrayIterator<EngineUnit>)super.iterator());
             } else {
                 iterator.reset();
             }
             return iterator;
         }
 
-        public class GameObjectsIterator implements Iterator<GameObject> {
+        public class EngineUnitsIterator implements Iterator<EngineUnit> {
 
-            public ArrayIterator<GameObject> iterator;
+            public ArrayIterator<EngineUnit> iterator;
             public boolean end = false;
             public boolean peeked = false;
-            public GameObject next = null;
+            public EngineUnit next = null;
 
-            public GameObjectsIterator(ArrayIterator<GameObject> iterator) {
+            public EngineUnitsIterator(ArrayIterator<EngineUnit> iterator) {
                 this.iterator = iterator;
             }
 
@@ -91,9 +95,9 @@ public class TagManager {
                 if (next != null) return true;
                 peeked = true;
                 while (iterator.hasNext()) {
-                    final GameObject gameObject = iterator.next();
-                    if (gameObject.enable) {
-                        next = gameObject;
+                    final EngineUnit unit = iterator.next();
+                    if (unit.isEnable()) {
+                        next = unit;
                         return true;
                     }
                 }
@@ -102,8 +106,8 @@ public class TagManager {
             }
 
             @Override
-            public GameObject next () {
-                GameObject result = next;
+            public EngineUnit next () {
+                EngineUnit result = next;
                 next = null;
                 peeked = false;
                 return result;

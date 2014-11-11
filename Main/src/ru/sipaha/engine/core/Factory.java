@@ -12,53 +12,54 @@ import java.util.HashSet;
 public class Factory {
 
     private final Engine engine;
-    private final ObjectMap<String, GameObject> templatesByName = new ObjectMap<>();
-    private final IntMap<GameObject> templatesById = new IntMap<>();
-    private final HashSet<GameObject> hashSet = new HashSet<>();
-
-    private boolean initialized = false;
+    private final ObjectMap<String, EngineUnit> templatesByName = new ObjectMap<>();
+    private final IntMap<EngineUnit> templatesById = new IntMap<>();
+    private final HashSet<EngineUnit> hashSet = new HashSet<>();
 
     public Factory(Engine engine) {
         this.engine = engine;
     }
 
-    public void addTemplate(GameObject template, String name) {
-        templatesByName.put(name, template);
-        template.engine = engine;
-        if(hashSet.add(template) && initialized) template.initialize(engine);
+    public void addTemplate(EngineUnit template, String name) {
+        EngineUnit oldValue = templatesByName.put(name, template);
+        if(oldValue != null) {
+            hashSet.remove(oldValue);
+        }
+        hashSet.add(template);
     }
 
-    public void addTemplate(GameObject template, int id) {
-        templatesById.put(id, template);
-        template.engine = engine;
-        if(hashSet.add(template) && initialized) template.initialize(engine);
+    public void addTemplate(EngineUnit template, int id) {
+        EngineUnit oldValue = templatesById.put(id, template);
+        if(oldValue != null) {
+            hashSet.remove(oldValue);
+        }
+        hashSet.add(template);
     }
 
-    public void addTemplate(GameObject template, String name, int id) {
-        templatesByName.put(name, template);
-        templatesById.put(id, template);
-        template.engine = engine;
-        if(hashSet.add(template) && initialized) template.initialize(engine);
+    public void addTemplate(EngineUnit template, String name, int id) {
+        addTemplate(template, name);
+        addTemplate(template, id);
     }
 
-    public GameObject getTemplate(String name) {
-        return templatesByName.get(name);
+    public <T extends EngineUnit> T getTemplate(String name) {
+        return (T)templatesByName.get(name);
     }
 
-    public GameObject getTemplate(int id) {
-        return templatesById.get(id);
+    public <T extends EngineUnit> T getTemplate(int id) {
+        return (T)templatesById.get(id);
     }
 
-    public GameObject create(int id) {
-        return templatesById.get(id).copy();
+    public <T extends EngineUnit> T create(int id) {
+        return (T)templatesById.get(id).copy();
     }
 
-    public GameObject create(String name) {
-        return templatesByName.get(name).copy();
+    public <T extends EngineUnit> T create(String name) {
+        return (T)templatesByName.get(name).copy();
     }
 
     protected void initialize() {
-        for(GameObject template : hashSet) template.initialize(engine);
-        initialized = true;
+        for(EngineUnit template : hashSet) {
+            template.initialize(engine);
+        }
     }
 }

@@ -9,7 +9,7 @@ import ru.sipaha.engine.graphics.RenderUnit;
  */
 
 public abstract class UIRenderUnit extends RenderUnit {
-    protected UIRenderUnit() {
+    /*protected UIRenderUnit() {
     }
 
     protected UIRenderUnit(RenderUnit unit) {
@@ -25,5 +25,5 @@ public abstract class UIRenderUnit extends RenderUnit {
     }
 
     public abstract void setBounds(float left, float right, float top, float bottom);
-
+*/
 }
