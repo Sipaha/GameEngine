@@ -1,10 +1,7 @@
 package ru.sipaha.engine.test.scripts;
 
 import com.badlogic.gdx.math.MathUtils;
-import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.core.Engine;
-import ru.sipaha.engine.core.Script;
-import ru.sipaha.engine.core.Transform;
+import ru.sipaha.engine.core.*;
 
 /**
  * Created on 03.10.2014.
@@ -13,7 +10,7 @@ import ru.sipaha.engine.core.Transform;
 public class AngleTracking extends Script implements TargetCatcher {
 
     private String trackingTransformName;
-    private Transform trackingTransform;
+    private Motion trackObject;
     private AngleTracking template;
     private TargetHolder targetHolder;
 
@@ -29,12 +26,11 @@ public class AngleTracking extends Script implements TargetCatcher {
     @Override
     public void start(Engine engine) {
         if(trackingTransformName != null) {
-            trackingTransform = gameObject.getEntity(trackingTransformName).transform;
+            trackObject = new Motion(gameObject.getEntity(trackingTransformName).transform);
         } else {
-            trackingTransform = gameObject.getTransform();
+            trackObject = new Motion(gameObject.transform);
         }
         targetHolder = gameObject.getScript(TargetHolder.class);
-        gameObject.getTransform();
     }
 
     @Override
@@ -43,21 +39,21 @@ public class AngleTracking extends Script implements TargetCatcher {
             GameObject target = targetHolder.getTarget();
             if (target != null) {
                 float distance = targetHolder.getDistanceToTarget();
-                float angle = calcAngle(trackingTransform, target.getTransform(), distance);
-                trackingTransform.motion.rotateTo(angle);
+                float angle = calcAngle(trackObject.transform, target.transform, distance);
+                trackObject.rotateTo(angle);
                 idleTimer = 0;
             } else {
                 if(updateInactive(delta)) {
                     float randAngle = MathUtils.random(-160, 160);
                     while (Math.abs(randAngle) < 40) randAngle = MathUtils.random(-120, 160);
-                    trackingTransform.motion.rotateTo(trackingTransform.getAbsAngle() + randAngle);
+                    trackObject.rotateTo(trackObject.transform.getAbsAngle() + randAngle);
                 }
             }
         }
     }
 
     private boolean updateInactive(float delta) {
-        if(!trackingTransform.motion.haveATarget && (idleTimer+=delta) >= idleLimit) {
+        if(!trackObject.haveATarget && (idleTimer+=delta) >= idleLimit) {
             idleTimer -= idleLimit;
             return true;
         }
@@ -65,8 +61,8 @@ public class AngleTracking extends Script implements TargetCatcher {
     }
 
     private float calcAngle(Transform from, Transform to, float distance) {
-        float dx = to.tx - from.tx;
-        float dy = to.ty - from.ty;
+        float dx = to.data[Transform.TX] - from.data[Transform.TX];
+        float dy = to.data[Transform.TY] - from.data[Transform.TY];
 
         float acos = (float) Math.acos(dy / distance);
         float radiansAngle = (dx < 0 ? 1 : -1) * acos;
@@ -83,6 +79,6 @@ public class AngleTracking extends Script implements TargetCatcher {
 
     @Override
     public boolean targetIsCatched() {
-        return targetHolder.getTarget() != null && !trackingTransform.motion.haveATarget;
+        return targetHolder.getTarget() != null && !trackObject.haveATarget;
     }
 }

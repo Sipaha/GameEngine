@@ -45,7 +45,7 @@ public class Spawner extends Script {
     @Override
     public void start(Engine engine) {
         this.engine = engine;
-        transform = gameObject.getTransform();
+        transform = gameObject.transform;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class Spawner extends Script {
                 active = loop;
             }
             GameObject gObject = engine.factory.create(currSpawn.unit);
-            gObject.getTransform().setPosition(transform.tx, transform.ty);
+            gObject.transform.setPosition(transform.x.get(), transform.y.get());
             spawnCounter++;
             //gObject.components.get(Life.class).death.add(spawner.spawnedDead);
         }

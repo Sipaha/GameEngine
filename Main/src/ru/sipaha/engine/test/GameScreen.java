@@ -43,21 +43,22 @@ public class GameScreen implements Screen {
                 default: u = 0; v = 0; u2 = 0; v2 = 0;
             }
             e.uv.set(new float[]{u, v, u2, v2});
-            e.transform.setPosition(128, 128);
-            e.setParent(prev);
+            if(i > 0) e.transform.setPosition(128, 128);
+            if(prev != null) e.transform.parent = prev.transform;
             g.addEntity(e);
             prev = e;
         }
-        g.getTransform().setPosition(100, 100);
-        g.getTransform().motion.va = 1;
-        g.getTransform().motion.a_velocity = 10;
+        g.transform.setPosition(100, 100);
+        g.motion.va = 1;
+        g.motion.a_velocity = 10;
         g.zOrder.set(1);
         engine.tagManager.setTag(g, "Enemy");
+        engine.tagManager.setTag(g, "Editable");
         //g.createBody(0.85f);
 
         PiecewiseLinFunction curve = new PiecewiseLinFunction(new Vector2(0,0), new Vector2(4,1), new Vector2(5,0.8f),
                                                         new Vector2(6,1f), new Vector2(7,0.8f), new Vector2(8,1f), new Vector2(12,0));
-        Animation animation = new Animation("test", new AnimatedFloat(g.getEntity(0).colorA, curve)).setLoop(true).start();
+        Animation animation = new Animation("test", new AnimatedFloat(((Sprite)g.getEntity(0)).colorA, curve)).setLoop(true).start();
         g.addAnimation(animation);
         engine.factory.addTemplate(g, "Name");
 
@@ -71,25 +72,25 @@ public class GameScreen implements Screen {
         points[5] = new Vector2(5*3, 4);
         float[] f = frames.get(0);
         g = new GameObject(new TextureRegion(t, f[0], f[1], f[2], f[3]));
-        animation = new Animation("SpriteTest",new AnimatedSprite(g.getEntity(0).uv, frames, new IntFunction(points)));
+        animation = new Animation("SpriteTest",new AnimatedSprite(((Sprite)g.getEntity(0)).uv, frames, new IntFunction(points)));
         g.addAnimation(animation.start().setLoop(true));
         g.addScript(ShellsShooting.class, new ShellsShooting("Shell", "name", null, 1f));
         g.addScript(TargetHolder.class, new Search("Enemy", 250));
         g.addScript(TargetCatcher.class, new AngleTracking());
         g.zOrder.set(5);
-        g.getEntity(0).colorA.set(0.5f);
+        ((Sprite)g.getEntity(0)).colorA.set(0.5f);
         engine.tagManager.setTag(g,"Editable");
         engine.factory.addTemplate(g, "SpriteTest");
 
         g = new GameObject(new Texture(Gdx.files.internal("images/4.png")));
-        g.getTransform().motion.xy_velocity = 140;
-        g.getTransform().motion.move_forward = true;
-        g.getTransform().setPosition(0, 70);
+        g.motion.xy_velocity = 140;
+        g.motion.move_forward = true;
+        g.transform.setPosition(0, 70);
         g.life.lifeTime = 4;
         g.life.onLifetimeExpired.add(new Listener<GameObject>() {
             @Override
             public void receive(GameObject object) {
-                engine.factory.<GameObject>create("Explosion").getTransform().unhook(object.getTransform());
+                engine.factory.<GameObject>create("Explosion").transform.unhook(object.transform);
             }
         });
         g.zOrder.set(10);
@@ -97,7 +98,7 @@ public class GameScreen implements Screen {
 
         t = new Texture(Gdx.files.internal("images/explosion.png"));
         g = new GameObject(new TextureRegion(t, 96, 96));
-        g.getTransform().setScale(2f);
+        g.transform.setScale(2f);
         frames = new Array<>(true, 17, float[].class);
         points = new Vector2[18];
         for(int i = 0; i < 4; i++) {
@@ -110,7 +111,7 @@ public class GameScreen implements Screen {
             }
         }
         points[17] = new Vector2(0.07f*17, 16);
-        g.addAnimation(new Animation("explosion_animation", new AnimatedSprite(g.getEntity(0).uv, frames, new IntFunction(points))).start());
+        g.addAnimation(new Animation("explosion_animation", new AnimatedSprite(((Sprite)g.getEntity(0)).uv, frames, new IntFunction(points))).start());
         g.life.lifeTime = 1.19f;
         engine.factory.addTemplate(g, "Explosion");
 
@@ -130,12 +131,12 @@ public class GameScreen implements Screen {
         }*/
 
         GameObject gameObject = engine.factory.create("Name");
-        gameObject.getTransform().setPosition(200, 200);
-        gameObject.getTransform().motion.moveTo(600, 600);
+        gameObject.transform.setPosition(200, 200);
+        gameObject.motion.moveTo(600, 600);
         gameObject.getAnimation("test").randomizeTimeOffset();
 
         gameObject = engine.factory.create("SpriteTest");
-        gameObject.getTransform().setPosition(500, 200);
+        gameObject.transform.setPosition(500, 200);
         //gameObject.startAnimation("Sprite");
 
         /*engine.input.addProcessor(new InputAdapter(){

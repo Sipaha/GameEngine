@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.structures.Bounds;
 
 public class Batch extends RenderUnit {
 

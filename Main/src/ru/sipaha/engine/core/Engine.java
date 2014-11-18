@@ -2,7 +2,6 @@ package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.Gdx;
 import ru.sipaha.engine.graphics.Camera;
-import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 import ru.sipaha.engine.graphics.Renderer;
 import ru.sipaha.engine.utils.Array;
@@ -18,36 +17,33 @@ public class Engine {
 
     private float timeCounter = 0f;
 
-    private final Array<EngineUnit> units = new Array<>(false, 32, EngineUnit.class);
-    private final Array<EngineUnit> unitsToAdd = new Array<>(false, 4, EngineUnit.class);
-    private final Array<EngineUnit> unitsToDelete = new Array<>(false, 2, EngineUnit.class);
+    private final Array<GameObject> gameObjects = new Array<>(false, 32, GameObject.class);
+    private final Array<GameObject> unitsToAdd = new Array<>(false, 4, GameObject.class);
+    private final Array<GameObject> unitsToDelete = new Array<>(false, 2, GameObject.class);
 
     private boolean physicsDebugDrawing = false;
     private boolean isRunning = false;
     private boolean inUpdateLoop = false;
+    private boolean editorMode = false;
 
-    public void add(EngineUnit unit) {
+    public void add(GameObject gameObject) {
         if(inUpdateLoop) {
-            unitsToAdd.add(unit);
+            unitsToAdd.add(gameObject);
         } else {
-            units.add(unit);
-            tagManager.add(unit);
-            if(unit instanceof RenderUnit) {
-                renderer.addRenderUnit((RenderUnit)unit);
-            }
-            unit.start(this);
+            gameObjects.add(gameObject);
+            tagManager.add(gameObject);
+            renderer.addRenderUnit(gameObject);
+            gameObject.start(this);
         }
     }
 
-    protected void remove(EngineUnit unit) {
+    protected void remove(GameObject gameObject) {
         if(inUpdateLoop) {
-            unitsToDelete.add(unit);
+            unitsToDelete.add(gameObject);
         } else {
-            units.removeValue(unit, true);
-            tagManager.remove(unit);
-            if(unit instanceof RenderUnit) {
-                renderer.removeRenderUnit((RenderUnit) unit);
-            }
+            gameObjects.removeValue(gameObject, true);
+            tagManager.remove(gameObject);
+            renderer.removeRenderUnit(gameObject);
         }
     }
 
@@ -66,23 +62,32 @@ public class Engine {
 
         float frameTime = Math.min(delta, 0.25f);
 
-        timeCounter += frameTime;
         inUpdateLoop = true;
-        while(timeCounter >= FIXED_TIME) {
-            physicsWorld.update(FIXED_TIME);
-            for (EngineUnit g : units) {
-                g.fixedUpdate(FIXED_TIME);
+        if(editorMode) {
+            for (GameObject g : gameObjects) {
+                g.updateData(FIXED_TIME);
             }
-            timeCounter -= FIXED_TIME;
-        }
-        for(EngineUnit g : units) {
-            g.update(frameTime);
+        } else {
+            timeCounter += frameTime;
+            while(timeCounter >= FIXED_TIME) {
+                physicsWorld.update(FIXED_TIME);
+                for (GameObject g : gameObjects) {
+                    g.updateData(FIXED_TIME);
+                }
+                for (GameObject g : gameObjects) {
+                    g.fixedUpdate(FIXED_TIME);
+                }
+                timeCounter -= FIXED_TIME;
+            }
+            for(GameObject g : gameObjects) {
+                g.update(frameTime);
+            }
         }
         inUpdateLoop = false;
 
-        for(EngineUnit unit : unitsToDelete) remove(unit);
+        for(GameObject gameObject : unitsToDelete) remove(gameObject);
         unitsToDelete.size = 0;
-        for(EngineUnit unit : unitsToAdd) add(unit);
+        for(GameObject gameObject : unitsToAdd) add(gameObject);
         unitsToAdd.size = 0;
     }
 
@@ -99,7 +104,11 @@ public class Engine {
         this.physicsDebugDrawing = physicsDebugDrawing;
     }
 
+    public void setEditorMode(boolean mode) {
+        editorMode = mode;
+    }
+
     public int unitsSize() {
-        return units.size;
+        return gameObjects.size;
     }
 }

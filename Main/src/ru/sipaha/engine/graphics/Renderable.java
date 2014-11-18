@@ -1,5 +1,7 @@
 package ru.sipaha.engine.graphics;
 
+import ru.sipaha.engine.utils.structures.Bounds;
+
 /**
  * Created on 01.11.2014.
  */
@@ -26,4 +28,8 @@ public abstract class Renderable {
     public abstract void render(RenderBuffer buffer);
 
     public abstract int getRenderSize();
+
+    public Bounds getBounds() {
+        return null;
+    }
 }

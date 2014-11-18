@@ -40,6 +40,18 @@ public class Bounds {
         return this;
     }
 
+    /*public Bounds check() {
+        float x1 = min.x;
+        float x2 = max.x;
+        float y1 = min.y;
+        float y2 = max.y;
+        min.x = Math.min(x1, x2);
+        min.y = Math.min(y1, y2);
+        max.x = Math.max(x1, x2);
+        max.y = Math.max(y1, y2);
+        return this;
+    }*/
+
     public Bounds translate(float dx, float dy) {
         min.x += dx;
         max.x += dx;
@@ -50,7 +62,7 @@ public class Bounds {
     }
 
     public Bounds union(Bounds bounds) {
-        if(!bounds.isEmpty()) {
+        if(bounds != null && !bounds.isEmpty()) {
             if(isEmpty()) {
                 set(bounds);
             } else {
@@ -59,8 +71,8 @@ public class Bounds {
                 min.y = Math.min(min.y, bounds.min.y);
                 max.y = Math.max(max.y, bounds.max.y);
             }
+            empty = false;
         }
-        empty = false;
         return this;
     }
 
@@ -86,14 +98,35 @@ public class Bounds {
     }
 
     public boolean pointIn(float x, float y) {
-        return x >= min.x && x <= max.x && y >= min.y && y <= max.y;
+        return !empty && x >= min.x && x <= max.x && y >= min.y && y <= max.y;
+    }
+
+    public boolean pointIn(Vector2 point) {
+        return pointIn(point.x, point.y);
     }
 
     public boolean overlaps(Bounds bounds) {
-        return min.x <= bounds.max.x && min.x >= bounds.min.x
+        return !empty && !bounds.empty &&
+                (min.x <= bounds.max.x && min.x >= bounds.min.x
                 || max.x <= bounds.max.x && max.x >= bounds.min.x
                 || min.y <= bounds.max.y && min.y >= bounds.min.y
-                || max.y <= bounds.max.y && max.y >= bounds.min.y;
+                || max.y <= bounds.max.y && max.y >= bounds.min.y);
+    }
+
+    public boolean overlapsHalfOf(Bounds bounds) {
+        if(empty || bounds.empty) return false;
+        float halfWidth = getWidth()/2;
+        float halfHeight = getHeight()/2;
+        if(pointIn(bounds.min.x, bounds.min.y)) {
+            return pointIn(bounds.min.x+halfWidth, bounds.min.y+halfHeight);
+        } else if(pointIn(bounds.min.x, bounds.max.y)) {
+            return pointIn(bounds.min.x+halfWidth, bounds.max.y-halfHeight);
+        } else if(pointIn(bounds.max.x, bounds.min.y)) {
+            return pointIn(bounds.max.x-halfWidth, bounds.min.y+halfHeight);
+        } else if(pointIn(bounds.max.x, bounds.max.y)) {
+            return pointIn(bounds.max.x-halfWidth, bounds.max.y-halfHeight);
+        }
+        return false;
     }
 
     public boolean isEmpty() {
@@ -111,5 +144,9 @@ public class Bounds {
     public void reset() {
         set(0,0,0,0);
         empty = true;
+    }
+
+    public static boolean pointIn(Vector2 min, Vector2 max, Vector2 point) {
+        return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y;
     }
 }

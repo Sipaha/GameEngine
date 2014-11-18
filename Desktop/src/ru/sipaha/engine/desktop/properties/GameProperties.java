@@ -37,7 +37,7 @@ public class GameProperties extends PropertiesTable {
 
     public void set(GameObject gameObject) {
         model.clear();
-        model.addPropertySection(transformSection.set(gameObject.getTransform()));
+        model.addPropertySection(transformSection.set(gameObject.transform));
         model.addPropertySection(renderUnitSection.set(gameObject));
     }
 

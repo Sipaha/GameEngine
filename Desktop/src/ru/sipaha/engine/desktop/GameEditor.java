@@ -9,6 +9,7 @@ import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.desktop.properties.GameProperties;
 import ru.sipaha.engine.desktop.properties.Property;
+import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.test.GameScreen;
 import ru.sipaha.engine.test.TestGame;
 
@@ -22,8 +23,6 @@ import java.awt.event.WindowEvent;
  */
 
 public class GameEditor extends JFrame {
-
-    Iterable<GameObject> editableObjects;
 
     public GameEditor() {
         final TestGame game = new TestGame();
@@ -71,10 +70,10 @@ public class GameEditor extends JFrame {
             public void run() {
                 Engine engine = ((GameScreen)game.getScreen()).engine;
                 table.setEngine(engine);
-                editableObjects = (Iterable)engine.tagManager.getUnitsWithTag("Editable");
-                for(GameObject g : editableObjects) table.set(g);
-                EditorRenderLayer layer = new EditorRenderLayer(engine.renderer.getRenderLayer().camera);
-                engine.input.addProcessor(new EditorController(layer));
+                Camera gameCamera = engine.renderer.getRenderLayer().camera;
+                EditorRenderLayer layer = new EditorRenderLayer(gameCamera);
+                engine.input.addProcessor(new EditorController(layer, gameCamera,
+                                                        engine.tagManager.getUnitsWithTag("Editable")));
                 engine.renderer.addRenderLayer(layer);
                 currFrame.repaint();
             }

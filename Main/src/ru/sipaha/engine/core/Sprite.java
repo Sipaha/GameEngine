@@ -4,23 +4,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.NumberUtils;
 import ru.sipaha.engine.graphics.RenderBuffer;
-import ru.sipaha.engine.graphics.Renderable;
 import ru.sipaha.engine.utils.Array;
 import ru.sipaha.engine.utils.structures.Bounds;
 
-public class Sprite extends Renderable {
+import static ru.sipaha.engine.core.Transform.*;
+
+public class Sprite extends Entity {
     public static final int ENTITY_RENDER_SIZE = 20;
 
     public static final int X1 = 0, Y1 = 1, C1 = 2, U1 = 3, V1 = 4;
     public static final int X2 = 5, Y2 = 6, C2 = 7, U2 = 8, V2 = 9;
     public static final int X3 = 10, Y3 = 11, C3 = 12, U3 = 13, V3 = 14;
     public static final int X4 = 15, Y4 = 16, C4 = 17, U4 = 18, V4 = 19;
-
-    public final Transform transform = new Transform();
-
-    private String name;
-    private Sprite parent = null;
-    private int parentId = -1;
 
     private final Values.Flag colorChanged = new Values.Flag();
     public final Values.Float colorA = new Values.Float(colorChanged, 1);
@@ -46,22 +41,26 @@ public class Sprite extends Renderable {
 
     protected Bounds bounds;
 
+    private Sprite prototype;
+
     public Sprite(TextureRegion r) {
-        this(r.getRegionWidth(), r.getRegionHeight(), r.getU(), r.getV(), r.getU2(), r.getV2());
+        this(null, r);
+    }
+
+    public Sprite(String name, TextureRegion r) {
+        this(name, r.getRegionWidth(), r.getRegionHeight(), r.getU(), r.getV(), r.getU2(), r.getV2());
     }
 
     public Sprite(Texture t) {
-        this(t.getWidth(), t.getHeight(), 0, 0, 1, 1);
+        this(null, t);
     }
 
-    public Sprite(Sprite sprite) {
-        this(sprite.width.value, sprite.height.value, sprite.uv.value);
-        reset(sprite);
-        name = sprite.name;
-        parentId = sprite.parentId;
+    public Sprite(String name, Texture t) {
+        this(name, t.getWidth(), t.getHeight(), 0, 0, 1, 1);
     }
 
-    public Sprite(float width, float height, float... uv) {
+    public Sprite(String name, float width, float height, float... uv) {
+        super(name);
         this.uv.setValues(uv);
         this.width.set(width);
         this.height.set(height);
@@ -69,41 +68,41 @@ public class Sprite extends Renderable {
         pivotY.set(height / 2f);
     }
 
-    public void start(Engine engine)  {
+    public Sprite(Sprite prototype) {
+        super(prototype);
+        width.set(prototype.width);
+        height.set(prototype.height);
+        uv.setValues(prototype.uv);
+        pivotX.set(prototype.pivotX);
+        pivotY.set(prototype.pivotY);
+        this.prototype = prototype;
+        reset();
+    }
+
+    @Override
+    public void start(Engine engine, Transform baseTransform, Array<Entity> entities)  {
+        super.start(engine, baseTransform, entities);
         if(renderData == null) {
-            renderData = new float[ENTITY_RENDER_SIZE];
-            offset = 0;
+            setRenderData(new float[ENTITY_RENDER_SIZE], 0);
         }
-    }
-
-    public void updateLinks(Array<Sprite> entities) {
-        for(int i = 0; i < entities.size; i++) {
-            if(entities.get(i) == parent) {
-                parentId = i;
-                return;
-            }
-        }
-    }
-
-    public void setLinks(Array<Sprite> entities) {
-        if(parentId >= 0) parent = entities.get(parentId);
     }
 
     @Override
     public void render(RenderBuffer buffer) {
-        if(visible.check()) {
+        if(visible.value) {
             buffer.render(renderData, offset, ENTITY_RENDER_SIZE);
         }
     }
 
+    @Override
     public void update(float delta) {
-        transform.update(parent != null ? parent.transform : null, delta);
+        super.update(delta);
         if(renderDataChanged) {
             updateBody();
             updateColor();
             updateUV();
             renderDataChanged = false;
-        } else if(renderData != null && visible.check()) {
+        } else if(renderData != null && visible.value) {
             if(colorChanged.value) {
                 updateColor();
             }
@@ -148,24 +147,24 @@ public class Sprite extends Renderable {
     }
 
     protected void updateBody() {
-        if(visible.check()) {
+        if(visible.value) {
             Transform t = this.transform;
             float localX = -pivotX.value;
             float localY = -pivotY.value;
             float localX2 = localX + width.value;
             float localY2 = localY + height.value;
 
-            if (!fixedRotation.check()) {
-                final float x_m00 = localX * t.t00, y_m01 = localY * t.t01;
-                final float x_m10 = localX * t.t10, y_m11 = localY * t.t11;
-                final float x2_m00 = localX2 * t.t00, y2_m01 = localY2 * t.t01;
-                final float x2_m10 = localX2 * t.t10, y2_m11 = localY2 * t.t11;
-                final float x1 = x_m00 + y_m01 + t.tx;
-                final float y1 = x_m10 + y_m11 + t.ty;
-                final float x2 = x_m00 + y2_m01 + t.tx;
-                final float y2 = x_m10 + y2_m11 + t.ty;
-                final float x3 = x2_m00 + y2_m01 + t.tx;
-                final float y3 = x2_m10 + y2_m11 + t.ty;
+            if (!fixedRotation.value) {
+                final float x_m00 = localX * t.data[T00], y_m01 = localY * t.data[T01];
+                final float x_m10 = localX * t.data[T10], y_m11 = localY * t.data[T11];
+                final float x2_m00 = localX2 * t.data[T00], y2_m01 = localY2 * t.data[T01];
+                final float x2_m10 = localX2 * t.data[T10], y2_m11 = localY2 * t.data[T11];
+                final float x1 = x_m00 + y_m01 + t.data[TX];
+                final float y1 = x_m10 + y_m11 + t.data[TY];
+                final float x2 = x_m00 + y2_m01 + t.data[TX];
+                final float y2 = x_m10 + y2_m11 + t.data[TY];
+                final float x3 = x2_m00 + y2_m01 + t.data[TX];
+                final float y3 = x2_m10 + y2_m11 + t.data[TY];
                 renderData[offset + X1] = x1;
                 renderData[offset + Y1] = y1;
                 renderData[offset + X2] = x2;
@@ -175,10 +174,10 @@ public class Sprite extends Renderable {
                 renderData[offset + X4] = x1 + (x3 - x2);
                 renderData[offset + Y4] = y3 - (y2 - y1);
             } else {
-                final float x1 = localX + t.tx;
-                final float y1 = localY + t.ty;
-                final float x3 = localX2 + t.tx;
-                final float y3 = localY2 + t.ty;
+                final float x1 = localX + t.data[TX];
+                final float y1 = localY + t.data[TY];
+                final float x3 = localX2 + t.data[TX];
+                final float y3 = localY2 + t.data[TY];
                 renderData[offset + X1] = x1;
                 renderData[offset + Y1] = y1;
                 renderData[offset + X2] = x1;
@@ -202,14 +201,15 @@ public class Sprite extends Renderable {
         verticesUpdateRequest.value = false;
     }
 
-    public void reset(Sprite source) {
-        colorA.set(source.colorA);
-        colorR.set(source.colorR);
-        colorG.set(source.colorG);
-        colorB.set(source.colorB);
-        transform.reset(source.transform);
+    @Override
+    public void reset() {
+        colorA.set(prototype.colorA);
+        colorR.set(prototype.colorR);
+        colorG.set(prototype.colorG);
+        colorB.set(prototype.colorB);
     }
 
+    @Override
     public Bounds getBounds() {
         if(bounds == null) {
             bounds = new Bounds();
@@ -260,18 +260,6 @@ public class Sprite extends Renderable {
     public void setSize(float width, float height) {
         this.width.set(width);
         this.height.set(height);
-    }
-
-    public void setParent(Sprite parent) {
-        this.parent = parent;
-    }
-
-    public Sprite setName(String name) {
-        this.name = name;
-        return this;
-    }
-    public String getName() {
-        return name;
     }
 }
 

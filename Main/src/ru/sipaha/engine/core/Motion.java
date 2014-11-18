@@ -5,6 +5,8 @@ import ru.sipaha.engine.utils.MathHelper;
 
 public class Motion {
 
+    public final Transform transform;
+
     public float xy_velocity = 20f;
     public float vx = 0f;
     public float vy = 0f;
@@ -22,10 +24,8 @@ public class Motion {
 
     public boolean move_forward = false;
 
-    public Motion() {}
-
-    public Motion(Motion prototype) {
-        reset(prototype);
+    public Motion(Transform transform) {
+        this.transform = transform;
     }
 
     public void moveTo(Vector2 v) {
@@ -46,16 +46,16 @@ public class Motion {
     public void mul(Transform t) {
         float tx = vx;
         float ty = vy;
-        vx = tx * t.t00 + ty * t.t01;
-        vy = tx * t.t10 + ty * t.t11;
+        vx = tx * t.data[Transform.T00] + ty * t.data[Transform.T01];
+        vy = tx * t.data[Transform.T10] + ty * t.data[Transform.T11];
     }
 
-    public void update(Transform t, float delta) {
+    public void update(float delta) {
 
         if(xyTargetIsAdded) {
             if(!move_forward) {
-                float vecX = xTarget - t.x.value;
-                float vecY = yTarget - t.y.value;
+                float vecX = xTarget - transform.x.value;
+                float vecY = yTarget - transform.y.value;
                 float length = (float)Math.sqrt(vecX*vecX + vecY*vecY);
                 vx = vecX / length;
                 vy = vecY / length;
@@ -65,7 +65,7 @@ public class Motion {
         }
 
         if(aTargetIsAdded) {
-            float direct = aTarget - t.absAngle;
+            float direct = aTarget - transform.absAngle;
             if(direct != 0) {
                 float absDirect = Math.abs(direct);
                 float back = 360 - absDirect;
@@ -78,10 +78,10 @@ public class Motion {
 
         float da = va * a_velocity * delta;
         if(da != 0) {
-            float angle = t.angle.value;
+            float angle = transform.angle.value;
             if(haveATarget) {
                 float absDelta = Math.abs(da);
-                float absDistance = Math.abs(aTarget - t.absAngle);
+                float absDistance = Math.abs(aTarget - transform.absAngle);
                 if(absDelta >= absDistance || absDelta >= (360-absDistance)) {
                     angle = aTarget;
                     haveATarget = false;
@@ -91,21 +91,21 @@ public class Motion {
                 }
             } else angle += da;
 
-            t.angle.value = MathHelper.angle360Limit(angle);
-            t.updateAngle();
+            transform.angle.value = MathHelper.angle360Limit(angle);
+            transform.updateAngle();
         }
 
         if(move_forward) {
-            vx = -t.sin;
-            vy = t.cos;
+            vx = -transform.sin;
+            vy = transform.cos;
         }
 
         if(vx != 0 || vy != 0) {
             float deltaXY = delta * xy_velocity;
-            t.translate(vx * deltaXY, vy * deltaXY);
+            transform.translate(vx * deltaXY, vy * deltaXY);
             if(haveXYTarget) {
-                float vecX = xTarget - t.x.value;
-                float vecY = yTarget - t.y.value;
+                float vecX = xTarget - transform.x.value;
+                float vecY = yTarget - transform.y.value;
                 if(vecX * vx + vecY * vy <= 0) {
                     vx = 0;
                     vy = 0;

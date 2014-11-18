@@ -5,6 +5,7 @@ import ru.sipaha.engine.graphics.Batch;
 import ru.sipaha.engine.graphics.RenderBuffer;
 import ru.sipaha.engine.graphics.RenderUnit;
 import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.structures.Bounds;
 
 /**
  * Created on 30.09.2014.

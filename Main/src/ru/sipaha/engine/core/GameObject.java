@@ -14,7 +14,10 @@ import ru.sipaha.engine.utils.structures.Bounds;
 
 import java.util.BitSet;
 
-public class GameObject extends RenderUnit implements EngineUnit {
+public class GameObject extends RenderUnit {
+
+    public final Transform transform = new Transform();
+    public final Motion motion = new Motion(transform);
 
     public final Life life;
     protected RigidBody rigidBody;
@@ -30,7 +33,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     private final ObjectIntMap<String> entityIdByName;
     private final ObjectIntMap<Class> scriptsIdByClass;
     private final Array<Script> scripts;
-    private final Array<Sprite> entities;
+    private final Array<Entity> entities;
     private Animator animator;
 
     private GameObject prototype;
@@ -44,7 +47,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
         entityIdByName = new ObjectIntMap<>();
         scriptsIdByClass = new ObjectIntMap<>();
         scripts = new Array<>(true, 4, Script.class);
-        entities = new Array<>(true, 4, Sprite.class);
+        entities = new Array<>(true, 4, Entity.class);
     }
 
     public GameObject(TextureRegion region) {
@@ -61,24 +64,22 @@ public class GameObject extends RenderUnit implements EngineUnit {
 
     public GameObject(GameObject prototype) {
         super(prototype);
+        transform.reset(prototype.transform);
+        motion.reset(prototype.motion);
         this.prototype = prototype;
         this.engine = prototype.engine;
         life = new Life(prototype.life);
 
-        entities = new Array<>(true, prototype.entities.size, Sprite.class);
+        entities = new Array<>(true, prototype.entities.size, Entity.class);
         for(int i = 0; i < prototype.entities.size; i++) {
-            Sprite e = new Sprite(prototype.entities.items[i]);
-            entities.add(e);
-        }
-        for(Sprite e : entities) {
-            e.setLinks(entities);
+            entities.add(prototype.entities.items[i].copy());
         }
 
         dynamicRenderSize = prototype.dynamicRenderSize;
-        if(!dynamicRenderSize) {
+        if(!dynamicRenderSize && !isStatic.value) {
             renderData = new float[prototype.renderData.length];
             offset = 0;
-            for(Sprite e : entities) {
+            for(Entity e : entities) {
                 offset = e.setRenderData(renderData, offset);
             }
             offset = 0;
@@ -95,7 +96,6 @@ public class GameObject extends RenderUnit implements EngineUnit {
         tagBits = prototype.tagBits;
         if(prototype.rigidBody != null) {
             rigidBody = new RigidBody(prototype.rigidBody);
-            entities.items[0].transform.rigidBody = rigidBody;
         }
         if(prototype.animator != null) {
             animator = new Animator(prototype.animator, entities);
@@ -105,7 +105,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     @Override
     public void setRenderData(RenderBuffer buffer) {
         super.setRenderData(buffer);
-        for(Sprite e : entities) {
+        for(Entity e : entities) {
             e.setRenderData(buffer);
         }
     }
@@ -114,7 +114,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     public void render(RenderBuffer buffer) {
         if(enable) {
             if(dynamicRenderSize) {
-                for(Sprite e : entities) e.render(buffer);
+                for(Entity e : entities) e.render(buffer);
             } else {
                 buffer.render(renderData, 0, renderData.length);
             }
@@ -124,7 +124,7 @@ public class GameObject extends RenderUnit implements EngineUnit {
     @Override
     public int getRenderSize() {
         int sum = 0;
-        for(Sprite e : entities) sum += e.getRenderSize();
+        for(Entity e : entities) sum += e.getRenderSize();
         return sum;
     }
 
@@ -138,8 +138,8 @@ public class GameObject extends RenderUnit implements EngineUnit {
         scripts.shrink();
 
         for(int i = 0; i < entities.size; i++) {
-            Sprite e = entities.items[i];
-            e.updateLinks(entities);
+            Entity e = entities.items[i];
+            e.initialize(engine, entities);
             String name = e.getName();
             if(name != null) entityIdByName.put(name, i);
         }
@@ -149,27 +149,25 @@ public class GameObject extends RenderUnit implements EngineUnit {
             s.initialize(engine);
         }
 
-        int renderSize = 0;
-        for(Sprite e : entities) {
-            int size = e.getRenderSize();
-            if(size != -1) {
-                renderSize += size;
-            } else {
-                dynamicRenderSize = true;
-                break;
+        if(!isStatic.value) {
+            int renderSize = 0;
+            for(Entity e : entities) {
+                int size = e.getRenderSize();
+                if(size != -1) {
+                    renderSize += size;
+                } else {
+                    dynamicRenderSize = true;
+                    break;
+                }
             }
-        }
-        if(!dynamicRenderSize) {
-            renderData = new float[renderSize];
-            offset = 0;
-            for(Sprite e : entities) {
-                offset = e.setRenderData(renderData, offset);
+            if(!dynamicRenderSize) {
+                renderData = new float[renderSize];
+                offset = 0;
+                for(Entity e : entities) {
+                    offset = e.setRenderData(renderData, offset);
+                }
+                offset = 0;
             }
-            offset = 0;
-        }
-
-        for(Sprite e : entities) {
-            e.start(engine);
         }
 
         if(animator != null) {
@@ -177,46 +175,51 @@ public class GameObject extends RenderUnit implements EngineUnit {
         }
     }
 
-    public void start(Engine engine) {
-        for(int i = 0; i < scripts.size; i++) scripts.get(i).start(engine);
-        if(rigidBody != null) rigidBody.create(this, engine.physicsWorld);
-        for(Sprite e : entities) e.start(engine);
+    protected void start(Engine engine) {
+        for(int i = 0; i < scripts.size; i++) {
+            scripts.get(i).start(engine);
+        }
+        if(rigidBody != null) {
+            rigidBody.create(this, engine.physicsWorld);
+        }
+        for(Entity e : entities) {
+            e.start(engine, transform, entities);
+        }
     }
 
-    @Override
-    public BitSet getTagBits() {
-        return tagBits;
+    protected void update(float delta) {
+        if(enable) {
+            for (Script s : scripts) {
+                s.update(delta);
+            }
+        }
     }
 
-    @Override
-    public boolean isEnable() {
-        return enable;
+    protected void fixedUpdate(float delta) {
+        life.update(this, delta);
+        if(enable) {
+            motion.update(delta);
+            if(animator != null) {
+                animator.update(delta);
+            }
+            for (Script s : scripts) {
+                s.fixedUpdate(delta);
+            }
+        }
     }
 
-    public void update(float delta) {
-        if(enable) for (Script s : scripts) s.update(delta);
-    }
-
-    public void fixedUpdate(float delta) {
-        updateData(delta);
-        if(enable) for (Script s : scripts) s.fixedUpdate(delta);
-    }
-
-    private void updateData(float delta) {
+    protected void updateData(float delta) {
         if(reqEnable) {
             enable = true;
             reqEnable = false;
         }
         if(enable) {
-            life.update(this, delta);
-            if(!enable) return;
-            if(animator != null) {
-                animator.update(delta);
-            }
-            for(Sprite e : entities) {
+            transform.update();
+            for(Entity e : entities) {
                 e.update(delta);
             }
-            for(Sprite e : entities) {
+            transform.wasChanged = false;
+            for(Entity e : entities) {
                 e.transform.wasChanged = false;
             }
         }
@@ -227,8 +230,10 @@ public class GameObject extends RenderUnit implements EngineUnit {
     }
 
     public GameObject reset() {
+        transform.reset(prototype.transform);
+        motion.reset(prototype.motion);
         for(int i = 0; i < entities.size; i++) {
-            entities.items[i].reset(prototype.entities.items[i]);
+            entities.items[i].reset();
         }
         for (Script script : scripts) script.reset();
         life.reset(prototype.life);
@@ -239,9 +244,12 @@ public class GameObject extends RenderUnit implements EngineUnit {
 
     public Bounds getBounds() {
         updateData(0);
-        if(bounds == null) bounds = new Bounds();
-        bounds.reset();
-        for(Sprite sprite : entities) {
+        if(bounds == null) {
+            bounds = new Bounds();
+        } else {
+            bounds.reset();
+        }
+        for(Entity sprite : entities) {
             bounds.union(sprite.getBounds());
         }
         return bounds;
@@ -260,10 +268,10 @@ public class GameObject extends RenderUnit implements EngineUnit {
         return animator.get(name);
     }
 
-    public Sprite getEntity(String name) {
+    public Entity getEntity(String name) {
         return entities.items[entityIdByName.get(name, -1)];
     }
-    public Sprite getEntity(int idx) {
+    public Entity getEntity(int idx) {
         return entities.items[idx];
     }
     public void addEntity(Sprite e) {
@@ -277,16 +285,14 @@ public class GameObject extends RenderUnit implements EngineUnit {
         Gdx.app.error("GameEngine","Script \""+type.getName()+"\" not found!");
         return null;
     }
+
     public void addScript(Script s) {
         scripts.add(s);
     }
+
     public void addScript(Class type, Script script) {
         scriptsIdByClass.put(type, scripts.size);
         scripts.add(script);
-    }
-
-    public Transform getTransform() {
-        return entities.first().transform;
     }
 
     public void free() {
@@ -302,22 +308,22 @@ public class GameObject extends RenderUnit implements EngineUnit {
     public GameObject disable() {
         reqDisable = true;
         if(rigidBody != null) rigidBody.disable();
-        if(isStatic.get()) {
-            for(Sprite sprite : entities) {
-                sprite.visible.set(false);
+        /*if(isStatic.value) {
+            for(Entity entity : entities) {
+                entity.visible.set(false);
             }
-        }
+        }*/
         return this;
     }
 
     public GameObject enable() {
         reqEnable = true;
         if(rigidBody != null) rigidBody.enable();
-        if(isStatic.get()) {
+        /*if(isStatic.get()) {
             for(Sprite sprite : entities) {
                 sprite.visible.set(true);
             }
-        }
+        }*/
         return this;
     }
 

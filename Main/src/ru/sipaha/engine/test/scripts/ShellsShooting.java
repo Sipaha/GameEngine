@@ -48,7 +48,7 @@ public class ShellsShooting extends Script {
         if(weaponName != null) {
             weaponTransform = gameObject.getEntity(weaponName).transform;
         } else {
-            weaponTransform = gameObject.getTransform();
+            weaponTransform = gameObject.transform;
         }
         if(shootAnimationName != null) shootAnimation = gameObject.getAnimation(shootAnimationName);
     }
@@ -63,7 +63,7 @@ public class ShellsShooting extends Script {
         if(timer >= fireRate && targetCatcher.targetIsCatched()) {
             timer -= fireRate;
             GameObject shell = shellTemplate.copy();
-            shell.getTransform().unhook(weaponTransform);
+            shell.transform.unhook(weaponTransform);
             if(shootAnimation != null) shootAnimation.start();
         }
     }

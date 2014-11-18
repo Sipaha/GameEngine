@@ -19,8 +19,6 @@ public class Search extends Script implements TargetHolder {
     private Iterable<GameObject> searchTargets;
     private String searchTag;
 
-    private Transform transform;
-
     public Search(String searchTag){
         this(searchTag, 200);
     }
@@ -39,7 +37,6 @@ public class Search extends Script implements TargetHolder {
     @Override
     protected void start(Engine engine) {
         super.start(engine);
-        transform = gameObject.getTransform();
     }
 
     @Override
@@ -55,10 +52,10 @@ public class Search extends Script implements TargetHolder {
         distance = radius * radius;
 
         for(GameObject target : searchTargets) {
-            Transform targetTransform = target.getTransform();
+            Transform targetTransform = target.transform;
 
-            float distanceToTarget = MathHelper.sqrDistance(transform.tx, transform.ty,
-                    targetTransform.tx, targetTransform.ty);
+            float distanceToTarget = MathHelper.sqrDistance(gameObject.transform.x.get(), gameObject.transform.y.get(),
+                    targetTransform.x.get(), targetTransform.y.get());
 
             if(distanceToTarget < distance) {
                 switch (strategy) {

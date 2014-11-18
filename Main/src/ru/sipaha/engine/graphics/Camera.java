@@ -6,11 +6,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import ru.sipaha.engine.utils.signals.Listener;
 import ru.sipaha.engine.utils.signals.Signal;
+import ru.sipaha.engine.utils.structures.Bounds;
 
 public class Camera extends OrthographicCamera {
 
     private final Vector3 tmpVec3 = new Vector3();
     private final Vector2 tmpVec2 = new Vector2();
+    private final Bounds tmpBounds = new Bounds();
     private final Vector2 maxPosition = new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
     private final Vector2 minPosition = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
     private final Vector2 maxView = new Vector2(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
@@ -34,6 +36,21 @@ public class Camera extends OrthographicCamera {
         tmpVec3.set(x, y, 0);
         unproject(tmpVec3);
         return tmpVec2.set(tmpVec3.x, tmpVec3.y);
+    }
+
+    public Vector2 unproject(Vector2 vec) {
+        return unproject(vec.x, vec.y);
+    }
+
+    public Bounds unproject(Bounds bounds) {
+        tmpBounds.reset();
+        tmpBounds.expand(unproject(bounds.min));
+        tmpBounds.expand(unproject(bounds.max));
+        return tmpBounds;
+    }
+
+    public Vector2 distance(Vector2 vec1, Vector2 vec2) {
+        return tmpVec2.set((vec2.x - vec1.x)*zoom, (vec2.y - vec1.y)*zoom);
     }
 
     public Vector2 project(float x, float y) {

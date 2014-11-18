@@ -12,53 +12,53 @@ import java.util.HashSet;
 public class Factory {
 
     private final Engine engine;
-    private final ObjectMap<String, EngineUnit> templatesByName = new ObjectMap<>();
-    private final IntMap<EngineUnit> templatesById = new IntMap<>();
-    private final HashSet<EngineUnit> hashSet = new HashSet<>();
+    private final ObjectMap<String, GameObject> templatesByName = new ObjectMap<>();
+    private final IntMap<GameObject> templatesById = new IntMap<>();
+    private final HashSet<GameObject> hashSet = new HashSet<>();
 
     public Factory(Engine engine) {
         this.engine = engine;
     }
 
-    public void addTemplate(EngineUnit template, String name) {
-        EngineUnit oldValue = templatesByName.put(name, template);
+    public void addTemplate(GameObject template, String name) {
+        GameObject oldValue = templatesByName.put(name, template);
         if(oldValue != null) {
             hashSet.remove(oldValue);
         }
         hashSet.add(template);
     }
 
-    public void addTemplate(EngineUnit template, int id) {
-        EngineUnit oldValue = templatesById.put(id, template);
+    public void addTemplate(GameObject template, int id) {
+        GameObject oldValue = templatesById.put(id, template);
         if(oldValue != null) {
             hashSet.remove(oldValue);
         }
         hashSet.add(template);
     }
 
-    public void addTemplate(EngineUnit template, String name, int id) {
+    public void addTemplate(GameObject template, String name, int id) {
         addTemplate(template, name);
         addTemplate(template, id);
     }
 
-    public <T extends EngineUnit> T getTemplate(String name) {
-        return (T)templatesByName.get(name);
+    public GameObject getTemplate(String name) {
+        return templatesByName.get(name);
     }
 
-    public <T extends EngineUnit> T getTemplate(int id) {
-        return (T)templatesById.get(id);
+    public GameObject getTemplate(int id) {
+        return templatesById.get(id);
     }
 
-    public <T extends EngineUnit> T create(int id) {
-        return (T)templatesById.get(id).copy();
+    public GameObject create(int id) {
+        return templatesById.get(id).copy();
     }
 
-    public <T extends EngineUnit> T create(String name) {
-        return (T)templatesByName.get(name).copy();
+    public GameObject create(String name) {
+        return templatesByName.get(name).copy();
     }
 
     protected void initialize() {
-        for(EngineUnit template : hashSet) {
+        for(GameObject template : hashSet) {
             template.initialize(engine);
         }
     }

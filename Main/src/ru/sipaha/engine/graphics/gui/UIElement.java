@@ -12,8 +12,11 @@ import ru.sipaha.engine.utils.Array;
  */
 
 public class UIElement extends Sprite {
+    public UIElement(String name, Texture t) {
+        super(name, t);
+    }
 
-    private Array<UIElement> children;
+    /*private Array<UIElement> children;
     private Layout layout = null;
     private ObjectMap<String, String> parameters;
 
@@ -52,5 +55,5 @@ public class UIElement extends Sprite {
     @Override
     public void render(RenderBuffer buffer) {
         super.render(buffer);
-    }
+    }*/
 }

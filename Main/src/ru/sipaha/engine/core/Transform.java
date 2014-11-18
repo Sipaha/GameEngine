@@ -2,24 +2,27 @@ package ru.sipaha.engine.core;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import ru.sipaha.engine.gameobjectdata.RigidBody;
+import ru.sipaha.engine.core.Values.Float;
+import ru.sipaha.engine.core.Values.Flag;
+import ru.sipaha.engine.core.Values.Bool;
 
 public class Transform {
-    public float t00, t01, t10, t11, tx, ty;
-    public boolean meshUpdateRequest;
+    public static final int T00 = 0, T01 = 1, T10 = 2, T11 = 3, TX = 4, TY = 5;
+    public final float[] data = new float[6];
     public boolean wasChanged;
-    public Motion motion;
+    public Transform parent;
 
-    public RigidBody rigidBody;
+    private final Flag positionChanged = new Flag();
+    public final Float x = new Float(positionChanged);
+    public final Float y = new Float(positionChanged);
+    private final Flag scaleChanged = new Flag();
+    public final Float scaleX = new Float(scaleChanged, 1);
+    public final Float scaleY = new Float(scaleChanged, 1);
+    private final Flag angleChanged = new Flag();
+    public final Float angle = new Float(angleChanged);
+    private final Flag dependencyChanged = new Flag();
+    public final Bool dependent = new Bool(dependencyChanged, false);
 
-    private final Values.Flag positionChanged = new Values.Flag();
-    public final Values.Float x = new Values.Float(positionChanged);
-    public final Values.Float y = new Values.Float(positionChanged);
-    private final Values.Flag scaleChanged = new Values.Flag();
-    public final Values.Float scaleX = new Values.Float(scaleChanged, 1);
-    public final Values.Float scaleY = new Values.Float(scaleChanged, 1);
-    private final Values.Flag angleChanged = new Values.Flag();
-    public final Values.Float angle = new Values.Float(angleChanged);
     protected float absAngle = 0;
     protected float cos = 1, sin = 0;
 
@@ -28,33 +31,27 @@ public class Transform {
     private boolean unhooked = false;
     private boolean forceUpdate = false;
 
-    public Transform(){
-        motion = new Motion();
-    }
+    public Transform(){}
 
-    public Transform(Transform prototype) {
-        motion = new Motion(prototype.motion);
-        reset(prototype);
-    }
-
-    public void update(Transform parent, float delta) {
+    public void update() {
         if(unhooked) {
-            meshUpdateRequest = true;
             wasChanged = true;
             unhooked = false;
         } else {
-            if (rigidBody != null && !rigidBody.manualMoving) {
-                setPosition(rigidBody.getPosition());
-                angle.set(rigidBody.getAngle());
-            } else {
-                motion.update(this, delta);
-            }
             if(parent == null) {
                 updateData();
             } else {
-                forceUpdate = parent.wasChanged;
-                updateData();
-                if(wasChanged) mul(parent);
+                forceUpdate = parent.wasChanged || dependencyChanged.value;
+                if(dependent.value) {
+                    if(forceUpdate) {
+                        System.arraycopy(parent.data, 0, data, 0, 6);
+                        wasChanged = true;
+                    }
+                } else {
+                    updateData();
+                    if(wasChanged) mul(parent);
+                }
+                dependencyChanged.value = false;
             }
         }
     }
@@ -68,17 +65,16 @@ public class Transform {
         } else if(scaleChanged.value) {
             updateScale();
         }
-        meshUpdateRequest |= wasChanged;
         forceUpdate = false;
     }
 
     protected void updateAngle() {
         sin = MathUtils.sinDeg(angle.value);
         cos = MathUtils.cosDeg(angle.value);
-        t00 = cos*scaleX.value;
-        t01 = -sin;
-        t10 = sin;
-        t11 = cos*scaleY.value;
+        data[T00] = cos*scaleX.value;
+        data[T01] = -sin*scaleX.value;
+        data[T10] = sin*scaleY.value;
+        data[T11] = cos*scaleY.value;
         absAngle = angle.value;
         angleChanged.value = false;
         scaleChanged.value = false;
@@ -86,18 +82,17 @@ public class Transform {
     }
 
     protected void updatePosition() {
-        tx = x.value;
-        ty = y.value;
-        if(rigidBody != null && rigidBody.manualMoving) {
-            rigidBody.setTransform(tx, ty, angle.value);
-        }
+        data[TX] = x.value;
+        data[TY] = y.value;
         positionChanged.value = false;
         wasChanged = true;
     }
 
     protected void updateScale() {
-        t00 = cos * scaleX.value;
-        t11 = cos * scaleY.value;
+        data[T00] = cos*scaleX.value;
+        data[T01] = -sin*scaleX.value;
+        data[T10] = sin*scaleY.value;
+        data[T11] = cos*scaleY.value;
         scaleChanged.value = false;
         wasChanged = true;
     }
@@ -108,25 +103,25 @@ public class Transform {
         angle.value = absAngle;
         scaleX.value = parent.scaleX.value*scaleX.value;
         scaleY.value = parent.scaleY.value*scaleY.value;
-        sin = t10;
+        sin = data[T10];
         cos = MathUtils.cosDeg(angle.value);
-        x.value = tx;
-        y.value = ty;
+        x.value = data[TX];
+        y.value = data[TY];
         unhooked = true;
     }
 
     protected Transform mul(Transform trn) {
-        float v00 = t00 * trn.t00 + t10 * trn.t01;
-        float v01 = t01 * trn.t00 + t11 * trn.t01;
-        float v02 = tx * trn.t00 + ty * trn.t01 + trn.tx;
+        float v00 = data[T00] * trn.data[T00] + data[T10] * trn.data[T01];
+        float v01 = data[T01] * trn.data[T00] + data[T11] * trn.data[T01];
+        float v02 = data[TX] * trn.data[T00] + data[TY] * trn.data[T01] + trn.data[TX];
 
-        float v10 = t00 * trn.t10 + t10 * trn.t11;
-        float v11 = t01 * trn.t10 + t11 * trn.t11;
-        float v12 = tx * trn.t10 + ty * trn.t11 + trn.ty;
+        float v10 = data[T00] * trn.data[T10] + data[T10] * trn.data[T11];
+        float v11 = data[T01] * trn.data[T10] + data[T11] * trn.data[T11];
+        float v12 = data[TX] * trn.data[T10] + data[TY] * trn.data[T11] + trn.data[TY];
 
-        t00 = v00; t10 = v10;
-        t01 = v01; t11 = v11;
-        tx = v02; ty = v12;
+        data[T00] = v00; data[T10] = v10;
+        data[T01] = v01; data[T11] = v11;
+        data[TX] = v02; data[TY] = v12;
 
         absAngle += trn.absAngle;
 
@@ -161,19 +156,24 @@ public class Transform {
         return this;
     }
 
+    public Transform translate(Vector2 delta) {
+        x.add(delta.x);
+        y.add(delta.y);
+        return this;
+    }
+
     public Vector2 getPosition() {
         if(positionTemp == null) positionTemp = new Vector2();
         positionTemp.set(x.value, y.value);
         return positionTemp;
     }
 
-    public Transform reset(Transform source) {
-        motion.reset(source.motion);
-        x.set(source.x);
-        y.set(source.y);
-        angle.set(source.angle);
-        scaleX.set(source.scaleX);
-        scaleY.set(source.scaleY);
+    public Transform reset(Transform prototype) {
+        x.set(prototype.x);
+        y.set(prototype.y);
+        angle.set(prototype.angle);
+        scaleX.set(prototype.scaleX);
+        scaleY.set(prototype.scaleY);
         return this;
     }
 }
