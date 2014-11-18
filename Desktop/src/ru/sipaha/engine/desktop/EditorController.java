@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.graphics.Camera;
 import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.signals.Signal;
 import ru.sipaha.engine.utils.structures.Bounds;
 
 /**
@@ -16,11 +17,12 @@ public class EditorController implements InputProcessor {
 
     enum Mode {NONE, SELECT, DOWN, CAMERA_MOVE, UNITS_MOVE}
 
+    public final Signal<Array<GameObject>> selected = new Signal<>();
+
     private static final int SELECT_MODE_BACKLASH = 30;
 
     private Array<GameObject> selection = new Array<>(GameObject.class);
     private Iterable<GameObject> editableUnits;
-    private EditorRenderLayer editorLayer;
     private final Vector2 prevPoint = new Vector2();
     private final Vector2 currentPoint = new Vector2();
     private Mode mode = Mode.NONE;
@@ -28,12 +30,9 @@ public class EditorController implements InputProcessor {
     private final Bounds selectionBounds = new Bounds();
     private final Camera gameCamera;
 
-    public EditorController(EditorRenderLayer layer, Camera gameCamera, Iterable<GameObject> editableUnits) {
-        this.editorLayer = layer;
+    public EditorController(Camera gameCamera, Iterable<GameObject> editableUnits) {
         this.editableUnits = editableUnits;
         this.gameCamera = gameCamera;
-        layer.setSelectionBounds(selectionBounds);
-        layer.setSelectedUnits(selection);
     }
 
     @Override
@@ -106,15 +105,16 @@ public class EditorController implements InputProcessor {
                     selection.add(unit);
                 }
             }
+            if(selection.size > 0) selected.dispatch(selection);
             selectionBounds.reset();
         }
         if(this.mode == Mode.DOWN && mode == Mode.NONE) {
             selection.clear();
             Vector2 pos = gameCamera.unproject(x, y);
             for(GameObject unit : editableUnits) {
-                Bounds bounds = unit.getBounds();
-                if(bounds != null && bounds.pointIn(pos)) {
+                if(unit.getBounds().pointIn(pos)) {
                     selection.add(unit);
+                    selected.dispatch(selection);
                     break;
                 }
             }
@@ -146,5 +146,13 @@ public class EditorController implements InputProcessor {
     public boolean scrolled(int amount) {
         gameCamera.zoomChange(amount/10f);
         return false;
+    }
+
+    public Bounds getSelectionBounds() {
+        return selectionBounds;
+    }
+
+    public Array<GameObject> getSelection() {
+        return selection;
     }
 }

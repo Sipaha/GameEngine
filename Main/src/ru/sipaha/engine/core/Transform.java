@@ -7,8 +7,8 @@ import ru.sipaha.engine.core.Values.Flag;
 import ru.sipaha.engine.core.Values.Bool;
 
 public class Transform {
-    public static final int T00 = 0, T01 = 1, T10 = 2, T11 = 3, TX = 4, TY = 5;
-    public final float[] data = new float[6];
+    protected static final int T00 = 0, T01 = 1, T10 = 2, T11 = 3, TX = 4, TY = 5;
+    protected final float[] data = new float[6];
     public boolean wasChanged;
     public Transform parent;
 

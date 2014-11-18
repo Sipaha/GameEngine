@@ -18,9 +18,13 @@ public abstract class Script {
         Script script = null;
         Class<? extends Script> clazz = getClass();
         try {
-            script = clazz.getConstructor(clazz).newInstance(this);
+            try {
+                script = clazz.getConstructor(clazz).newInstance(this);
+            } catch (NoSuchMethodException e) {
+                script = clazz.newInstance();
+            }
         } catch (InstantiationException | IllegalAccessException
-                | InvocationTargetException | NoSuchMethodException e) {
+                | InvocationTargetException e) {
             String className = clazz.getSimpleName();
             String constructor = "public "+className+"("+className+" source) {}";
             Gdx.app.error("GameEngine","Constructor \""+constructor+"\" is not implemented! " +

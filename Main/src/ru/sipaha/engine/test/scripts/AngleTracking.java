@@ -19,6 +19,10 @@ public class AngleTracking extends Script implements TargetCatcher {
 
     public AngleTracking(){}
 
+    public AngleTracking(AngleTracking prototype) {
+        template = prototype;
+    }
+
     public AngleTracking(String trackingTransformName) {
         this.trackingTransformName = trackingTransformName;
     }
@@ -42,6 +46,7 @@ public class AngleTracking extends Script implements TargetCatcher {
                 float angle = calcAngle(trackObject.transform, target.transform, distance);
                 trackObject.rotateTo(angle);
                 idleTimer = 0;
+                trackObject.update(delta);
             } else {
                 if(updateInactive(delta)) {
                     float randAngle = MathUtils.random(-160, 160);
@@ -61,16 +66,13 @@ public class AngleTracking extends Script implements TargetCatcher {
     }
 
     private float calcAngle(Transform from, Transform to, float distance) {
-        float dx = to.data[Transform.TX] - from.data[Transform.TX];
-        float dy = to.data[Transform.TY] - from.data[Transform.TY];
+        float dx = to.x.get() - from.x.get();
+        float dy = to.y.get() - from.y.get();
 
         float acos = (float) Math.acos(dy / distance);
         float radiansAngle = (dx < 0 ? 1 : -1) * acos;
-        return radiansAngle * MathUtils.radiansToDegrees;
-    }
 
-    public AngleTracking(AngleTracking prototype) {
-        template = prototype;
+        return radiansAngle * MathUtils.radiansToDegrees;
     }
 
     @Override

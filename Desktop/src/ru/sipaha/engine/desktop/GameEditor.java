@@ -47,7 +47,7 @@ public class GameEditor extends JFrame {
             System.exit(0);
         }
 
-        LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+        final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.vSyncEnabled = false;
 
         final LwjglApplication app = new LwjglApplication(game, config);
@@ -72,8 +72,11 @@ public class GameEditor extends JFrame {
                 table.setEngine(engine);
                 Camera gameCamera = engine.renderer.getRenderLayer().camera;
                 EditorRenderLayer layer = new EditorRenderLayer(gameCamera);
-                engine.input.addProcessor(new EditorController(layer, gameCamera,
-                                                        engine.tagManager.getUnitsWithTag("Editable")));
+                EditorController controller = new EditorController(gameCamera,
+                                                                    engine.tagManager.getUnitsWithTag("Editable"));
+                layer.setSelectedUnits(controller.getSelection());
+                layer.setSelectionBounds(controller.getSelectionBounds());
+                engine.input.addProcessor(controller);
                 engine.renderer.addRenderLayer(layer);
                 currFrame.repaint();
             }
