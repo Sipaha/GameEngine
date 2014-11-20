@@ -127,6 +127,18 @@ public class Camera extends OrthographicCamera {
         setPosition(x, y);
     }
 
+    public void set(Camera camera) {
+        viewportWidth = camera.viewportWidth;
+        viewportHeight = camera.viewportHeight;
+        zoom = camera.zoom;
+        position.set(camera.position);
+        maxPosition.set(camera.maxPosition);
+        minPosition.set(camera.minPosition);
+        maxView.set(camera.maxView);
+        minView.set(camera.minView);
+        update();
+    }
+
     @Override
     public void update() {
         super.update();

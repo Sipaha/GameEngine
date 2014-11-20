@@ -42,8 +42,12 @@ public class ShellsShooting extends Script {
     }
 
     @Override
-    public void start(Engine engine) {
+    public void initialize(Engine engine) {
         shellTemplate = engine.factory.getTemplate(shellName);
+    }
+
+    @Override
+    public void start(Engine engine) {
         targetCatcher = gameObject.getScript(TargetCatcher.class);
         if(weaponName != null) {
             weaponTransform = gameObject.getEntity(weaponName).transform;
@@ -62,7 +66,7 @@ public class ShellsShooting extends Script {
         }
         if(timer >= fireRate && targetCatcher.targetIsCatched()) {
             timer -= fireRate;
-            GameObject shell = shellTemplate.copy();
+            GameObject shell = shellTemplate.getCopy();
             shell.transform.unhook(weaponTransform);
             if(shootAnimation != null) shootAnimation.start();
         }
@@ -72,7 +76,6 @@ public class ShellsShooting extends Script {
     public void reset() {
         fireRate = template.fireRate;
         timer = 0;
-        shellTemplate = template.shellTemplate;
         damage = template.damage;
     }
 

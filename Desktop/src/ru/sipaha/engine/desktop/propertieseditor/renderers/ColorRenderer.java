@@ -1,4 +1,4 @@
-package ru.sipaha.engine.desktop.properties.renderers;
+package ru.sipaha.engine.desktop.propertieseditor.renderers;
 
 import javax.swing.*;
 import javax.swing.border.Border;

@@ -20,6 +20,9 @@ public class GameObject extends RenderUnit {
     public final Motion motion = new Motion(transform);
 
     public final Life life;
+
+    protected String name = "GameObject";
+
     protected RigidBody rigidBody;
 
     protected final BitSet tagBits;
@@ -69,6 +72,7 @@ public class GameObject extends RenderUnit {
         this.prototype = prototype;
         this.engine = prototype.engine;
         life = new Life(prototype.life);
+        name = prototype.name;
 
         entities = new Array<>(true, prototype.entities.size, Entity.class);
         for(int i = 0; i < prototype.entities.size; i++) {
@@ -132,7 +136,8 @@ public class GameObject extends RenderUnit {
         this.rigidBody = body;
     }
 
-    public void initialize(Engine engine) {
+    public GameObject initialize(Engine engine) {
+        super.initialize();
         this.engine = engine;
         entities.shrink();
         scripts.shrink();
@@ -173,9 +178,12 @@ public class GameObject extends RenderUnit {
         if(animator != null) {
             animator.initialize(entities);
         }
+
+        cache = null;
+        return this;
     }
 
-    protected void start(Engine engine) {
+    protected GameObject start(Engine engine) {
         for(int i = 0; i < scripts.size; i++) {
             scripts.get(i).start(engine);
         }
@@ -185,6 +193,7 @@ public class GameObject extends RenderUnit {
         for(Entity e : entities) {
             e.start(engine, transform, entities);
         }
+        return this;
     }
 
     protected void update(float delta) {
@@ -243,7 +252,6 @@ public class GameObject extends RenderUnit {
     }
 
     public Bounds getBounds() {
-        updateData(0);
         if(bounds == null) {
             bounds = new Bounds();
         } else {
@@ -284,6 +292,10 @@ public class GameObject extends RenderUnit {
         for(Script s : scripts) if(type.isInstance(s)) return (T)s;
         Gdx.app.error("GameEngine","Script \""+type.getName()+"\" not found!");
         return null;
+    }
+
+    public Array<Script> getScripts() {
+        return scripts;
     }
 
     public void addScript(Script s) {
@@ -327,7 +339,11 @@ public class GameObject extends RenderUnit {
         return this;
     }
 
-    public GameObject copy() {
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public GameObject getCopy() {
         if(cache == null) cache = new Array<>(true, 4, GameObject.class);
         if(cache.size == 0) {
             GameObject gameObject = new GameObject(this);
@@ -340,5 +356,10 @@ public class GameObject extends RenderUnit {
             gameObject.reset();
             return gameObject;
         }
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

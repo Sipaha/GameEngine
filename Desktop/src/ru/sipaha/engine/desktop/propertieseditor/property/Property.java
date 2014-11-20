@@ -1,12 +1,14 @@
-package ru.sipaha.engine.desktop.properties;
+package ru.sipaha.engine.desktop.propertieseditor.property;
 
 /**
  * Created on 09.11.2014.
  */
 
 public class Property {
-    private String name;
-    private Object object = null;
+    protected String name;
+    protected Object object = null;
+
+    public Property() {}
 
     public Property(String name) {
         this.name = name;
@@ -19,6 +21,10 @@ public class Property {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Object getPropertyObject() {

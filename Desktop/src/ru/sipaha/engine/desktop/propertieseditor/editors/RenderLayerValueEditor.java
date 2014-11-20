@@ -1,9 +1,8 @@
-package ru.sipaha.engine.desktop.properties.editors;
+package ru.sipaha.engine.desktop.propertieseditor.editors;
 
 import ru.sipaha.engine.core.Values;
 import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 import ru.sipaha.engine.utils.Array;
-import ru.sipaha.engine.utils.Shaders;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -15,19 +14,21 @@ import java.awt.event.ItemListener;
  * Created on 11.11.2014.
  */
 
-public class ShaderEditor extends AbstractCellEditor
-                                    implements TableCellEditor {
+public class RenderLayerValueEditor extends AbstractCellEditor
+                                        implements TableCellEditor {
 
-    private JComboBox<String> comboBox;
-    private Values.ShaderValue value;
+    private JComboBox<RenderLayer> comboBox;
+    private Array<RenderLayer> layers;
+    private Values.RenderLayerValue value;
 
-    public ShaderEditor() {
+    public RenderLayerValueEditor(Array<RenderLayer> layers) {
+        this.layers = layers;
         comboBox = new JComboBox<>();
         comboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
-                    value.set((String)comboBox.getSelectedItem());
+                    value.set((RenderLayer)comboBox.getSelectedItem());
                     stopCellEditing();
                 }
             }
@@ -37,12 +38,12 @@ public class ShaderEditor extends AbstractCellEditor
     public Component getTableCellEditorComponent(JTable table,
                                                  Object value, boolean isSelected,
                                                  int row, int column) {
-        this.value = (Values.ShaderValue)value;
+        this.value = (Values.RenderLayerValue)value;
         comboBox.removeAllItems();
-        for(String shaderName : Shaders.getNamesOfShaders()) {
-            comboBox.addItem(shaderName);
+        for(RenderLayer layer : layers) {
+            comboBox.addItem(layer);
         }
-        comboBox.setSelectedItem(this.value.getName());
+        comboBox.setSelectedItem(this.value.getLayer());
         return comboBox;
     }
 

@@ -236,10 +236,15 @@ public class Values {
         }
 
         public void set(RenderLayer layer) {
-            if(layer != this.layer) {
-                this.name = layer.name;
-                this.layer = layer;
+            if(layer == null) {
+                this.layer = null;
                 changed.value = true;
+            } else {
+                if(layer != this.layer) {
+                    this.name = layer.name;
+                    this.layer = layer;
+                    changed.value = true;
+                }
             }
         }
 

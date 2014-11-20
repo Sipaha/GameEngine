@@ -34,6 +34,7 @@ public class Engine {
             tagManager.add(gameObject);
             renderer.addRenderUnit(gameObject);
             gameObject.start(this);
+            gameObject.updateData(0);
         }
     }
 
@@ -49,10 +50,14 @@ public class Engine {
 
     public void initialize() {
         if(isRunning) Gdx.app.error("GameEngine", "This engine is already initialized!");
-        Gdx.input.setInputProcessor(input);
         renderer.initialize();
         factory.initialize();
+        awake();
         isRunning = true;
+    }
+
+    public void awake() {
+        Gdx.input.setInputProcessor(input);
     }
 
     public void update(float delta) {
@@ -110,5 +115,16 @@ public class Engine {
 
     public int unitsSize() {
         return gameObjects.size;
+    }
+
+    public void set(Engine engine) {
+        for(int i = gameObjects.size-1; i >= 0; i--) remove(gameObjects.pop());
+
+        for(GameObject gameObject : engine.gameObjects) {
+            add(new GameObject(gameObject).initialize(this));
+        }
+
+        factory.set(engine.factory);
+        factory.initialize();
     }
 }

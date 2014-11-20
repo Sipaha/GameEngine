@@ -1,6 +1,6 @@
-package ru.sipaha.engine.desktop.properties.sections;
+package ru.sipaha.engine.desktop.propertieseditor.sections;
 
-import ru.sipaha.engine.desktop.properties.Property;
+import ru.sipaha.engine.desktop.propertieseditor.property.Property;
 
 /**
  * Created on 09.11.2014.
@@ -18,8 +18,11 @@ public abstract class PropertiesSection {
         return this.name;
     }
 
-    public abstract int getVisiblePropertiesCount();
-        //return (state.expanded ? properties.size() : 0)+1;
+    public final int getVisiblePropertiesCount() {
+        return (state.expanded ? getPropertiesCount() : 0)+1;
+    }
+
+    public abstract int getPropertiesCount();
 
     public abstract Property getProperty(int idx);
 

@@ -1,11 +1,11 @@
-package ru.sipaha.engine.desktop.properties;
+package ru.sipaha.engine.desktop.propertieseditor;
 
-import ru.sipaha.engine.desktop.properties.editors.SectionEditor;
-import ru.sipaha.engine.desktop.properties.editors.SectionStateEditor;
-import ru.sipaha.engine.desktop.properties.renderers.BorderRenderer;
-import ru.sipaha.engine.desktop.properties.renderers.SectionRenderer;
-import ru.sipaha.engine.desktop.properties.renderers.SectionStateRenderer;
-import ru.sipaha.engine.desktop.properties.sections.PropertiesSection;
+import ru.sipaha.engine.desktop.propertieseditor.editors.SectionEditor;
+import ru.sipaha.engine.desktop.propertieseditor.editors.SectionStateEditor;
+import ru.sipaha.engine.desktop.propertieseditor.renderers.BorderRenderer;
+import ru.sipaha.engine.desktop.propertieseditor.renderers.SectionRenderer;
+import ru.sipaha.engine.desktop.propertieseditor.renderers.SectionStateRenderer;
+import ru.sipaha.engine.desktop.propertieseditor.sections.PropertiesSection;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;

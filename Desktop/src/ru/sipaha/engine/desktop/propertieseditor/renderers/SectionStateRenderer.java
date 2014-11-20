@@ -1,7 +1,7 @@
-package ru.sipaha.engine.desktop.properties.renderers;
+package ru.sipaha.engine.desktop.propertieseditor.renderers;
 
-import ru.sipaha.engine.desktop.properties.sections.PropertiesSection;
-import ru.sipaha.engine.desktop.properties.PropertiesTable;
+import ru.sipaha.engine.desktop.propertieseditor.sections.PropertiesSection;
+import ru.sipaha.engine.desktop.propertieseditor.PropertiesTable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -13,7 +13,7 @@ import java.net.URL;
  */
 
 public class SectionStateRenderer extends DefaultTableCellRenderer {
-    private static final String basePath = "/ru/sipaha/engine/desktop/properties/images/";
+    private static final String basePath = "/ru/sipaha/engine/desktop/propertieseditor/images/";
 
     private Icon expandSection;
     private Icon collapseSection;
@@ -23,7 +23,7 @@ public class SectionStateRenderer extends DefaultTableCellRenderer {
         if(url != null) {
             expandSection = new ImageIcon(url);
         }
-        url = getClass().getResource("/ru/sipaha/engine/desktop/properties/images/collapse.png");
+        url = getClass().getResource("/ru/sipaha/engine/desktop/propertieseditor/images/collapse.png");
         if(url != null) {
             collapseSection = new ImageIcon(url);
         }

@@ -1,12 +1,15 @@
-package ru.sipaha.engine.desktop.properties;
+package ru.sipaha.engine.desktop.propertieseditor;
 
 import ru.sipaha.engine.core.Engine;
 import ru.sipaha.engine.core.GameObject;
+import ru.sipaha.engine.core.Script;
 import ru.sipaha.engine.core.Values;
-import ru.sipaha.engine.desktop.properties.editors.*;
-import ru.sipaha.engine.desktop.properties.renderers.SectionRenderer;
-import ru.sipaha.engine.desktop.properties.sections.RenderUnitSection;
-import ru.sipaha.engine.desktop.properties.sections.TransformSection;
+import ru.sipaha.engine.desktop.propertieseditor.editors.*;
+import ru.sipaha.engine.desktop.propertieseditor.renderers.SectionRenderer;
+import ru.sipaha.engine.desktop.propertieseditor.sections.GeneralSection;
+import ru.sipaha.engine.desktop.propertieseditor.sections.RenderUnitSection;
+import ru.sipaha.engine.desktop.propertieseditor.sections.TransformSection;
+import ru.sipaha.engine.utils.Array;
 
 import java.awt.*;
 
@@ -25,6 +28,7 @@ public class GameProperties extends PropertiesTable {
         SectionRenderer sectionRenderer = new SectionRenderer();
         addCellRenderer(TransformSection.class, sectionRenderer);
         addCellRenderer(RenderUnitSection.class, sectionRenderer);
+        addCellRenderer(GeneralSection.class, sectionRenderer);
 
         addCellEditor(Values.BlendFunction.class, new BlendingEditor());
         addCellEditor(Values.Float.class, new FloatValueEditor());
@@ -39,6 +43,13 @@ public class GameProperties extends PropertiesTable {
         model.clear();
         model.addPropertySection(transformSection.set(gameObject.transform));
         model.addPropertySection(renderUnitSection.set(gameObject));
+
+        Array<Script> scripts = gameObject.getScripts();
+        for(Script script : scripts) {
+            model.addPropertySection(new GeneralSection(script));
+        }
+
+        repaint();
     }
 
     public void setEngine(Engine engine) {

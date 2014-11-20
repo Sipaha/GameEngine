@@ -1,4 +1,4 @@
-package ru.sipaha.engine.desktop.properties.editors;
+package ru.sipaha.engine.desktop.propertieseditor.editors;
 
 import ru.sipaha.engine.core.Values;
 

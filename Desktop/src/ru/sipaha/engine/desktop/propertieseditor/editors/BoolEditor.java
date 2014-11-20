@@ -1,8 +1,6 @@
-package ru.sipaha.engine.desktop.properties.editors;
+package ru.sipaha.engine.desktop.propertieseditor.editors;
 
 import ru.sipaha.engine.core.Values;
-import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
-import ru.sipaha.engine.utils.Array;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;

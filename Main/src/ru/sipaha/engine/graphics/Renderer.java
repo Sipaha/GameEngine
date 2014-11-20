@@ -71,7 +71,6 @@ public class Renderer {
     }
 
     public void addRenderUnit(RenderUnit renderUnit) {
-        renderUnit.checkChanges();
         renderUnits.add(renderUnit);
         RenderLayer layer = renderUnit.renderLayer.getLayer();
         if(layer == null) {
@@ -80,6 +79,7 @@ public class Renderer {
             renderUnit.renderLayer.set(layer);
         }
         layer.add(renderUnit);
+        renderUnit.checkChanges();
     }
 
     public void removeRenderUnit(RenderUnit renderUnit) {

@@ -1,6 +1,6 @@
-package ru.sipaha.engine.desktop.properties;
+package ru.sipaha.engine.desktop.propertieseditor;
 
-import ru.sipaha.engine.desktop.properties.sections.PropertiesSection;
+import ru.sipaha.engine.desktop.propertieseditor.sections.PropertiesSection;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;

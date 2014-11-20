@@ -1,6 +1,6 @@
-package ru.sipaha.engine.desktop.properties.sections;
+package ru.sipaha.engine.desktop.propertieseditor.sections;
 
-import ru.sipaha.engine.desktop.properties.Property;
+import ru.sipaha.engine.desktop.propertieseditor.property.Property;
 import ru.sipaha.engine.graphics.RenderUnit;
 
 /**
@@ -33,8 +33,8 @@ public class RenderUnitSection extends PropertiesSection {
     }
 
     @Override
-    public int getVisiblePropertiesCount() {
-        return isExpanded() ? 8 : 1;
+    public int getPropertiesCount() {
+        return 7;
     }
 
     @Override

@@ -33,4 +33,9 @@ public abstract class Script {
         }
         return script;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

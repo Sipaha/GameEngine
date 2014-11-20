@@ -50,16 +50,25 @@ public class Factory {
     }
 
     public GameObject create(int id) {
-        return templatesById.get(id).copy();
+        return templatesById.get(id).getCopy();
     }
 
     public GameObject create(String name) {
-        return templatesByName.get(name).copy();
+        return templatesByName.get(name).getCopy();
     }
 
     protected void initialize() {
         for(GameObject template : hashSet) {
             template.initialize(engine);
+        }
+    }
+
+    protected void set(Factory factory) {
+        for(ObjectMap.Entry<String, GameObject> entry : factory.templatesByName) {
+            addTemplate(new GameObject(entry.value), entry.key);
+        }
+        for(IntMap.Entry<GameObject> entry : factory.templatesById) {
+            addTemplate(new GameObject(entry.value), entry.key);
         }
     }
 }

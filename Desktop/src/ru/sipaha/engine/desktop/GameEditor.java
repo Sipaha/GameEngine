@@ -5,16 +5,12 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
-import ru.sipaha.engine.core.Engine;
-import ru.sipaha.engine.core.GameObject;
-import ru.sipaha.engine.desktop.properties.GameProperties;
-import ru.sipaha.engine.desktop.properties.Property;
-import ru.sipaha.engine.graphics.Camera;
-import ru.sipaha.engine.test.GameScreen;
-import ru.sipaha.engine.test.TestGame;
+import ru.sipaha.engine.desktop.propertieseditor.GameProperties;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -25,16 +21,57 @@ import java.awt.event.WindowEvent;
 public class GameEditor extends JFrame {
 
     public GameEditor() {
-        final TestGame game = new TestGame();
+        final EditorApplication application = new EditorApplication();
 
-        setSize(1280, 720);
+        setSize(1500, 900);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        final Container contentPanel = getContentPane();
+        getContentPane().setLayout(new BorderLayout());
+
+        JMenuBar menu = new JMenuBar();
+        menu.add(new JMenu("File"));
+        menu.add(new JMenu("Settings"));
+        getContentPane().add(menu, BorderLayout.NORTH);
+
+        Container contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
+        getContentPane().add(contentPanel);
+
         final GameProperties table = new GameProperties();
         table.setResizable(false,true);
         contentPanel.add(table, BorderLayout.WEST);
+
+        JPanel topPanel = new JPanel();
+        topPanel.setPreferredSize(new Dimension(0, 27));
+        contentPanel.add(topPanel, BorderLayout.NORTH);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setPreferredSize(new Dimension(0,20));
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        String[] data = {"one", "two", "three", "four"};
+        JList<String> sceneObjectsList = new JList<>(data);
+
+        JList<String> layersList = new JList<>(data);
+
+        JSplitPane rightSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sceneObjectsList, layersList);
+        rightSplitPane.setDividerSize(4);
+        rightSplitPane.setPreferredSize(new Dimension(300, 0));
+        contentPanel.add(rightSplitPane, BorderLayout.EAST);
+
+        final JToggleButton btn = new JToggleButton("Run");
+        btn.setFocusPainted(false);
+        btn.setMargin(new Insets(0,0,0,0));
+        btn.setPreferredSize(new Dimension(60, 19));
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                application.setTestRunning(btn.isSelected());
+                btn.setText(btn.isSelected() ? "Stop" : "Run");
+            }
+        });
+        topPanel.add(btn);
+
         Canvas canvas = new Canvas();
         contentPanel.add(canvas);
         setVisible(true);
@@ -50,7 +87,7 @@ public class GameEditor extends JFrame {
         final LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.vSyncEnabled = false;
 
-        final LwjglApplication app = new LwjglApplication(game, config);
+        final LwjglApplication app = new LwjglApplication(application, config);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -64,28 +101,13 @@ public class GameEditor extends JFrame {
                 });
             }
         });
-        final JFrame currFrame = this;
-        app.postRunnable(new Runnable() {
+
+        /*app.postRunnable(new Runnable() {
             @Override
             public void run() {
-                Engine engine = ((GameScreen)game.getScreen()).engine;
-                table.setEngine(engine);
-                Camera gameCamera = engine.renderer.getRenderLayer().camera;
-                EditorRenderLayer layer = new EditorRenderLayer(gameCamera);
-                EditorController controller = new EditorController(gameCamera,
-                                                                    engine.tagManager.getUnitsWithTag("Editable"));
-                layer.setSelectedUnits(controller.getSelection());
-                layer.setSelectionBounds(controller.getSelectionBounds());
-                engine.input.addProcessor(controller);
-                engine.renderer.addRenderLayer(layer);
-                currFrame.repaint();
+                table.set(application.getGameObject());
             }
         });
-
-
-    }
-
-    private Property createColorProperty() {
-        return null;//new Property("FloatValue", new Values.Float(new Values.Bool(),4523.34f));
+*/
     }
 }

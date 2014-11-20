@@ -2,6 +2,7 @@ package ru.sipaha.engine.graphics;
 
 import com.badlogic.gdx.graphics.Texture;
 import ru.sipaha.engine.core.Values;
+import ru.sipaha.engine.graphics.renderlayers.RenderLayer;
 import ru.sipaha.engine.utils.Shaders;
 
 /**
@@ -79,6 +80,10 @@ public abstract class RenderUnit extends Renderable implements Comparable<Render
                 && blendingEnabled.equals(r.blendingEnabled)
                 && blendDstFunc.equals(r.blendDstFunc)
                 && blendSrcFunc.equals(r.blendSrcFunc);
+    }
+
+    public void initialize() {
+        renderLayer.set((RenderLayer)null);
     }
 
     @Override

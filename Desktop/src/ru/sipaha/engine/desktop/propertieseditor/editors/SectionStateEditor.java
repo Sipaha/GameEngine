@@ -1,7 +1,7 @@
-package ru.sipaha.engine.desktop.properties.editors;
+package ru.sipaha.engine.desktop.propertieseditor.editors;
 
-import ru.sipaha.engine.desktop.properties.sections.PropertiesSection;
-import ru.sipaha.engine.desktop.properties.PropertiesTableModel;
+import ru.sipaha.engine.desktop.propertieseditor.sections.PropertiesSection;
+import ru.sipaha.engine.desktop.propertieseditor.PropertiesTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;

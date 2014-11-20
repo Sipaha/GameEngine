@@ -1,4 +1,4 @@
-package ru.sipaha.engine.desktop.properties;
+package ru.sipaha.engine.desktop.propertieseditor;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;

@@ -1,7 +1,7 @@
-package ru.sipaha.engine.desktop.properties.sections;
+package ru.sipaha.engine.desktop.propertieseditor.sections;
 
 import ru.sipaha.engine.core.Transform;
-import ru.sipaha.engine.desktop.properties.Property;
+import ru.sipaha.engine.desktop.propertieseditor.property.Property;
 
 /**
  * Created on 10.11.2014.
@@ -29,8 +29,8 @@ public class TransformSection extends PropertiesSection {
     }
 
     @Override
-    public int getVisiblePropertiesCount() {
-        return isExpanded() ? 6 : 1;
+    public int getPropertiesCount() {
+        return 5;
     }
 
     @Override

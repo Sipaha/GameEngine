@@ -22,6 +22,45 @@ public class GameScreen implements Screen {
     public final Engine engine = new Engine();
 
     public GameScreen() {
+        createTestObjects(engine);
+    }
+
+    @Override
+    public void render(float delta) {
+        engine.update(delta);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        engine.renderer.resize(width, height);
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void dispose() {
+
+    }
+
+    public static void createTestObjects(final Engine engine) {
         Texture[] textures = new Texture[3];
         for(int i = 0; i < textures.length; i++) {
             textures[i] = new Texture("images/"+Gdx.files.internal((i+1)+".png"));
@@ -57,7 +96,7 @@ public class GameScreen implements Screen {
         //g.createBody(0.85f);
 
         PiecewiseLinFunction curve = new PiecewiseLinFunction(new Vector2(0,0), new Vector2(4,1), new Vector2(5,0.8f),
-                                                        new Vector2(6,1f), new Vector2(7,0.8f), new Vector2(8,1f), new Vector2(12,0));
+                new Vector2(6,1f), new Vector2(7,0.8f), new Vector2(8,1f), new Vector2(12,0));
         Animation animation = new Animation("test", new AnimatedFloat(((Sprite)g.getEntity(0)).colorA, curve)).setLoop(true).start();
         g.addAnimation(animation);
         engine.factory.addTemplate(g, "Name");
@@ -90,7 +129,7 @@ public class GameScreen implements Screen {
         g.life.onLifetimeExpired.add(new Listener<GameObject>() {
             @Override
             public void receive(GameObject object) {
-                engine.factory.<GameObject>create("Explosion").transform.unhook(object.transform);
+                object.getEngine().factory.create("Explosion").transform.unhook(object.transform);
             }
         });
         g.zOrder.set(10);
@@ -159,40 +198,5 @@ public class GameScreen implements Screen {
         });*/
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         engine.renderer.getRenderLayer().camera.setZoom(0.5f);
-    }
-
-    @Override
-    public void render(float delta) {
-        engine.update(delta);
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        engine.renderer.resize(width, height);
-    }
-
-    @Override
-    public void show() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void dispose() {
-
     }
 }
