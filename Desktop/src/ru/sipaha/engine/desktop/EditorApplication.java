@@ -21,6 +21,9 @@ public class EditorApplication implements ApplicationListener {
     private final Engine testEngine = new Engine();
     private boolean isTestRunning = false;
 
+    private EditorController controller;
+    private EditorRenderLayer renderLayer;
+
     private volatile boolean testRunRequest = false;
     private volatile boolean testStopRequest = false;
 
@@ -32,13 +35,12 @@ public class EditorApplication implements ApplicationListener {
         editorEngine.awake();
 
         Camera gameCamera = editorEngine.renderer.getRenderLayer().camera;
-        EditorRenderLayer layer = new EditorRenderLayer(gameCamera);
-        EditorController controller = new EditorController(gameCamera,
-                                                editorEngine.tagManager.getUnitsWithTag("Editable"));
-        layer.setSelectedUnits(controller.getSelection());
-        layer.setSelectionBounds(controller.getSelectionBounds());
+        renderLayer = new EditorRenderLayer(gameCamera);
+        controller = new EditorController(gameCamera, editorEngine.tagManager.getUnitsWithTag("Editable"));
+        renderLayer.setSelectedUnits(controller.getSelection());
+        renderLayer.setSelectionBounds(controller.getSelectionBounds());
         editorEngine.input.addProcessor(controller);
-        editorEngine.renderer.addRenderLayer(layer);
+        editorEngine.renderer.addRenderLayer(renderLayer);
 
         final Camera camera = testEngine.renderer.getRenderLayer().camera;
         testEngine.input.addProcessor(new InputAdapter() {
@@ -132,5 +134,13 @@ public class EditorApplication implements ApplicationListener {
 
     public Engine getTestEngine() {
         return testEngine;
+    }
+
+    public EditorRenderLayer getRenderLayer() {
+        return renderLayer;
+    }
+
+    public EditorController getController() {
+        return controller;
     }
 }

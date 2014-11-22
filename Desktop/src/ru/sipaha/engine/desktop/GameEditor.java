@@ -5,7 +5,10 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl.LwjglNativesLoader;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
+import ru.sipaha.engine.core.GameObject;
 import ru.sipaha.engine.desktop.propertieseditor.GameProperties;
+import ru.sipaha.engine.utils.Array;
+import ru.sipaha.engine.utils.signals.Listener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -102,12 +105,22 @@ public class GameEditor extends JFrame {
             }
         });
 
-        /*app.postRunnable(new Runnable() {
+        app.postRunnable(new Runnable() {
             @Override
             public void run() {
-                table.set(application.getGameObject());
+                application.getController().onSelect.add(new Listener<Array<GameObject>>() {
+                    @Override
+                    public void receive(Array<GameObject> selected) {
+                        table.set(selected);
+                    }
+                });
+                application.getController().onChange.add(new Listener<Array<GameObject>>() {
+                    @Override
+                    public void receive(Array<GameObject> object) {
+                        table.repaint();
+                    }
+                });
             }
         });
-*/
     }
 }

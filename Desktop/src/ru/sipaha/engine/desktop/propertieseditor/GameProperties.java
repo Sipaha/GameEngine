@@ -39,14 +39,18 @@ public class GameProperties extends PropertiesTable {
         setPreferredSize(new Dimension(320, 0));
     }
 
-    public void set(GameObject gameObject) {
+    public void set(Array<GameObject> gameObjects) {
         model.clear();
-        model.addPropertySection(transformSection.set(gameObject.transform));
-        model.addPropertySection(renderUnitSection.set(gameObject));
+        GameObject gameObject = gameObjects.items[0];
 
-        Array<Script> scripts = gameObject.getScripts();
-        for(Script script : scripts) {
-            model.addPropertySection(new GeneralSection(script));
+        if(gameObject != null && gameObjects.size == 1) {
+            model.addPropertySection(transformSection.set(gameObject.transform));
+            model.addPropertySection(renderUnitSection.set(gameObject));
+
+            Array<Script> scripts = gameObject.getScripts();
+            for(Script script : scripts) {
+                model.addPropertySection(new GeneralSection(script));
+            }
         }
 
         repaint();

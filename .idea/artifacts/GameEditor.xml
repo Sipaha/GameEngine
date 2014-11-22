@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GameEditor">
+    <output-path>$PROJECT_DIR$/Artifacts/</output-path>
+    <root id="archive" name="GameEditor.jar">
+      <element id="module-output" name="Desktop" />
+      <element id="module-output" name="Main" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Main/lib/gdx.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Main/lib/gdx-box2d.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Desktop/lib/gdx-natives.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Desktop/lib/gdx-backend-lwjgl.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Desktop/lib/gdx-box2d-natives.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/Desktop/lib/gdx-backend-lwjgl-natives.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

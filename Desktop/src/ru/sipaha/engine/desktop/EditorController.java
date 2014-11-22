@@ -17,7 +17,8 @@ public class EditorController implements InputProcessor {
 
     enum Mode {NONE, SELECT, DOWN, CAMERA_MOVE, UNITS_MOVE}
 
-    public final Signal<Array<GameObject>> selected = new Signal<>();
+    public final Signal<Array<GameObject>> onSelect = new Signal<>();
+    public final Signal<Array<GameObject>> onChange = new Signal<>();
 
     private static final int SELECT_MODE_BACKLASH = 30;
 
@@ -83,6 +84,7 @@ public class EditorController implements InputProcessor {
                 for(GameObject unit : selection) {
                     unit.transform.translate(delta);
                 }
+                onChange.dispatch(selection);
                 prevPoint.set(currentPoint);
                 break;
         }
@@ -105,7 +107,7 @@ public class EditorController implements InputProcessor {
                     selection.add(unit);
                 }
             }
-            if(selection.size > 0) selected.dispatch(selection);
+            onSelect.dispatch(selection);
             selectionBounds.reset();
         }
         if(this.mode == Mode.DOWN && mode == Mode.NONE) {
@@ -114,10 +116,10 @@ public class EditorController implements InputProcessor {
             for(GameObject unit : editableUnits) {
                 if(unit.getBounds().pointIn(pos)) {
                     selection.add(unit);
-                    selected.dispatch(selection);
                     break;
                 }
             }
+            onSelect.dispatch(selection);
         }
         this.mode = mode;
     }
